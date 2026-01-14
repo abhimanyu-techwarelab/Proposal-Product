@@ -1,0 +1,10 @@
+export { apiClient, tokenManager, ApiRequestError, serverFetch } from './client';
+export { authApi } from './auth';
+export { dashboardApi, dashboardServerApi } from './dashboard';
+export { proposalsApi, proposalsServerApi } from './proposals';
+export { usersApi } from './users';
+export { rolesApi } from './roles';
+export type { LoginInput, RegisterInput, AuthResult } from './auth';
+export type { ProposalsListResponse, ProposalApproveInput, ProposalRejectInput } from './proposals';
+export type { User, UsersListResponse, UserFilters } from './users';
+export type { Role, RolesListResponse } from './roles';
