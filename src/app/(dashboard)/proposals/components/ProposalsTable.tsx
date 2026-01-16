@@ -76,8 +76,27 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
   );
   const [deleting, setDeleting] = useState(false);
 
-  // Check if user has delete permission
+  // Check permissions
   const canDelete = hasPermission("delete_proposals_product");
+  const canUpdate = hasPermission("update_proposals_product");
+  const canApprove = hasPermission("approve_proposals_product");
+
+  // Helper to check if edit/delete should be shown for a proposal
+  const canEditProposal = (proposal: Proposal) => {
+    // If proposal is approved/completed, need approval permission to edit
+    if (proposal.status === ProposalStatus.COMPLETED) {
+      return canApprove;
+    }
+    return canUpdate;
+  };
+
+  const canDeleteProposal = (proposal: Proposal) => {
+    // If proposal is approved/completed, need approval permission to delete
+    if (proposal.status === ProposalStatus.COMPLETED) {
+      return canApprove && canDelete;
+    }
+    return canDelete;
+  };
 
   useEffect(() => {
     async function fetchProposals() {
@@ -301,12 +320,14 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Link href={`/proposals/${proposal.id}/edit`}>
-                    <Button variant="ghost" size="sm" title="Edit">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  {canDelete && (
+                  {canEditProposal(proposal) && (
+                    <Link href={`/proposals/${proposal.id}/edit`}>
+                      <Button variant="ghost" size="sm" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
+                  {canDeleteProposal(proposal) && (
                     <Button
                       variant="ghost"
                       size="sm"

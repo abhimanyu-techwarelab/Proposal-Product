@@ -95,15 +95,33 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   className?: string;
+  compact?: boolean;
+  valueSize?: 'default' | 'large';
 }
 
-export function StatsCard({ title, value, description, icon, trend, className }: StatsCardProps) {
+export function StatsCard({ title, value, description, icon, trend, className, compact, valueSize = 'large' }: StatsCardProps) {
+  const valueSizeClass = valueSize === 'large' ? 'text-4xl' : 'text-2xl';
+  if (compact) {
+    return (
+      <Card className={cn('overflow-hidden', className)}>
+        <div className="flex flex-col items-center justify-center">
+          {icon && (
+            <div className="rounded-lg bg-gradient-to-br from-[#B87333]/20 to-[#DA8A67]/10 p-3 text-[#DA8A67] border border-[#B87333]/30">
+              {icon}
+            </div>
+          )}
+          <p className={cn('mt-3 font-bold text-white', valueSizeClass)}>{value}</p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <Card className={cn('', className)}>
-      <div className="flex items-start justify-between">
-        <div>
+    <Card className={cn('overflow-hidden', className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-slate-400">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+          <p className={cn('mt-2 font-bold text-white', valueSizeClass)}>{value}</p>
           {description && <p className="mt-1 text-sm text-slate-400">{description}</p>}
           {trend && (
             <p
@@ -118,7 +136,7 @@ export function StatsCard({ title, value, description, icon, trend, className }:
           )}
         </div>
         {icon && (
-          <div className="rounded-lg bg-gradient-to-br from-[#B87333]/20 to-[#DA8A67]/10 p-3 text-[#DA8A67] border border-[#B87333]/30">
+          <div className="rounded-lg bg-gradient-to-br from-[#B87333]/20 to-[#DA8A67]/10 p-3 text-[#DA8A67] border border-[#B87333]/30 shrink-0">
             {icon}
           </div>
         )}

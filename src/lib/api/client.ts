@@ -34,13 +34,28 @@ export class ApiRequestError extends Error {
     this.details = details;
   }
 
-  static fromApiError(error: ApiError, status: number): ApiRequestError {
-    return new ApiRequestError(
-      error.error.message,
-      status,
-      error.error.code,
-      error.error.details
-    );
+  static fromApiError(error: ApiError | Record<string, unknown>, status: number): ApiRequestError {
+    // Handle expected ApiError format: { error: { message, code, details } }
+    if (error && typeof error === 'object' && 'error' in error && error.error && typeof error.error === 'object') {
+      const apiError = error as ApiError;
+      return new ApiRequestError(
+        apiError.error.message,
+        status,
+        apiError.error.code,
+        apiError.error.details
+      );
+    }
+    // Handle NestJS default error format: { statusCode, message, error }
+    if (error && typeof error === 'object' && 'message' in error) {
+      const nestError = error as { statusCode?: number; message?: string; error?: string };
+      return new ApiRequestError(
+        String(nestError.message || nestError.error || 'Unknown error'),
+        status,
+        nestError.error || 'API_ERROR'
+      );
+    }
+    // Fallback for unexpected formats
+    return new ApiRequestError('An unexpected error occurred', status, 'UNKNOWN_ERROR');
   }
 }
 

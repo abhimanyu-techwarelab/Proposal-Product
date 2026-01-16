@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { Button } from "./Button";
@@ -31,7 +32,7 @@ const sizeStyles = {
   md: "max-w-md",
   lg: "max-w-lg",
   xl: "max-w-xl",
-  full: "max-w-4xl",
+  full: "max-w-6xl",
 };
 
 // ============================================================================
@@ -50,6 +51,13 @@ export function Modal({
   closeOnEsc = true,
   className,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting for portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Handle ESC key
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -72,11 +80,11 @@ export function Modal({
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
-      {/* Overlay */}
+      {/* Overlay - covers entire screen including sidebar */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity z-[9999]"
         onClick={closeOnOverlayClick ? onClose : undefined}
@@ -134,6 +142,9 @@ export function Modal({
       </div>
     </div>
   );
+
+  // Render modal in a portal to document.body to ensure it covers entire screen
+  return createPortal(modalContent, document.body);
 }
 
 // ============================================================================

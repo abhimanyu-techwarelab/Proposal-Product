@@ -465,3 +465,28 @@ svg.pulse-beams-svg path[data-pulse-beam="base"],
 .dashboard-layout svg.pulse-beams-svg path[data-pulse-beam="base"] {
   stroke-width: 1 !important;
 }
+
+/* Glowing Effect Styles */
+@property --start {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --active {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --glowingeffect-border-width {
+  syntax: "<length>";
+  initial-value: 1px;
+  inherits: true;
+}
+
+@property --spread {
+  syntax: "<number>";
+  initial-value: 20;
+  inherits: false;
+}

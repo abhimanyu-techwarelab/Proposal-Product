@@ -11,24 +11,25 @@ export const metadata = {
 };
 
 interface ProposalsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     status?: string;
     client?: string;
     start_date?: string;
     end_date?: string;
     search?: string;
     page?: string;
-  };
+  }>;
 }
 
-export default function ProposalsPage({ searchParams }: ProposalsPageProps) {
+export default async function ProposalsPage({ searchParams }: ProposalsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const filters = {
-    status: searchParams.status as ProposalStatus | undefined,
-    client_name: searchParams.client,
-    start_date: searchParams.start_date,
-    end_date: searchParams.end_date,
-    search: searchParams.search,
-    page: searchParams.page ? parseInt(searchParams.page, 10) : 1,
+    status: resolvedSearchParams.status as ProposalStatus | undefined,
+    client_name: resolvedSearchParams.client,
+    start_date: resolvedSearchParams.start_date,
+    end_date: resolvedSearchParams.end_date,
+    search: resolvedSearchParams.search,
+    page: resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1,
   };
 
   return (

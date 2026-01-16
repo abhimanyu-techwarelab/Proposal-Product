@@ -1,23 +1,16 @@
-import { PageHeader } from '@/components/layout';
-import { ProposalForm } from '@/components/forms/ProposalForm';
+import { Metadata } from "next";
+import { Suspense } from "react";
+import { NewProposalContent } from "./NewProposalContent";
 
-export const metadata = {
-  title: 'Create Proposal - ProposalGen',
-  description: 'Create a new professional proposal',
+export const metadata: Metadata = {
+  title: "Create Proposal - ProposalGen",
+  description: "Create a new professional proposal",
 };
 
 export default function NewProposalPage() {
   return (
-    <div className="mx-auto max-w-4xl">
-      <PageHeader
-        title="Create New Proposal"
-        description="Fill in the details below to create a professional proposal"
-        breadcrumbs={[
-          { label: 'Proposals', href: '/proposals' },
-          { label: 'New Proposal' },
-        ]}
-      />
-      <ProposalForm />
-    </div>
+    <Suspense fallback={<div className="flex items-center justify-center py-20 text-slate-400">Loading...</div>}>
+      <NewProposalContent />
+    </Suspense>
   );
 }

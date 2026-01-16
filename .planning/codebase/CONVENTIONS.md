@@ -1,170 +1,228 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-01-14
+**Analysis Date:** 2026-01-16
 
 ## Naming Patterns
 
 **Files:**
-- PascalCase for components: `Button.tsx`, `ProposalForm.tsx`, `AuthContext.tsx`
-- kebab-case for utilities: `jwt-auth.ts`
-- lowercase for Next.js pages: `page.tsx`, `layout.tsx`, `route.ts`
-- Barrel exports: `index.ts` in component and lib directories
+- `PascalCase.tsx` for React components - `Button.tsx`, `Modal.tsx`, `ProposalPreviewModal.tsx`
+- `camelCase.ts` for utilities and modules - `index.ts`, `logger.ts`, `jwt-auth.ts`
+- `page.tsx` for Next.js pages (Next.js convention)
+- `route.ts` for Next.js API routes (Next.js convention)
+- `layout.tsx` for Next.js layouts (Next.js convention)
+- Test files: (Not currently used - no test files found)
 
 **Functions:**
-- camelCase for all functions: `formatCurrency`, `hasPermission`, `fetchProposalPreview`
-- Prefix with `handle` for event handlers: `handleSubmit`, `handleClick`
-- Prefix with `is` or `has` for boolean returns: `isLoading`, `hasPermission`, `isAuthenticated`
+- camelCase for all functions - `fetchCurrentUser()`, `generateSignedUrl()`, `handleSubmit()`
+- No special prefix for async functions - `async function fetchData()`
+- Event handlers: `handleEventName` - `handleClick`, `handleSubmit`, `handleFileUpload`
+- API methods: Verb-based - `list()`, `getById()`, `create()`, `update()`, `delete()`, `approve()`, `reject()`
 
 **Variables:**
-- camelCase for variables: `user`, `proposalId`, `htmlContent`
-- UPPER_SNAKE_CASE for constants: `API_ENDPOINTS`, `CURRENCY_CONFIG`, `STORAGE_BUCKETS`
-- No underscore prefix for private members
+- camelCase for variables - `isLoading`, `proposalData`, `selectedFile`
+- Boolean flags: `is*`, `has*`, `can*` - `isAuthenticated`, `hasPermission`, `canApprove`
+- UPPER_SNAKE_CASE for constants - `API_BASE_URL`, `APPROVAL_ROLES`, `STORAGE_BUCKETS`
 
 **Types:**
-- PascalCase for interfaces: `User`, `Proposal`, `AuthContextValue`
-- PascalCase for type aliases: `ProposalFilters`, `ApiResponse`
-- Suffix with `Props` for component props: `ButtonProps`, `InputProps`, `HeaderProps`
-- PascalCase for enums: `ProposalStatus`, `UserRole`, `Currency`
+- PascalCase for interfaces and types - `Proposal`, `User`, `Role`, `Permission`
+- No `I` prefix for interfaces - `interface User` (not `IUser`)
+- PascalCase for type aliases - `UserRole`, `ProposalStatus`, `ApiResponse<T>`
+- PascalCase for enums - `enum ProposalStatus`, `enum Currency`, `enum BillingType`
+- UPPER_CASE for enum values - `ProposalStatus.PENDING`, `Currency.USD`
 
 ## Code Style
 
 **Formatting:**
-- 2-space indentation
-- Single quotes for strings: `'text'`
-- Semicolons required
-- No explicit Prettier config (consistent manual style)
+- Indentation: 2 spaces (TypeScript/Next.js default)
+- Line length: Generally under 100 characters
+- Single quotes for imports and strings - `import React from 'react';`
+- Double quotes for JSX attributes - `className="..."`
+- Semicolons: Required at end of statements
+- No Prettier config found - ESLint handles formatting via Next.js
 
 **Linting:**
-- ESLint with `eslint-config-next` preset
+- ESLint with `eslint.config.mjs`
+- Extends: `next/core-web-vitals` (Next.js recommended rules)
+- Ignored paths: `.next/**`, `out/**`, `build/**`
 - Run: `npm run lint`
-- No custom rules beyond Next.js defaults
 
 ## Import Organization
 
 **Order:**
-1. React and Next.js imports: `import { useState } from 'react'`
-2. External packages: `import { z } from 'zod'`
-3. Internal modules with `@/` alias: `import { Button } from '@/components/ui'`
-4. Relative imports: `import { helper } from './utils'`
-5. Type imports last: `import type { User } from '@/types'`
+1. External packages - `import React from 'react'`
+2. Next.js imports - `import { useRouter } from 'next/navigation'`
+3. Internal modules with `@/` alias - `import { cn } from '@/lib/utils'`
+4. Relative imports - `import { Button } from './Button'`
+5. Type imports - `import type { User } from '@/types'`
 
 **Grouping:**
-- Blank line between groups
-- Related imports together
+- Blank lines between groups (not consistently enforced)
+- Alphabetical within each group (not enforced)
 
 **Path Aliases:**
-- `@/` maps to `src/` (from `tsconfig.json`)
+- `@/*` maps to `./src/*` - configured in `tsconfig.json`
+- Example: `import { Button } from '@/components/ui'`
 
 ## Error Handling
 
 **Patterns:**
-- Throw errors with descriptive messages
-- Catch at component boundaries (page level)
-- Custom `ApiRequestError` class extends Error (`src/lib/api/client.ts`)
-- try/catch for all async operations
+- Throw errors, catch at boundaries (route handlers, component level)
+- Custom error class: `ApiRequestError` extends `Error` - `src/lib/api/client.ts`
+- Async functions use try/catch - no `.catch()` chains
+- Error responses include status code and message
 
 **Error Types:**
-- Throw on invalid API responses, network failures
-- Return error state for UI display
-- Log errors to console (should use structured logging in production)
+- Throw on invalid input, missing dependencies, API failures
+- Return error objects for expected failures - `{ error: string | null }`
+- Client components display user-friendly error messages
+- 401 responses trigger automatic redirect to `/login`
 
 ## Logging
 
 **Framework:**
-- Console.log for debugging (temporary)
-- Custom auth logger: `src/lib/utils/logger.ts`
-- Levels: info for auth events
+- Custom logger: `src/lib/utils/logger.ts`
+- Levels: Auth events only (loginSuccess, loginFailure, registerSuccess, registerFailure, logout)
+- Console-based logging
 
 **Patterns:**
-- Log state transitions (login, logout)
-- Log errors with context
-- Should minimize console.log for production
+- Excessive `console.log` statements in development (15+ instances)
+- Examples: `src/app/api/auth/me/route.ts`, `src/contexts/AuthContext.tsx`
+- Log state transitions, external API calls, errors
+- **Issue**: Need to remove console.log before production
 
 ## Comments
 
 **When to Comment:**
-- Section headers with visual separators:
+- Section headers with ASCII box style:
   ```typescript
   // ============================================================================
   // Types
   // ============================================================================
   ```
-- Explain business logic and non-obvious code
-- JSDoc for exported functions
+- JSDoc for exported functions and utilities
+- Inline comments for non-obvious logic only
+- Avoid obvious comments
 
 **JSDoc/TSDoc:**
-- Required for API service methods
-- Optional for internal utilities
-- Use `@param`, `@returns` tags
+- Required for public API functions
+- Optional for internal functions if signature is self-explanatory
+- Pattern:
+  ```typescript
+  /**
+   * Upload a single file to Supabase Storage
+   * @param file - The file to upload
+   * @param bucket - The storage bucket name
+   * @param folderId - The folder ID within the bucket
+   */
+  ```
 
 **TODO Comments:**
 - Format: `// TODO: description`
-- Used for planned features: Google sign-in, password reset
+- Examples:
+  - `src/app/(auth)/login/page.tsx` (line 61): `// TODO: Implement Google sign-in`
+  - `src/app/(auth)/login/page.tsx` (line 66): `// TODO: Implement password reset`
 
 ## Function Design
 
 **Size:**
-- Keep under 50 lines when possible
+- Keep under 50-100 lines (not strictly enforced)
 - Extract helpers for complex logic
-- Some large components exist (ProposalForm.tsx 1093 lines - needs refactoring)
+- **Issue**: Some functions exceed 200 lines (e.g., form components)
 
 **Parameters:**
-- Max 3 parameters preferred
-- Use options object for more: `function create(options: CreateOptions)`
-- Destructure in parameter list: `function process({ id, name }: Props)`
+- Max 3-4 parameters preferred
+- Use options object for more parameters:
+  ```typescript
+  function create(options: CreateOptions)
+  ```
+- Destructure in parameter list:
+  ```typescript
+  function process({ id, name }: ProcessParams)
+  ```
 
 **Return Values:**
 - Explicit return statements
 - Return early for guard clauses
-- Typed return values with `Promise<ApiResponse<T>>`
+- Type-safe returns with TypeScript
+- Use `Promise<T>` for async functions
 
 ## Module Design
 
 **Exports:**
-- Named exports preferred: `export const proposalsApi = { ... }`
-- Default exports for React components
-- Barrel files re-export public API: `src/components/ui/index.ts`
+- Named exports preferred - `export const Button`
+- Default exports for Next.js pages - `export default function Page()`
+- Barrel exports from `index.ts` for public APIs
 
 **Barrel Files:**
-- `index.ts` in `src/components/ui/` exports all UI components
-- `src/lib/api/index.ts` exports all API services
+- `index.ts` re-exports public API
+- Example: `src/components/ui/index.ts` exports all UI components
+- Keep internal helpers private (don't export from index)
 - Avoid circular dependencies
 
 ## Component Patterns
 
-**React Components:**
-- Functional components only (no class components)
-- `forwardRef` for UI primitives that need ref access
-- `displayName` set on forwardRef components
+**Component Structure:**
+```typescript
+// ============================================================================
+// Types
+// ============================================================================
 
-**Client vs Server:**
-- `'use client'` directive for interactive components
-- Server Components by default in App Router
-- Suspense boundaries for async data
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  isLoading?: boolean;
+}
+
+// ============================================================================
+// Styles
+// ============================================================================
+
+const variantStyles: Record<ButtonVariant, string> = { ... }
+
+// ============================================================================
+// Component
+// ============================================================================
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant = 'primary', size = 'md', isLoading, ...props }, ref) => {
+    return <button ref={ref} {...props} />;
+  }
+);
+
+Button.displayName = 'Button';
+```
 
 **Props:**
-- TypeScript interfaces for all props
-- Variant patterns for styling options:
-  ```typescript
-  interface ButtonProps {
-    variant?: 'primary' | 'secondary' | 'danger';
-    size?: 'sm' | 'md' | 'lg';
-  }
-  ```
+- Extend native HTML attributes when possible
+- Use optional props with sensible defaults
+- Spread operator for flexible props: `{...props}`
+- Forwarding refs with `React.forwardRef()`
 
-## State Management
+**State Management:**
+- `useState` for local component state
+- `useCallback` for memoized handlers
+- `useEffect` with dependency arrays
+- Context for global state
 
-**Patterns:**
-- React Context for global state (auth, sidebar)
-- useState for component-local state
-- No external state libraries
+## Validation Pattern
 
-**Context Structure:**
-- Provider wraps app in layout
-- Custom hook exports: `useAuth()`, `useSidebar()`
-- Type-safe context values
+**Zod Schemas:**
+- Separate schema files: `src/lib/validations/*.ts`
+- Type inference: `export type LoginInput = z.infer<typeof loginSchema>;`
+- Custom refinements for complex validation
+- Shared schemas for nested objects - `deliverableSchema`, `teamMemberSchema`
+
+**Usage:**
+```typescript
+import { loginSchema, type LoginInput } from '@/lib/validations/auth';
+
+const result = loginSchema.safeParse(formData);
+if (!result.success) {
+  // Handle validation errors
+}
+```
 
 ---
 
-*Convention analysis: 2026-01-14*
+*Convention analysis: 2026-01-16*
 *Update when patterns change*

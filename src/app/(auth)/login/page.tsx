@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { LoginPage } from "@/components/ui/login";
 import { useAuthNavigation } from "@/contexts/AuthNavigationContext";
 import { validateRedirectUrl } from "@/lib/jwt-auth";
+import { LoginTransitionLoader } from "@/components/PostLoginLoader";
 
-export default function LoginPageRoute() {
-  const router = useRouter();
+function LoginPageContent() {
   const searchParams = useSearchParams();
   const { navigateTo } = useAuthNavigation();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showTransitionLoader, setShowTransitionLoader] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get and validate redirect URL from query parameters, default to dashboard
@@ -47,6 +48,9 @@ export default function LoginPageRoute() {
         return;
       }
 
+      // Show loader immediately on login page
+      setShowTransitionLoader(true);
+
       // Redirect to the validated safe URL
       // Use window.location.href to force full page reload and ensure cookie is available
       window.location.href = redirectUrl;
@@ -72,13 +76,24 @@ export default function LoginPageRoute() {
   };
 
   return (
-    <LoginPage
-      onSignIn={handleSignIn}
-      onGoogleSignIn={handleGoogleSignIn}
-      onResetPassword={handleResetPassword}
-      onCreateAccount={handleCreateAccount}
-      isLoading={isLoading}
-      error={error}
-    />
+    <>
+      <LoginTransitionLoader show={showTransitionLoader} />
+      <LoginPage
+        onSignIn={handleSignIn}
+        onGoogleSignIn={handleGoogleSignIn}
+        onResetPassword={handleResetPassword}
+        onCreateAccount={handleCreateAccount}
+        isLoading={isLoading}
+        error={error}
+      />
+    </>
+  );
+}
+
+export default function LoginPageRoute() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-black">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

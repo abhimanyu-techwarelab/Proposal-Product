@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -14,8 +15,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Menu,
   Shield,
+  ClipboardCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
@@ -58,6 +59,12 @@ const navItems: NavItem[] = [
 ];
 
 const adminItems: NavItem[] = [
+  {
+    label: "Approvals",
+    href: "/approvals",
+    icon: <ClipboardCheck className="h-5 w-5" />,
+    requiredPermission: "approve_proposals_product",
+  },
   {
     label: "Users",
     href: "/users",
@@ -292,8 +299,31 @@ export function Sidebar() {
               !showExpanded ? "lg:justify-center" : "justify-start"
             )}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#B87333] to-[#DA8A67] text-white font-medium flex-shrink-0">
-              {displayName.charAt(0).toUpperCase()}
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
+              {productUser?.profile_image ? (
+                <Image
+                  width={40}
+                  height={40}
+                  src={productUser.profile_image}
+                  alt="User"
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <svg
+                  className="w-5 h-5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              )}
             </div>
             {showExpanded && (
               <>
@@ -302,9 +332,16 @@ export function Sidebar() {
                     {displayName}
                   </p>
                   <p className="truncate text-xs text-slate-400">
-                    {user?.email || ""}
+                    {productUser?.email || ""}
                   </p>
                 </div>
+                <Link
+                  href="/settings"
+                  className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors flex-shrink-0"
+                  title="Settings"
+                >
+                  <Settings className="h-4 w-4" />
+                </Link>
                 <button
                   onClick={() => logout()}
                   className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors flex-shrink-0"

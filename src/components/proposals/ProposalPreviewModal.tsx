@@ -113,12 +113,13 @@ export function ProposalPreviewModal({
               </Button>
             </div>
           ) : htmlContent ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-              className="prose prose-xs sm:prose-sm md:prose-base lg:prose-lg xl:prose-xl max-w-none dark:prose-invert prose-headings:text-slate-900 dark:prose-headings:text-white prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-a:text-[#B87333] dark:prose-a:text-[#DA8A67] prose-strong:text-slate-900 dark:prose-strong:text-white prose-img:rounded-lg prose-table:overflow-x-auto"
+            <iframe
+              srcDoc={htmlContent}
+              className="w-full h-full min-h-[70vh] border-0 bg-white rounded-lg"
+              title={`Preview of ${proposalTitle}`}
+              sandbox="allow-same-origin"
               style={{
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
+                display: "block",
               }}
             />
           ) : (

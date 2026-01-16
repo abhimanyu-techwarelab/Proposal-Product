@@ -1,0 +1,57 @@
+[00:00:02.161] Server  LOG      ✓ Ready in 1517ms
+[00:00:05.354] Server  LOG      ○ Compiling /_not-found/page ...
+[00:00:07.996] Server  WARN     ⚠ Cross origin request detected from abhimanyu-82.tl-workspace.techwarelab.com to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[00:00:08.047] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:15.702] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:00:16.200] Server  LOG     [/api/auth/me] Token present: true
+[00:00:16.202] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
+[00:00:17.123] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:00:17.354] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:00:17.354] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:00:17.354] Browser LOG     [AuthContext] productUser set successfully
+[00:03:23.241] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:23.476] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:03:23.699] Browser LOG     [AuthContext] /api/auth/me response status: 401
+[00:03:23.699] Browser LOG     [AuthContext] User not authenticated (401)
+[00:03:23.933] Browser ERROR   Error fetching proposals: {"code":"Unauthorized","name":"ApiRequestError","status":401}
+[00:03:25.751] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:26.031] Browser LOG     THREE.WebGLRenderer 89
+[00:03:38.930] Server  LOG     [LOGIN] Attempting to connect to backend: https://abhimanyu-3000.tl-workspace.techwarelab.com/auth/login
+[00:03:43.278] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:43.992] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:03:44.134] Server  LOG     [/api/auth/me] Token present: true
+[00:03:44.135] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
+[00:03:44.856] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:03:45.047] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:03:45.047] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:03:45.047] Browser LOG     [AuthContext] productUser set successfully
+[00:05:11.661] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:11.967] Browser LOG     THREE.WebGLRenderer 89
+[00:05:13.139] Server  LOG     [LOGIN] Attempting to connect to backend: https://abhimanyu-3000.tl-workspace.techwarelab.com/auth/login
+[00:05:14.452] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:14.603] Server  LOG     [/api/auth/me] Token present: true
+[00:05:14.603] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
+[00:05:14.654] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:05:14.683] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:05:14.873] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:05:14.873] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:05:14.873] Browser LOG     [AuthContext] productUser set successfully
+[00:05:20.730] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:23.337] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:23.447] Server  LOG     [/api/auth/me] Token present: true
+[00:05:23.448] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
+[00:05:23.502] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:05:23.594] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:05:23.769] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:05:23.769] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:05:23.769] Browser LOG     [AuthContext] productUser set successfully
+[00:05:32.044] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:34.638] Server  LOG     [/api/auth/me] Token present: true
+[00:05:34.639] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
+[00:05:34.648] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:34.648] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:05:34.780] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:05:34.947] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:05:34.947] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:05:34.947] Browser LOG     [AuthContext] productUser set successfully

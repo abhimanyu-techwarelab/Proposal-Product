@@ -67,6 +67,12 @@ export const PROPOSAL_STATUS_CONFIG: Record<
     bgColor: "bg-slate-100",
     borderColor: "border-slate-200",
   },
+  [ProposalStatus.PROCESSING]: {
+    label: "Processing",
+    color: "text-blue-700",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+  },
   [ProposalStatus.APPROVAL_PENDING]: {
     label: "Awaiting Approval",
     color: "text-warning-700",
@@ -302,7 +308,8 @@ export const VALID_STATUS_TRANSITIONS: Record<
   ProposalStatus,
   ProposalStatus[]
 > = {
-  [ProposalStatus.PENDING]: [ProposalStatus.APPROVAL_PENDING],
+  [ProposalStatus.PENDING]: [ProposalStatus.PROCESSING],
+  [ProposalStatus.PROCESSING]: [ProposalStatus.APPROVAL_PENDING],
   [ProposalStatus.APPROVAL_PENDING]: [
     ProposalStatus.COMPLETED,
     ProposalStatus.REJECTED,

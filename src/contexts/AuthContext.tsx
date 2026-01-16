@@ -20,6 +20,8 @@ interface ProductUser {
   organization_id: string;
   first_name: string;
   last_name: string;
+  email: string;
+  profile_image: string | null;
   role_id: number;
 }
 
@@ -65,14 +67,69 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<any | null>(null);
   const [productUser, setProductUser] = useState<ProductUser | null>(null);
   const [session, setSession] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const permissionsLoadRef = React.useRef<Promise<void> | null>(null);
+  const userLoadRef = React.useRef<Promise<void> | null>(null);
 
   // For now, always authenticated - auth will be set up later
   const isAuthenticated = true;
+
+  // Fetch current user data from backend (similar to Admin Panel pattern)
+  const fetchCurrentUser = useCallback(async () => {
+    // Prevent duplicate concurrent loads
+    if (userLoadRef.current) {
+      return userLoadRef.current;
+    }
+
+    const loadPromise = (async () => {
+      try {
+        console.log("[AuthContext] Fetching current user from /api/auth/me...");
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        console.log("[AuthContext] /api/auth/me response status:", response.status);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.log("[AuthContext] User not authenticated (401)");
+            setProductUser(null);
+            return;
+          }
+          const errorData = await response.json().catch(() => ({}));
+          console.error("[AuthContext] Failed to fetch user data:", errorData);
+          setProductUser(null);
+          return;
+        }
+
+        const userData = await response.json();
+        console.log("[AuthContext] User data received:", userData);
+        setProductUser({
+          id: userData.id,
+          user_id: userData.id,
+          organization_id: userData.organization_id,
+          first_name: userData.first_name || "",
+          last_name: userData.last_name || "",
+          email: userData.email || "",
+          profile_image: userData.profile_image || null,
+          role_id: userData.role_id ? Number(userData.role_id) : 4,
+        });
+        console.log("[AuthContext] productUser set successfully");
+      } catch (error) {
+        console.error("[AuthContext] Error fetching current user:", error);
+        setProductUser(null);
+      } finally {
+        userLoadRef.current = null;
+      }
+    })();
+
+    userLoadRef.current = loadPromise;
+    return loadPromise;
+  }, []);
 
   // Load permissions from token (similar to Admin Panel's fetchPermissions)
   const loadPermissions = useCallback(async () => {
@@ -123,6 +180,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     permissionsLoadRef.current = loadPromise;
     return loadPromise;
   }, []);
+
+  // Load user and permissions on mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([fetchCurrentUser(), loadPermissions()]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, [fetchCurrentUser, loadPermissions]);
 
   const login = useCallback(
     async (email: string, password: string) => {

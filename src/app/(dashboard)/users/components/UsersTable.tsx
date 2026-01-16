@@ -16,8 +16,8 @@ import {
 import { formatDate } from "@/lib/utils";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { UsersTablePagination } from "./UsersTablePagination";
-import { usersApi, User, UserFilters } from "@/lib/api/users";
-import { rolesApi, Role } from "@/lib/api";
+import { usersApi, User, UserFilters, UsersListResponse } from "@/lib/api/users";
+import { rolesApi, Role, RolesListResponse } from "@/lib/api";
 import { decodeJWT } from "@/lib/jwt-auth";
 
 // ============================================================================
@@ -86,12 +86,13 @@ export function UsersTable({ filters }: UsersTableProps) {
         const responseData =
           response.success && response.data ? response.data : response;
 
-        if (responseData && "data" in responseData) {
-          // Paginated response
-          setRoles(responseData.data || []);
-        } else if (Array.isArray(responseData)) {
+        if (Array.isArray(responseData)) {
           // Array response
           setRoles(responseData);
+        } else if (responseData && "data" in responseData) {
+          // Paginated response
+          const typedResponse = responseData as RolesListResponse;
+          setRoles(typedResponse.data || []);
         } else {
           setRoles([]);
         }
@@ -141,12 +142,13 @@ export function UsersTable({ filters }: UsersTableProps) {
           response.success && response.data ? response.data : response;
 
         if (responseData && "data" in responseData) {
-          setUsers(responseData.data || []);
+          const typedResponse = responseData as UsersListResponse;
+          setUsers(typedResponse.data || []);
           setMeta({
-            page: responseData.page || 1,
-            limit: responseData.limit || DEFAULT_PAGE_SIZE,
-            total: responseData.total || 0,
-            total_pages: responseData.totalPages || 1,
+            page: typedResponse.page || 1,
+            limit: typedResponse.limit || DEFAULT_PAGE_SIZE,
+            total: typedResponse.total || 0,
+            total_pages: typedResponse.totalPages || 1,
           });
         } else {
           // Fallback for array response

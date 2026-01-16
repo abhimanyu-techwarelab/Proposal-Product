@@ -33,6 +33,23 @@ export interface UserFilters {
   role_id?: string;
 }
 
+export interface CreateUserDto {
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+  organization_id?: string;
+  role_id?: string;
+}
+
+export interface UpdateUserDto {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  role_id?: string;
+  profile_image?: string;
+}
+
 // ============================================================================
 // Client-Side API (for Client Components)
 // ============================================================================
@@ -54,5 +71,26 @@ export const usersApi = {
    */
   getById: async (id: string): Promise<ApiResponse<User>> => {
     return apiClient.get<User>(API_ENDPOINTS.USER_BY_ID(id));
+  },
+
+  /**
+   * Create a new user
+   */
+  create: async (dto: CreateUserDto): Promise<ApiResponse<User>> => {
+    return apiClient.post<User>(`${API_ENDPOINTS.USERS}/create`, dto);
+  },
+
+  /**
+   * Update an existing user
+   */
+  update: async (id: string, dto: UpdateUserDto): Promise<ApiResponse<User>> => {
+    return apiClient.put<User>(`${API_ENDPOINTS.USERS}/update/${id}`, dto);
+  },
+
+  /**
+   * Delete a user (soft delete)
+   */
+  delete: async (id: string): Promise<ApiResponse<User>> => {
+    return apiClient.delete<User>(`${API_ENDPOINTS.USERS}/delete/${id}`);
   },
 };

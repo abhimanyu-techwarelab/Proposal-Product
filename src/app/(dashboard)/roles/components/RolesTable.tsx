@@ -18,7 +18,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { RolesTablePagination } from "./RolesTablePagination";
-import { rolesApi, Role, RoleFilters } from "@/lib/api/roles";
+import { rolesApi, Role, RoleFilters, RolesListResponse } from "@/lib/api/roles";
 import { decodeJWT } from "@/lib/jwt-auth";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -73,12 +73,13 @@ export function RolesTable({ filters }: RolesTableProps) {
       const responseData =
         response.success && response.data ? response.data : response;
 
-      if (responseData && "data" in responseData) {
-        allRoles = responseData.data || [];
-        totalCount = responseData.total || allRoles.length;
-      } else if (Array.isArray(responseData)) {
+      if (Array.isArray(responseData)) {
         allRoles = responseData;
         totalCount = responseData.length;
+      } else if (responseData && "data" in responseData) {
+        const typedResponse = responseData as RolesListResponse;
+        allRoles = typedResponse.data || [];
+        totalCount = typedResponse.total || allRoles.length;
       }
 
       // Filter by search
@@ -106,15 +107,16 @@ export function RolesTable({ filters }: RolesTableProps) {
       const responseData =
         response.success && response.data ? response.data : response;
 
-      if (responseData && "data" in responseData) {
-        allRoles = responseData.data || [];
-        totalCount = responseData.total || 0;
-        totalPages =
-          responseData.totalPages || Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
-      } else if (Array.isArray(responseData)) {
+      if (Array.isArray(responseData)) {
         allRoles = responseData;
         totalCount = responseData.length;
         totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
+      } else if (responseData && "data" in responseData) {
+        const typedResponse = responseData as RolesListResponse;
+        allRoles = typedResponse.data || [];
+        totalCount = typedResponse.total || 0;
+        totalPages =
+          typedResponse.totalPages || Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
       }
     }
 
@@ -319,7 +321,7 @@ export function RolesTable({ filters }: RolesTableProps) {
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1">
-                  {canUpdateRoles && (
+                  {canUpdateRoles && role.name !== "Super Admin" && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -332,7 +334,7 @@ export function RolesTable({ filters }: RolesTableProps) {
                       <Edit className="h-4 w-4" />
                     </Button>
                   )}
-                  {canDeleteRoles && (
+                  {canDeleteRoles && role.name !== "Super Admin" && (
                     <Button
                       variant="ghost"
                       size="sm"

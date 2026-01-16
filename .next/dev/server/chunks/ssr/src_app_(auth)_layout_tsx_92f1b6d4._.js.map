@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///usr/src/app/Proposal/Proposal-Product/src/app/%28auth%29/layout.tsx"],"sourcesContent":["import React from \"react\";\n\nexport default function AuthLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  // The custom UI components handle their own layout\n  return <>{children}</>;\n}\n"],"names":[],"mappings":";;;;;;AAEe,SAAS,WAAW,EACjC,QAAQ,EAGT;IACC,mDAAmD;IACnD,qBAAO;kBAAG;;AACZ"}}]
+}

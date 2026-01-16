@@ -10,18 +10,19 @@ export const metadata = {
 };
 
 interface UsersPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     role_id?: string;
     page?: string;
-  };
+  }>;
 }
 
-export default function UsersPage({ searchParams }: UsersPageProps) {
+export default async function UsersPage({ searchParams }: UsersPageProps) {
+  const resolvedSearchParams = await searchParams;
   const filters = {
-    search: searchParams.search,
-    role_id: searchParams.role_id,
-    page: searchParams.page ? parseInt(searchParams.page, 10) : 1,
+    search: resolvedSearchParams.search,
+    role_id: resolvedSearchParams.role_id,
+    page: resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1,
   };
 
   return (

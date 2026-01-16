@@ -1,5 +1,8 @@
-import Link from 'next/link';
-import { Eye } from 'lucide-react';
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Eye } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -10,162 +13,149 @@ import {
   TableEmptyState,
   StatusBadge,
   Button,
-} from '@/components/ui';
-import { formatDate, formatCurrency } from '@/lib/utils';
-import { Proposal, ProposalStatus, Currency, BillingType } from '@/types';
+} from "@/components/ui";
+import { formatDate, formatCurrency } from "@/lib/utils";
+import { proposalsApi } from "@/lib/api/proposals";
+import { ProposalPreviewModal } from "@/components/proposals/ProposalPreviewModal";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Proposal,
+  ProposalStatus,
+  Currency,
+  BillingType,
+} from "@/types";
+
+interface BackendProposal {
+  id: string;
+  title: string;
+  client_name: string;
+  client_email: string;
+  industry?: string;
+  total_budget?: number;
+  currency?: string;
+  status?: string;
+  date_of_proposal?: string;
+  created_at: string;
+}
 
 export function RecentProposalsTable() {
-  // Mock data for demonstration
-  const proposals: Proposal[] = [
-    {
-      id: '1',
-      organization_id: 'org-1',
-      pdf_code: 'PRO-ABC12345',
-      title: 'Website Redesign Project',
-      client_name: 'Acme Corp',
-      client_email: 'contact@acme.com',
-      industry: 'Technology',
-      summary: 'Complete website redesign with modern UI/UX',
-      goals: 'Improve user engagement and conversion rates',
-      scope: 'Full website redesign including all pages',
-      deliverables: [],
-      milestones: [],
-      start_date: '2024-02-01',
-      end_date: '2024-04-30',
-      date_of_proposal: '2024-01-15',
-      total_budget: 25000,
-      currency: Currency.USD,
-      billing_type: BillingType.MILESTONE,
-      team_members: [],
-      submitted_to: [],
-      links: [],
-      audio_path: [],
-      document_path: [],
-      status: ProposalStatus.APPROVAL_PENDING,
-      created_by: 'user-1',
-      created_at: '2024-01-15T10:30:00Z',
-      updated_at: '2024-01-15T10:30:00Z',
-    },
-    {
-      id: '2',
-      organization_id: 'org-1',
-      pdf_code: 'PRO-DEF67890',
-      title: 'Mobile App Development',
-      client_name: 'TechStart Inc',
-      client_email: 'hello@techstart.io',
-      industry: 'Technology',
-      summary: 'Native mobile app for iOS and Android',
-      goals: 'Launch MVP within 3 months',
-      scope: 'Full mobile app development',
-      deliverables: [],
-      milestones: [],
-      start_date: '2024-03-01',
-      end_date: '2024-06-30',
-      date_of_proposal: '2024-01-20',
-      total_budget: 75000,
-      currency: Currency.USD,
-      billing_type: BillingType.MILESTONE,
-      team_members: [],
-      submitted_to: [],
-      links: [],
-      audio_path: [],
-      document_path: [],
-      status: ProposalStatus.COMPLETED,
-      created_by: 'user-1',
-      approved_by: 'user-2',
-      created_at: '2024-01-20T14:00:00Z',
-      updated_at: '2024-01-22T09:15:00Z',
-    },
-    {
-      id: '3',
-      organization_id: 'org-1',
-      pdf_code: 'PRO-GHI11111',
-      title: 'Marketing Campaign Strategy',
-      client_name: 'Global Brands Ltd',
-      client_email: 'marketing@globalbrands.com',
-      industry: 'Marketing',
-      summary: 'Q2 digital marketing campaign',
-      goals: 'Increase brand awareness by 40%',
-      scope: 'Strategy, content, and execution',
-      deliverables: [],
-      milestones: [],
-      start_date: '2024-04-01',
-      end_date: '2024-06-30',
-      date_of_proposal: '2024-01-25',
-      total_budget: 50000,
-      currency: Currency.USD,
-      billing_type: BillingType.RETAINER,
-      team_members: [],
-      submitted_to: [],
-      links: [],
-      audio_path: [],
-      document_path: [],
-      status: ProposalStatus.REJECTED,
-      created_by: 'user-1',
-      approved_by: 'user-2',
-      rejection_reason: 'Budget constraints',
-      created_at: '2024-01-25T11:45:00Z',
-      updated_at: '2024-01-26T16:30:00Z',
-    },
-    {
-      id: '4',
-      organization_id: 'org-1',
-      pdf_code: 'PRO-JKL22222',
-      title: 'E-commerce Platform',
-      client_name: 'RetailMax',
-      client_email: 'projects@retailmax.com',
-      industry: 'Retail',
-      summary: 'Custom e-commerce solution',
-      goals: 'Launch online store with 1000+ products',
-      scope: 'Full e-commerce development',
-      deliverables: [],
-      milestones: [],
-      start_date: '2024-05-01',
-      end_date: '2024-10-31',
-      date_of_proposal: '2024-01-28',
-      total_budget: 120000,
-      currency: Currency.USD,
-      billing_type: BillingType.MILESTONE,
-      team_members: [],
-      submitted_to: [],
-      links: [],
-      audio_path: [],
-      document_path: [],
-      status: ProposalStatus.PENDING,
-      created_by: 'user-1',
-      created_at: '2024-01-28T09:00:00Z',
-      updated_at: '2024-01-28T09:00:00Z',
-    },
-    {
-      id: '5',
-      organization_id: 'org-1',
-      pdf_code: 'PRO-MNO33333',
-      title: 'Cloud Migration Services',
-      client_name: 'Enterprise Solutions Co',
-      client_email: 'it@enterprise.co',
-      industry: 'Technology',
-      summary: 'AWS cloud migration for legacy systems',
-      goals: 'Migrate 50 applications to cloud',
-      scope: 'Assessment, planning, and migration',
-      deliverables: [],
-      milestones: [],
-      start_date: '2024-06-01',
-      end_date: '2024-12-31',
-      date_of_proposal: '2024-01-30',
-      total_budget: 200000,
-      currency: Currency.USD,
-      billing_type: BillingType.FIXED,
-      team_members: [],
-      submitted_to: [],
-      links: [],
-      audio_path: [],
-      document_path: [],
-      status: ProposalStatus.APPROVAL_PENDING,
-      created_by: 'user-1',
-      created_at: '2024-01-30T13:20:00Z',
-      updated_at: '2024-01-30T13:20:00Z',
-    },
-  ];
+  const { hasPermission } = useAuth();
+  const canViewProposals = hasPermission('read_proposals_product');
+
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState<Proposal | null>(null);
+
+  const handlePreviewClick = (proposal: Proposal) => {
+    setSelectedProposal(proposal);
+    setPreviewModalOpen(true);
+  };
+
+  useEffect(() => {
+    // Skip API call if user doesn't have permission
+    if (!canViewProposals) {
+      setLoading(false);
+      return;
+    }
+
+    async function fetchRecentProposals() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await proposalsApi.list({
+          page: 1,
+          limit: 4,
+        });
+
+        const responseData =
+          response.success && response.data ? response.data : response;
+        const proposalsData = (responseData as any).proposals || [];
+
+        if (proposalsData && Array.isArray(proposalsData)) {
+          const mappedProposals: Proposal[] = proposalsData.map(
+            (p: BackendProposal) => ({
+              id: p.id,
+              organization_id: "",
+              pdf_code: `PRO-${p.id.substring(0, 8).toUpperCase()}`,
+              title: p.title || "",
+              client_name: p.client_name || "",
+              client_email: p.client_email || "",
+              industry: p.industry,
+              summary: "",
+              goals: "",
+              scope: "",
+              deliverables: [],
+              milestones: [],
+              start_date: "",
+              end_date: "",
+              date_of_proposal:
+                p.date_of_proposal || p.created_at.split("T")[0],
+              total_budget: p.total_budget || 0,
+              currency: (p.currency as Currency) || Currency.USD,
+              billing_type: BillingType.FIXED,
+              team_members: [],
+              submitted_to: [],
+              links: [],
+              audio_path: [],
+              document_path: [],
+              status: (p.status as ProposalStatus) || ProposalStatus.PENDING,
+              created_by: "",
+              created_at: p.created_at,
+              updated_at: p.created_at,
+            })
+          );
+
+          setProposals(mappedProposals);
+        }
+      } catch (err) {
+        console.error("Error fetching recent proposals:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load proposals"
+        );
+        setProposals([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRecentProposals();
+  }, [canViewProposals]);
+
+  // Hide the entire section if user doesn't have permission
+  if (!canViewProposals) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+              Loading proposals...
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+  }
+
+  if (error) {
+    return (
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell colSpan={6} className="text-center py-8 text-danger-600">
+              Error: {error}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+  }
 
   if (proposals.length === 0) {
     return (
@@ -186,6 +176,7 @@ export function RecentProposalsTable() {
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -222,15 +213,32 @@ export function RecentProposalsTable() {
               {formatDate(proposal.date_of_proposal)}
             </TableCell>
             <TableCell>
-              <Link href={`/proposals/${proposal.id}`}>
-                <Button variant="ghost" size="sm">
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Preview"
+                onClick={() => handlePreviewClick(proposal)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+
+    {/* Preview Modal */}
+    {selectedProposal && (
+      <ProposalPreviewModal
+        isOpen={previewModalOpen}
+        onClose={() => {
+          setPreviewModalOpen(false);
+          setSelectedProposal(null);
+        }}
+        proposalId={selectedProposal.id}
+        proposalTitle={selectedProposal.title}
+      />
+    )}
+  </>
   );
 }

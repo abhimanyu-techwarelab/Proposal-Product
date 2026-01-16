@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, GripVertical, Upload, FileText, Music, X } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Upload, FileText, Music, X, RefreshCw, Eye, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Button,
@@ -12,8 +12,10 @@ import {
   Card,
   CardHeader,
   CardContent,
+  DatePicker,
 } from '@/components/ui';
-import { proposalsApi, ApiRequestError } from '@/lib/api';
+import { Badge } from '@/components/ui/Badge';
+import { proposalsApi, templatesApi, subscriptionsApi, ApiRequestError } from '@/lib/api';
 import { insertProposal } from '@/lib/api/supabaseProposals';
 import { proposalCreateSchema } from '@/lib/validations';
 import { generateId } from '@/lib/utils';
@@ -30,16 +32,26 @@ import {
   TeamMember,
   ProposalLink,
   Recipient,
+  Template,
 } from '@/types';
 import {
   CURRENCY_CONFIG,
   BILLING_TYPE_CONFIG,
   INDUSTRY_OPTIONS,
 } from '@/constants';
+import { Modal } from '@/components/ui/Modal';
+import { TemplatePreview } from '@/components/templates/TemplatePreview';
 
 // ============================================================================
 // File Upload Types & Constants
 // ============================================================================
+
+interface PendingFile {
+  id: string;
+  name: string;
+  file: File;
+  size: number;
+}
 
 interface UploadedFile {
   id: string;
@@ -115,23 +127,41 @@ const getInitialLink = (): LinkInput => ({
 });
 
 // ============================================================================
+// Component Props
+// ============================================================================
+
+interface ProposalFormProps {
+  templateId?: string | null;
+  onChangeTemplate?: () => void;
+}
+
+// ============================================================================
 // Component
 // ============================================================================
 
-export function ProposalForm() {
+export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps) {
   const router = useRouter();
   const { productUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // File upload refs and state
+  // Template state
+  const [loadedTemplate, setLoadedTemplate] = useState<Template | null>(null);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+  // Loader modal state
+  const [showLoaderModal, setShowLoaderModal] = useState(false);
+  const [loaderStatus, setLoaderStatus] = useState<'uploading' | 'generating' | 'pending'>('uploading');
+
+  // File upload refs and state (files stored locally until submit)
   const documentInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedFile[]>([]);
-  const [uploadedAudio, setUploadedAudio] = useState<UploadedFile[]>([]);
-  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
-  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [pendingDocuments, setPendingDocuments] = useState<PendingFile[]>([]);
+  const [pendingAudio, setPendingAudio] = useState<PendingFile[]>([]);
+  const [isAddingDocuments, setIsAddingDocuments] = useState(false);
+  const [isAddingAudio, setIsAddingAudio] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Form state
@@ -152,13 +182,104 @@ export function ProposalForm() {
   const [billingType, setBillingType] = useState<BillingType>(BillingType.FIXED);
   const [recipients, setRecipients] = useState<RecipientInput[]>([]);
 
-  // Array fields
-  const [deliverables, setDeliverables] = useState<DeliverableInput[]>([
-    getInitialDeliverable(),
-  ]);
+  // Array fields - simplified string arrays for deliverables and links
+  const [deliverables, setDeliverables] = useState<string[]>([]);
+  const [deliverableInput, setDeliverableInput] = useState('');
   const [milestones, setMilestones] = useState<MilestoneInput[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMemberInput[]>([]);
-  const [links, setLinks] = useState<LinkInput[]>([]);
+  const [links, setLinks] = useState<string[]>([]);
+  const [linkInput, setLinkInput] = useState('');
+
+  // ============================================================================
+  // Template Loading
+  // ============================================================================
+
+  useEffect(() => {
+    if (templateId) {
+      loadTemplateData(templateId);
+    } else {
+      setLoadedTemplate(null);
+    }
+  }, [templateId]);
+
+  const loadTemplateData = async (id: string) => {
+    try {
+      setIsLoadingTemplate(true);
+      const response = await templatesApi.getById(id);
+
+      if (response.success && response.data) {
+        const template = response.data;
+        setLoadedTemplate(template);
+
+        // Pre-fill form fields from template content
+        const content = template.content;
+        if (content) {
+          if (content.title) setTitle(content.title);
+          if (content.client_name) setClientName(content.client_name);
+          if (content.client_email) setClientEmail(content.client_email);
+          if (content.industry) setIndustry(content.industry);
+          if (content.summary) setSummary(content.summary);
+          if (content.goals) setGoals(content.goals);
+          if (content.scope) setScope(content.scope);
+          if (content.start_date) setStartDate(content.start_date);
+          if (content.end_date) setEndDate(content.end_date);
+          if (content.total_budget) setTotalBudget(content.total_budget);
+          if (content.currency) setCurrency(content.currency);
+          if (content.billing_type) setBillingType(content.billing_type);
+
+          // Pre-fill deliverables (as string array)
+          if (content.deliverables && content.deliverables.length > 0) {
+            setDeliverables(
+              content.deliverables.map((d) => d.title || '')
+            );
+          }
+
+          // Pre-fill milestones
+          if (content.milestones && content.milestones.length > 0) {
+            setMilestones(
+              content.milestones.map((m) => ({
+                id: generateId(),
+                title: m.title || '',
+              }))
+            );
+          }
+
+          // Pre-fill team members
+          if (content.team_members && content.team_members.length > 0) {
+            setTeamMembers(
+              content.team_members.map((t) => ({
+                id: generateId(),
+                role: t.role || '',
+                experience: t.experience || '',
+              }))
+            );
+          }
+
+          // Pre-fill links (as string array)
+          if (content.links && content.links.length > 0) {
+            setLinks(
+              content.links.map((l) => l.url || '')
+            );
+          }
+
+          // Pre-fill recipients
+          if (content.submitted_to && content.submitted_to.length > 0) {
+            setRecipients(
+              content.submitted_to.map((r) => ({
+                id: generateId(),
+                salutation: r.salutation || '',
+                name: r.name || '',
+              }))
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load template:', error);
+    } finally {
+      setIsLoadingTemplate(false);
+    }
+  };
 
   // ============================================================================
   // File Upload Handlers
@@ -200,42 +321,26 @@ export function ProposalForm() {
     }
   };
 
+  // Store files locally (upload happens on submit)
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (!productUser) {
-      setUploadError('You must be logged in to upload files');
-      return;
-    }
-
-    setIsUploadingDocuments(true);
     setUploadError(null);
+    setIsAddingDocuments(true);
 
-    const newUploads: UploadedFile[] = [];
+    const newFiles: PendingFile[] = Array.from(files).map((file) => ({
+      id: generateId(),
+      name: file.name,
+      file,
+      size: file.size,
+    }));
 
-    for (const file of Array.from(files)) {
-      const { path, url, error } = await uploadFileToSupabase(
-        file,
-        STORAGE_BUCKETS.DOCUMENTS
-      );
+    // Show uploading state for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (error) {
-        setUploadError(`Failed to upload ${file.name}: ${error}`);
-        continue;
-      }
-
-      newUploads.push({
-        id: generateId(),
-        name: file.name,
-        path,
-        url,
-        size: file.size,
-      });
-    }
-
-    setUploadedDocuments((prev) => [...prev, ...newUploads]);
-    setIsUploadingDocuments(false);
+    setPendingDocuments((prev) => [...prev, ...newFiles]);
+    setIsAddingDocuments(false);
 
     // Reset input
     if (documentInputRef.current) {
@@ -243,42 +348,26 @@ export function ProposalForm() {
     }
   };
 
+  // Store files locally (upload happens on submit)
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (!productUser) {
-      setUploadError('You must be logged in to upload files');
-      return;
-    }
-
-    setIsUploadingAudio(true);
     setUploadError(null);
+    setIsAddingAudio(true);
 
-    const newUploads: UploadedFile[] = [];
+    const newFiles: PendingFile[] = Array.from(files).map((file) => ({
+      id: generateId(),
+      name: file.name,
+      file,
+      size: file.size,
+    }));
 
-    for (const file of Array.from(files)) {
-      const { path, url, error } = await uploadFileToSupabase(
-        file,
-        STORAGE_BUCKETS.AUDIO
-      );
+    // Show uploading state for 1 second
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (error) {
-        setUploadError(`Failed to upload ${file.name}: ${error}`);
-        continue;
-      }
-
-      newUploads.push({
-        id: generateId(),
-        name: file.name,
-        path,
-        url,
-        size: file.size,
-      });
-    }
-
-    setUploadedAudio((prev) => [...prev, ...newUploads]);
-    setIsUploadingAudio(false);
+    setPendingAudio((prev) => [...prev, ...newFiles]);
+    setIsAddingAudio(false);
 
     // Reset input
     if (audioInputRef.current) {
@@ -286,26 +375,109 @@ export function ProposalForm() {
     }
   };
 
-  const removeDocument = async (fileId: string) => {
-    const file = uploadedDocuments.find((f) => f.id === fileId);
-    if (file) {
-      await supabase.storage.from(STORAGE_BUCKETS.DOCUMENTS).remove([file.path]);
-      setUploadedDocuments((prev) => prev.filter((f) => f.id !== fileId));
-    }
+  const removeDocument = (fileId: string) => {
+    setPendingDocuments((prev) => prev.filter((f) => f.id !== fileId));
   };
 
-  const removeAudioFile = async (fileId: string) => {
-    const file = uploadedAudio.find((f) => f.id === fileId);
-    if (file) {
-      await supabase.storage.from(STORAGE_BUCKETS.AUDIO).remove([file.path]);
-      setUploadedAudio((prev) => prev.filter((f) => f.id !== fileId));
-    }
+  const removeAudioFile = (fileId: string) => {
+    setPendingAudio((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  // ============================================================================
+  // Validation Helpers
+  // ============================================================================
+
+  const validateField = (field: string, value: string | number): boolean => {
+    let error = '';
+
+    switch (field) {
+      case 'title':
+        if (!value || String(value).length < 3) error = 'Title must be at least 3 characters';
+        break;
+      case 'client_name':
+        if (!value) error = 'Client name is required';
+        break;
+      case 'client_email':
+        if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)))
+          error = 'Valid email is required';
+        break;
+      case 'start_date':
+        if (!value) error = 'Start date is required';
+        break;
+      case 'end_date':
+        if (!value) error = 'End date is required';
+        break;
+      case 'total_budget':
+        if (value === undefined || Number(value) < 0) error = 'Budget must be positive';
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [field]: error || undefined }));
+    return !error;
+  };
+
+  const validateSummaryGoalsScope = (): boolean => {
+    if (!summary.trim() && !goals.trim() && !scope.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        summary: 'At least one of Summary, Goals, or Scope is required',
+      }));
+      return false;
+    }
+    setErrors((prev) => ({ ...prev, summary: undefined }));
+    return true;
+  };
+
+  const validateFileUploads = (): boolean => {
+    if (pendingDocuments.length === 0 && pendingAudio.length === 0) {
+      setUploadError('At least one document or audio file is required');
+      return false;
+    }
+    setUploadError(null);
+    return true;
+  };
+
+  const validateAllFields = (): boolean => {
+    let isValid = true;
+    const newErrors: FormErrors = {};
+
+    if (!title || title.length < 3) {
+      newErrors.title = 'Title must be at least 3 characters';
+      isValid = false;
+    }
+    if (!clientName) {
+      newErrors.client_name = 'Client name is required';
+      isValid = false;
+    }
+    if (!clientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+      newErrors.client_email = 'Valid email is required';
+      isValid = false;
+    }
+    if (!startDate) {
+      newErrors.start_date = 'Start date is required';
+      isValid = false;
+    }
+    if (!endDate) {
+      newErrors.end_date = 'End date is required';
+      isValid = false;
+    }
+    if (totalBudget < 0) {
+      newErrors.total_budget = 'Budget must be positive';
+      isValid = false;
+    }
+    if (deliverables.length === 0) {
+      newErrors.deliverables = 'At least one deliverable is required';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   // ============================================================================
@@ -322,64 +494,69 @@ export function ProposalForm() {
       return;
     }
 
-    // Collect file URLs from uploaded files (full Supabase storage URLs)
-    const documentUrls = uploadedDocuments.map((f) => f.url);
-    const audioUrls = uploadedAudio.map((f) => f.url);
+    // Validate all fields
+    const isValid = validateAllFields();
+    const hasSummaryGoalsScope = validateSummaryGoalsScope();
+    const hasFiles = validateFileUploads();
 
-    const formData = {
-      title,
-      client_name: clientName,
-      client_email: clientEmail,
-      industry: industry || undefined,
-      summary,
-      goals,
-      scope,
-      deliverables: deliverables.map(({ id, ...d }) => d),
-      milestones: milestones.map(({ id, ...m }) => m),
-      start_date: startDate,
-      end_date: endDate,
-      date_of_proposal: dateOfProposal,
-      total_budget: totalBudget,
-      currency,
-      billing_type: billingType,
-      team_members: teamMembers.map(({ id, ...t }) => t),
-      submitted_to: recipients.map(({ id, ...r }) => r),
-      links: links.map(({ id, ...l }) => l),
-      audio_path: audioUrls,
-      document_path: documentUrls,
-    };
-
-    // Validate form data
-    const result = proposalCreateSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      result.error.errors.forEach((err) => {
-        const path = err.path.join('.');
-        fieldErrors[path] = err.message;
-      });
-      setErrors(fieldErrors);
+    if (!isValid || !hasSummaryGoalsScope || !hasFiles) {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Step 1: Save proposal to Supabase proposals table with file URLs
-      const { data: proposal, error: insertError } = await insertProposal({
-        ...result.data,
-        organization_id: productUser.organization_id,
-        created_by: productUser.user_id,
-      });
+      // Show loader modal
+      setShowLoaderModal(true);
+      setLoaderStatus('uploading');
+      setIsSubmitting(true);
 
-      if (insertError || !proposal) {
-        throw new Error(insertError || 'Failed to save proposal');
+      // Step 1: Get active subscription
+      const subscription = await subscriptionsApi.getActiveByOrganization(
+        productUser.organization_id
+      );
+
+      // Step 2: Upload pending files to Supabase Storage
+      const uploadedDocs: UploadedFile[] = [];
+      const uploadedAudioFiles: UploadedFile[] = [];
+
+      // Upload documents
+      for (const pendingFile of pendingDocuments) {
+        const { path, url, error } = await uploadFileToSupabase(
+          pendingFile.file,
+          STORAGE_BUCKETS.DOCUMENTS
+        );
+        if (error) {
+          throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+        }
+        uploadedDocs.push({
+          id: pendingFile.id,
+          name: pendingFile.name,
+          path,
+          url,
+          size: pendingFile.size,
+        });
       }
 
-      const proposalId = proposal.id;
+      // Upload audio files
+      for (const pendingFile of pendingAudio) {
+        const { path, url, error } = await uploadFileToSupabase(
+          pendingFile.file,
+          STORAGE_BUCKETS.AUDIO
+        );
+        if (error) {
+          throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+        }
+        uploadedAudioFiles.push({
+          id: pendingFile.id,
+          name: pendingFile.name,
+          path,
+          url,
+          size: pendingFile.size,
+        });
+      }
 
-      // Step 2: Generate signed URLs for uploaded documents and audio files
-      const documentPaths = uploadedDocuments.map((f) => f.path);
-      const audioPaths = uploadedAudio.map((f) => f.path);
+      // Step 3: Generate signed URLs for uploaded files
+      const documentPaths = uploadedDocs.map((f) => f.path);
+      const audioPaths = uploadedAudioFiles.map((f) => f.path);
 
       const { documentUrls: signedDocUrls, audioUrls: signedAudioUrls, errors: signedUrlErrors } =
         await generateAllSignedUrls(documentPaths, audioPaths);
@@ -388,17 +565,48 @@ export function ProposalForm() {
         console.warn('Some signed URLs failed to generate:', signedUrlErrors);
       }
 
-      // Step 3: POST form data + signed URLs to backend generate endpoint
-      await proposalsApi.generate({
-        ...result.data,
-        proposal_id: proposalId,
-        document_signed_urls: signedDocUrls,
-        audio_signed_urls: signedAudioUrls,
+      setLoaderStatus('generating');
+
+      // Step 4: Transform data for backend
+      // Recipients: combine salutation and name into a single string
+      const submittedTo = recipients.map((r) =>
+        r.salutation && r.name ? `${r.salutation} ${r.name}` : r.name || ''
+      );
+
+      setLoaderStatus('pending');
+
+      // Step 5: POST to backend generate endpoint
+      const result = await proposalsApi.generate({
+        subscription_id: subscription.id,
+        template_id: templateId || undefined,
+        created_by: productUser.id,
+        submitted_to: submittedTo,
+        title,
+        client_name: clientName,
+        client_email: clientEmail,
+        industry: industry || '',
+        summary: summary || '',
+        goals: goals || '',
+        scope: scope || '',
+        start_date: startDate,
+        end_date: endDate,
+        date_of_proposal: dateOfProposal,
+        total_budget: totalBudget,
+        currency,
+        billing_type: billingType,
+        deliverables, // string[]
+        milestones: milestones.map(({ id, ...m }) => m),
+        team_members: teamMembers.map(({ id, ...t }) => t),
+        links, // string[]
+        document_storage_paths: signedDocUrls,
+        audio_storage_paths: signedAudioUrls,
       });
 
-      // Navigate to the proposal detail page
-      router.push(`/proposals/${proposalId}`);
+      // Keep modal showing - user can click View Proposals to navigate
+      // The modal will stay open showing "Pending" status
+
     } catch (error) {
+      setShowLoaderModal(false);
       if (error instanceof ApiRequestError) {
         setSubmitError(error.message);
         if (error.details) {
@@ -418,24 +626,18 @@ export function ProposalForm() {
     }
   };
 
+  // Simplified deliverables handlers (string array)
   const addDeliverable = () => {
-    setDeliverables([...deliverables, getInitialDeliverable()]);
-  };
-
-  const removeDeliverable = (id: string) => {
-    if (deliverables.length > 1) {
-      setDeliverables(deliverables.filter((d) => d.id !== id));
+    if (deliverableInput.trim()) {
+      setDeliverables([...deliverables, deliverableInput.trim()]);
+      setDeliverableInput('');
+      // Clear deliverables error if any
+      setErrors((prev) => ({ ...prev, deliverables: undefined }));
     }
   };
 
-  const updateDeliverable = (
-    id: string,
-    field: keyof DeliverableInput,
-    value: string
-  ) => {
-    setDeliverables(
-      deliverables.map((d) => (d.id === id ? { ...d, [field]: value } : d))
-    );
+  const removeDeliverable = (index: number) => {
+    setDeliverables(deliverables.filter((_, i) => i !== index));
   };
 
   const addMilestone = () => {
@@ -474,16 +676,23 @@ export function ProposalForm() {
     );
   };
 
+  // Simplified links handlers (string array)
   const addLink = () => {
-    setLinks([...links, getInitialLink()]);
+    if (linkInput.trim()) {
+      // Basic URL validation
+      try {
+        new URL(linkInput.trim());
+        setLinks([...links, linkInput.trim()]);
+        setLinkInput('');
+        setErrors((prev) => ({ ...prev, linkInput: undefined }));
+      } catch {
+        setErrors((prev) => ({ ...prev, linkInput: 'Invalid URL format' }));
+      }
+    }
   };
 
-  const removeLink = (id: string) => {
-    setLinks(links.filter((l) => l.id !== id));
-  };
-
-  const updateLink = (id: string, field: keyof LinkInput, value: string) => {
-    setLinks(links.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  const removeLink = (index: number) => {
+    setLinks(links.filter((_, i) => i !== index));
   };
 
   const addRecipient = () => {
@@ -510,6 +719,118 @@ export function ProposalForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Template Banner */}
+      {loadedTemplate && (
+        <div className="flex items-center justify-between rounded-lg border border-[#B87333]/30 bg-gradient-to-r from-[#B87333]/10 to-[#DA8A67]/5 p-4">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-[#DA8A67]" />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-400">Using template:</span>
+                <span className="font-medium text-white">{loadedTemplate.name}</span>
+                {loadedTemplate.is_default && (
+                  <Badge variant="primary" size="sm">Default</Badge>
+                )}
+              </div>
+              {loadedTemplate.description && (
+                <p className="text-xs text-slate-500 mt-0.5">{loadedTemplate.description}</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPreviewModal(true)}
+              leftIcon={<Eye className="h-4 w-4" />}
+            >
+              View
+            </Button>
+            {onChangeTemplate && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onChangeTemplate}
+                leftIcon={<RefreshCw className="h-4 w-4" />}
+              >
+                Change Template
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Template Preview Modal */}
+      {loadedTemplate && (
+        <Modal
+          isOpen={showPreviewModal}
+          onClose={() => setShowPreviewModal(false)}
+          size="full"
+        >
+          <TemplatePreview
+            template={loadedTemplate}
+            onBack={() => setShowPreviewModal(false)}
+            onSelect={() => setShowPreviewModal(false)}
+          />
+        </Modal>
+      )}
+
+      {/* Loader Modal */}
+      <Modal
+        isOpen={showLoaderModal}
+        onClose={() => {}}
+        closeOnOverlayClick={false}
+        closeOnEsc={false}
+        showCloseButton={false}
+        size="sm"
+      >
+        <div className="flex flex-col items-center justify-center py-8">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#B87333] border-t-transparent mb-4" />
+
+          <h3 className="text-lg font-semibold text-white mb-2">
+            {loaderStatus === 'uploading' && 'Uploading Documents...'}
+            {loaderStatus === 'generating' && 'Generating Proposal...'}
+            {loaderStatus === 'pending' && 'Processing...'}
+          </h3>
+
+          <p className="text-sm text-slate-400">
+            Status:{' '}
+            <span className="text-[#DA8A67] font-medium">
+              {loaderStatus === 'uploading' && 'Uploading'}
+              {loaderStatus === 'generating' && 'Generating'}
+              {loaderStatus === 'pending' && 'Pending'}
+            </span>
+          </p>
+
+          {/* Info message */}
+          <p className="text-sm text-slate-500 mt-4 text-center max-w-sm">
+            Your proposal will be available in the Proposals page once generated.
+          </p>
+
+          {/* View Proposals Button */}
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-4"
+            onClick={() => router.push('/proposals')}
+          >
+            View Proposals
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Template Loading State */}
+      {isLoadingTemplate && (
+        <div className="flex items-center justify-center rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#B87333] border-t-transparent" />
+            Loading template...
+          </div>
+        </div>
+      )}
+
       {submitError && (
         <div className="rounded-lg bg-danger-500/20 border border-danger-500/30 p-4 text-sm text-danger-400">
           {submitError}
@@ -541,17 +862,17 @@ export function ProposalForm() {
               className="hidden"
             />
             <div
-              onClick={() => documentInputRef.current?.click()}
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#B87333]/30 p-6 cursor-pointer hover:border-[#DA8A67] hover:bg-[#B87333]/10 transition-colors group"
+              onClick={() => !isAddingDocuments && documentInputRef.current?.click()}
+              className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#B87333]/30 p-6 cursor-pointer hover:border-[#DA8A67] hover:bg-[#B87333]/10 transition-colors group ${isAddingDocuments ? 'opacity-70 cursor-wait' : ''}`}
             >
-              <FileText className="h-10 w-10 text-slate-400 mb-2 group-hover:text-[#DA8A67] transition-colors" />
-              <p className="text-sm font-medium text-slate-300 group-hover:text-[#DA8A67] transition-colors">
-                {isUploadingDocuments ? 'Uploading...' : 'Click to upload'}
+              <FileText className={`h-10 w-10 mb-2 transition-colors ${isAddingDocuments ? 'text-[#DA8A67] animate-pulse' : 'text-slate-400 group-hover:text-[#DA8A67]'}`} />
+              <p className={`text-sm font-medium transition-colors ${isAddingDocuments ? 'text-[#DA8A67]' : 'text-slate-300 group-hover:text-[#DA8A67]'}`}>
+                {isAddingDocuments ? 'Uploading...' : 'Click to upload'}
               </p>
             </div>
-            {uploadedDocuments.length > 0 && (
+            {pendingDocuments.length > 0 && (
               <div className="space-y-2">
-                {uploadedDocuments.map((file) => (
+                {pendingDocuments.map((file) => (
                   <div
                     key={file.id}
                     className="flex items-center gap-3 rounded-lg border border-[#B87333]/30 bg-slate-800/50 p-3"
@@ -593,17 +914,17 @@ export function ProposalForm() {
               className="hidden"
             />
             <div
-              onClick={() => audioInputRef.current?.click()}
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#B87333]/30 p-6 cursor-pointer hover:border-[#DA8A67] hover:bg-[#B87333]/10 transition-colors group"
+              onClick={() => !isAddingAudio && audioInputRef.current?.click()}
+              className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#B87333]/30 p-6 cursor-pointer hover:border-[#DA8A67] hover:bg-[#B87333]/10 transition-colors group ${isAddingAudio ? 'opacity-70 cursor-wait' : ''}`}
             >
-              <Music className="h-10 w-10 text-slate-400 mb-2 group-hover:text-[#DA8A67] transition-colors" />
-              <p className="text-sm font-medium text-slate-300 group-hover:text-[#DA8A67] transition-colors">
-                {isUploadingAudio ? 'Uploading...' : 'Click to upload'}
+              <Music className={`h-10 w-10 mb-2 transition-colors ${isAddingAudio ? 'text-[#DA8A67] animate-pulse' : 'text-slate-400 group-hover:text-[#DA8A67]'}`} />
+              <p className={`text-sm font-medium transition-colors ${isAddingAudio ? 'text-[#DA8A67]' : 'text-slate-300 group-hover:text-[#DA8A67]'}`}>
+                {isAddingAudio ? 'Uploading...' : 'Click to upload'}
               </p>
             </div>
-            {uploadedAudio.length > 0 && (
+            {pendingAudio.length > 0 && (
               <div className="space-y-2">
-                {uploadedAudio.map((file) => (
+                {pendingAudio.map((file) => (
                   <div
                     key={file.id}
                     className="flex items-center gap-3 rounded-lg border border-[#B87333]/30 bg-slate-800/50 p-3"
@@ -640,6 +961,7 @@ export function ProposalForm() {
                 label="Proposal Title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => validateField('title', title)}
                 error={errors.title}
                 placeholder="e.g., Website Redesign Project"
                 required
@@ -649,6 +971,7 @@ export function ProposalForm() {
               label="Client Name"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
+              onBlur={() => validateField('client_name', clientName)}
               error={errors.client_name}
               placeholder="e.g., Acme Corporation"
               required
@@ -658,6 +981,7 @@ export function ProposalForm() {
               type="email"
               value={clientEmail}
               onChange={(e) => setClientEmail(e.target.value)}
+              onBlur={() => validateField('client_email', clientEmail)}
               error={errors.client_email}
               placeholder="e.g., contact@acme.com"
               required
@@ -669,11 +993,10 @@ export function ProposalForm() {
               options={INDUSTRY_OPTIONS.map((ind) => ({ value: ind, label: ind }))}
               placeholder="Select industry"
             />
-            <Input
+            <DatePicker
               label="Proposal Date"
-              type="date"
               value={dateOfProposal}
-              onChange={(e) => setDateOfProposal(e.target.value)}
+              onChange={(value) => setDateOfProposal(value)}
               error={errors.date_of_proposal}
               required
             />
@@ -723,20 +1046,25 @@ export function ProposalForm() {
         <CardHeader title="Timeline" description="Set the project schedule" />
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
-            <Input
+            <DatePicker
               label="Start Date"
-              type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(value) => {
+                setStartDate(value);
+                validateField('start_date', value);
+              }}
               error={errors.start_date}
               required
             />
-            <Input
+            <DatePicker
               label="End Date"
-              type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(value) => {
+                setEndDate(value);
+                validateField('end_date', value);
+              }}
               error={errors.end_date}
+              minDate={startDate}
               required
             />
           </div>
@@ -753,6 +1081,7 @@ export function ProposalForm() {
               type="number"
               value={totalBudget}
               onChange={(e) => setTotalBudget(Number(e.target.value))}
+              onBlur={() => validateField('total_budget', totalBudget)}
               error={errors.total_budget}
               min={0}
               step={0.01}
@@ -782,65 +1111,59 @@ export function ProposalForm() {
         </CardContent>
       </Card>
 
-      {/* Deliverables */}
+      {/* Deliverables - Simplified string input */}
       <Card>
         <CardHeader
           title="Deliverables"
           description="List the project deliverables"
-          action={
-            <Button type="button" variant="outline" size="sm" onClick={addDeliverable}>
+        />
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                value={deliverableInput}
+                onChange={(e) => setDeliverableInput(e.target.value)}
+                placeholder="Enter a deliverable"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addDeliverable();
+                  }
+                }}
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={addDeliverable}>
               <Plus className="mr-1 h-4 w-4" />
               Add
             </Button>
-          }
-        />
-        <CardContent className="space-y-4">
-          {deliverables.map((deliverable, index) => (
-            <div
-              key={deliverable.id}
-              className="flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4"
-            >
-              <div className="flex items-center text-slate-400">
-                <GripVertical className="h-5 w-5" />
-              </div>
-              <div className="flex-1 grid gap-4 md:grid-cols-3">
-                <Input
-                  label="Title"
-                  value={deliverable.title}
-                  onChange={(e) =>
-                    updateDeliverable(deliverable.id, 'title', e.target.value)
-                  }
-                  error={errors[`deliverables.${index}.title`]}
-                  required
-                />
-                <Input
-                  label="Description"
-                  value={deliverable.description}
-                  onChange={(e) =>
-                    updateDeliverable(deliverable.id, 'description', e.target.value)
-                  }
-                  error={errors[`deliverables.${index}.description`]}
-                  required
-                />
-                <Input
-                  label="Due Date"
-                  type="date"
-                  value={deliverable.due_date || ''}
-                  onChange={(e) =>
-                    updateDeliverable(deliverable.id, 'due_date', e.target.value)
-                  }
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => removeDeliverable(deliverable.id)}
-                className="self-center rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-danger-400 transition-colors"
-                disabled={deliverables.length === 1}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+          </div>
+          {errors.deliverables && (
+            <p className="text-sm text-danger-400">{errors.deliverables}</p>
+          )}
+          {deliverables.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {deliverables.map((deliverable, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 rounded-lg border border-[#B87333]/30 bg-slate-800/50 px-3 py-2"
+                >
+                  <span className="text-sm text-white">{deliverable}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeDeliverable(index)}
+                    className="rounded p-0.5 text-slate-400 hover:text-danger-400 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          {deliverables.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-2">
+              No deliverables added. Enter a deliverable and click "Add".
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -952,57 +1275,57 @@ export function ProposalForm() {
         </CardContent>
       </Card>
 
-      {/* Links */}
+      {/* Links - Simplified URL input */}
       <Card>
         <CardHeader
           title="Reference Links"
           description="Add relevant links (optional)"
-          action={
-            <Button type="button" variant="outline" size="sm" onClick={addLink}>
+        />
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="url"
+                value={linkInput}
+                onChange={(e) => setLinkInput(e.target.value)}
+                placeholder="https://example.com"
+                error={errors.linkInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addLink();
+                  }
+                }}
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={addLink}>
               <Plus className="mr-1 h-4 w-4" />
               Add
             </Button>
-          }
-        />
-        <CardContent className="space-y-4">
-          {links.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">
-              No links added. Click "Add" to add a reference link.
-            </p>
-          ) : (
-            links.map((link, index) => (
-              <div
-                key={link.id}
-                className="flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4"
-              >
-                <div className="flex-1 grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Label"
-                    value={link.label}
-                    onChange={(e) => updateLink(link.id, 'label', e.target.value)}
-                    error={errors[`links.${index}.label`]}
-                    placeholder="e.g., Design Mockups"
-                    required
-                  />
-                  <Input
-                    label="URL"
-                    type="url"
-                    value={link.url}
-                    onChange={(e) => updateLink(link.id, 'url', e.target.value)}
-                    error={errors[`links.${index}.url`]}
-                    placeholder="https://..."
-                    required
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeLink(link.id)}
-                  className="self-center rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-danger-400 transition-colors"
+          </div>
+          {links.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {links.map((link, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 rounded-lg border border-[#B87333]/30 bg-slate-800/50 px-3 py-2 max-w-full"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))
+                  <span className="text-sm text-white truncate max-w-[300px]">{link}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeLink(index)}
+                    className="rounded p-0.5 text-slate-400 hover:text-danger-400 transition-colors flex-shrink-0"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {links.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-2">
+              No links added. Enter a URL and click "Add".
+            </p>
           )}
         </CardContent>
       </Card>

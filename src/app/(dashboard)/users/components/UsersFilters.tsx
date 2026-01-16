@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, Plus } from "lucide-react";
 import { Input, Select, Button } from "@/components/ui";
-import { rolesApi, Role } from "@/lib/api";
+import { rolesApi, Role, RolesListResponse } from "@/lib/api";
 import { decodeJWT } from "@/lib/jwt-auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ============================================================================
 // Types
@@ -26,9 +27,13 @@ interface UsersFiltersProps {
 export function UsersFilters({ currentFilters }: UsersFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hasPermission } = useAuth();
   const [roles, setRoles] = useState<Role[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [canFetchRoles, setCanFetchRoles] = useState(true);
+
+  // Check if user has permission to create users
+  const canCreateUsers = hasPermission("create_users_product");
 
   // Fetch organization_id from JWT token and then fetch roles
   useEffect(() => {
@@ -76,12 +81,13 @@ export function UsersFilters({ currentFilters }: UsersFiltersProps) {
         const responseData =
           response.success && response.data ? response.data : response;
 
-        if (responseData && "data" in responseData) {
-          // Paginated response
-          setRoles(responseData.data || []);
-        } else if (Array.isArray(responseData)) {
+        if (Array.isArray(responseData)) {
           // Array response
           setRoles(responseData);
+        } else if (responseData && "data" in responseData) {
+          // Paginated response
+          const typedResponse = responseData as RolesListResponse;
+          setRoles(typedResponse.data || []);
         } else {
           setRoles([]);
         }
@@ -197,6 +203,21 @@ export function UsersFilters({ currentFilters }: UsersFiltersProps) {
           >
             <X className="mr-1 h-4 w-4" />
             Clear
+          </Button>
+        )}
+
+        {/* Spacer to push Create button to the right */}
+        <div className="flex-1" />
+
+        {/* Create User Button */}
+        {canCreateUsers && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => router.push("/users/new")}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Create User
           </Button>
         )}
       </div>

@@ -1,118 +1,127 @@
 # External Integrations
 
-**Analysis Date:** 2026-01-14
+**Analysis Date:** 2026-01-16
 
 ## APIs & External Services
 
-**Backend API:**
-- Custom Node.js backend - Business logic, permissions, CRUD operations
-  - Base URL: `NEXT_PUBLIC_API_URL` environment variable
-  - Client: `src/lib/api/client.ts` (typed HTTP client)
-  - Endpoints: `/auth/*`, `/dashboard/*`, `/product/proposals/*`, `/users`, `/roles`, `/organizations`
-  - Auth: JWT Bearer token in Authorization header
-
-**Payment Processing:**
-- Not detected
-
-**Email/SMS:**
-- Not detected
+**Backend REST API:**
+- Custom REST API at `NEXT_PUBLIC_API_URL` (default: http://localhost:3001)
+  - SDK/Client: Custom fetch-based client - `src/lib/api/client.ts`
+  - Auth: JWT Bearer tokens in Authorization header
+  - Endpoints: Authentication, Proposals, Users, Roles, Templates, Subscriptions, Organizations, Dashboard
+  - Integration: Server-side and client-side fetch with automatic token injection
 
 **External APIs:**
-- Not detected
+- None detected (self-contained SaaS application)
 
 ## Data Storage
 
 **Databases:**
-- PostgreSQL on Supabase - Primary data store
-  - Connection: via `NEXT_PUBLIC_SUPABASE_URL` env var
-  - Client: @supabase/supabase-js v2.89.0 (`src/lib/api/supabaseClient.ts`)
-  - Tables: `organizations`, `product_users`, `proposals`
+- Supabase (PostgreSQL) - Primary data store
+  - Connection: Via `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` env vars
+  - Client: @supabase/supabase-js v2.89.0 - `src/lib/api/supabaseClient.ts`
+  - Tables: `proposals`, `organizations`, `product_users`
+  - Direct table access: `src/lib/api/supabaseProposals.ts`, `src/lib/api/auth.ts`
 
 **File Storage:**
-- Supabase Storage - User uploads (proposal documents, audio files)
-  - Client: `src/lib/storage/index.ts`
-  - Buckets: `proposal-documents`, `proposal-audio`
-  - Operations: upload, download, signed URLs, delete
+- Supabase Storage - User uploads (documents, audio files)
+  - SDK/Client: @supabase/supabase-js Storage API
+  - Auth: Supabase anon key (with RLS policies)
+  - Buckets: `proposal-documents`, `proposal-audio` - `src/lib/storage/index.ts`
+  - Upload functions: `uploadFileToStorage()`, `uploadFilesToStorage()`, `generateSignedUrl()`
+  - Used in: `src/components/forms/ProposalForm.tsx` for file uploads
 
 **Caching:**
-- Not detected (no Redis or similar)
+- Not detected - No Redis or external caching layer
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Supabase Auth + Custom JWT - Email/password authentication
-  - Implementation: `src/lib/api/auth.ts`, `src/contexts/AuthContext.tsx`
-  - Token storage: HTTP-only cookies via Next.js API routes
-  - Session management: JWT tokens with client-side refresh
+- Dual authentication system:
+  1. JWT-based custom auth - `src/lib/jwt-auth.ts`
+     - Implementation: HTTP-only cookies (`product_auth_token`)
+     - Token storage: Cookies managed via API routes
+     - Session management: JWT decoding client-side, verification server-side
+  2. Supabase Auth - Email/password - `src/lib/api/auth.ts`
+     - Implementation: Supabase client SDK with email/password
+     - Token storage: Supabase session management
+     - Integration: `src/lib/api/supabaseClient.ts`
 
 **OAuth Integrations:**
-- Google OAuth - Planned but not yet implemented (TODO in login page)
+- None currently integrated
+  - TODO: Google sign-in mentioned in `src/app/(auth)/login/page.tsx` (line 61)
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- Not detected (no Sentry or similar)
+- None configured
+  - Custom logger utility: `src/lib/utils/logger.ts`
+  - Auth event logging: loginSuccess, loginFailure, registerSuccess, registerFailure, logout
 
 **Analytics:**
-- Not detected (no Mixpanel, Amplitude, etc.)
+- Not detected
 
 **Logs:**
-- Custom auth logger: `src/lib/utils/logger.ts` (tracks login/register/logout events)
-- Console logging throughout (103 console.log statements)
+- Console-based logging only (development)
+  - Custom logger: `src/lib/utils/logger.ts`
+  - No centralized log aggregation
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Docker - Containerized deployment
-  - `Dockerfile` - Multi-stage build for production
-  - `docker-compose.yml` - Development/production setup
-  - `docker-compose.prod.yml` - Production variant
-  - `docker-compose.dev.yml` - Development variant
+- Not specified in code
+  - Next.js application (can deploy to Vercel, Docker, or any Node.js host)
+  - Environment vars: Configured externally
 
 **CI Pipeline:**
-- Not detected (no GitHub Actions or similar)
+- Not detected
+  - No GitHub Actions, GitLab CI, or similar configuration files found
 
 ## Environment Configuration
 
 **Development:**
-- Required env vars: `NEXT_PUBLIC_API_URL`, `JWT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Secrets location: `.env` file (gitignored recommended)
-- Mock/stub services: Uses localhost API on port 3000
+- Required env vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `JWT_SECRET`
+- Secrets location: `.env.local` (gitignored) or `.env` (template in `.env.example`)
+- Mock/stub services: Supabase development project (via env vars)
 
 **Staging:**
-- Not configured
+- Not explicitly configured
+  - Same env var pattern with staging-specific values
 
 **Production:**
-- Docker Compose orchestration with:
-  - PostgreSQL 16 (port 5432)
-  - pgAdmin 4 (port 5050)
-  - Backend API (port 3001)
-  - Frontend (port 3000)
+- Secrets management: Environment variables (platform-specific: Vercel, Docker env, etc.)
+- Database: Supabase production project
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- Not detected
+- None detected
 
 **Outgoing:**
-- Not detected
+- None detected
 
-## API Route Structure
+## Backend API Endpoints
 
-**Next.js API Routes:**
-- `src/app/api/auth/login/route.ts` - Backend login proxy, sets HTTP-only cookies
-- `src/app/api/auth/logout/route.ts` - Clears auth cookies
-- `src/app/api/auth/token/route.ts` - Returns token for client-side requests
+**Authentication:**
+- `/api/auth/login` - Login with email/password - `src/app/api/auth/login/route.ts`
+- `/api/auth/logout` - Logout and clear cookies - `src/app/api/auth/logout/route.ts`
+- `/api/auth/token` - Retrieve JWT from cookies - `src/app/api/auth/token/route.ts`
+- `/api/auth/me` - Get current user details - `src/app/api/auth/me/route.ts`
 
-**Client API Services:**
-- `src/lib/api/auth.ts` - Authentication (login, register, logout)
-- `src/lib/api/proposals.ts` - Proposal CRUD, approval workflow
-- `src/lib/api/users.ts` - User management
-- `src/lib/api/roles.ts` - Role management
-- `src/lib/api/dashboard.ts` - Dashboard statistics
-- `src/lib/api/permissions.ts` - Permission queries
+**Product Endpoints** (Backend API):
+- `/product/proposals` - List/create proposals - `src/lib/api/proposals.ts`
+- `/product/proposals/{id}` - Get/update/delete proposal
+- `/product/proposals/generate` - Generate proposal with signed documents
+- `/product/proposals/{id}/render` - Render proposal HTML preview
+- `/product/permissions` - Get permissions list - `src/lib/api/permissions.ts`
+- `/dashboard/summary` - Dashboard stats - `src/lib/api/dashboard.ts`
+- `/users`, `/users/{id}` - User management - `src/lib/api/users.ts`
+- `/roles`, `/roles/{id}` - Role management - `src/lib/api/roles.ts`
+- `/templates`, `/templates/{id}` - Template management - `src/lib/api/templates.ts`
+- `/subscriptions` - Subscription management - `src/lib/api/subscriptions.ts`
+- `/organizations` - Organization management
 
 ---
 
-*Integration audit: 2026-01-14*
+*Integration audit: 2026-01-16*
 *Update when adding/removing external services*

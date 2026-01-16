@@ -1,223 +1,118 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-01-14
+**Analysis Date:** 2026-01-16
 
 ## Test Framework
 
 **Runner:**
-- Not configured - No test framework installed
+- Not configured - No test framework found
 
 **Assertion Library:**
-- Not detected
+- Not applicable
 
 **Run Commands:**
-```bash
-# No test commands available
-# package.json scripts: dev, build, start, lint
-```
+- Not applicable - No test scripts in `package.json`
 
 ## Test File Organization
 
 **Location:**
-- No test files present in codebase
-- No `*.test.ts`, `*.spec.ts`, or `__tests__/` directories
+- Not applicable - No test files found
 
 **Naming:**
-- Not established (recommend: `*.test.ts` alongside source)
+- No test files detected (no `*.test.*`, `*.spec.*`, or `__tests__/`)
 
 **Structure:**
-```
-# Recommended structure (not yet implemented)
-src/
-  lib/
-    api/
-      proposals.ts
-      proposals.test.ts  # Co-located tests
-  components/
-    ui/
-      Button.tsx
-      Button.test.tsx
-```
+- Not applicable
 
-## Current Testing Status
-
-**Unit Tests:** Not implemented
-**Integration Tests:** Not implemented
-**E2E Tests:** Not implemented
-**Test Coverage:** 0%
-
-## Recommended Setup
-
-**Framework Options:**
-- Vitest - Fast, Vite-native, good for Next.js (recommended)
-- Jest - Mature ecosystem, more configuration needed
-
-**Installation:**
-```bash
-# Recommended Vitest setup
-npm install -D vitest @testing-library/react @testing-library/jest-dom
-```
-
-**Configuration:**
-```typescript
-// vitest.config.ts (to be created)
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/test/setup.ts',
-  },
-  resolve: {
-    alias: {
-      '@': './src',
-    },
-  },
-})
-```
-
-## Recommended Test Patterns
+## Test Structure
 
 **Suite Organization:**
-```typescript
-// Recommended pattern
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-
-describe('ModuleName', () => {
-  describe('functionName', () => {
-    beforeEach(() => {
-      // reset state
-    });
-
-    it('should handle valid input', () => {
-      // arrange
-      // act
-      // assert
-    });
-
-    it('should throw on invalid input', () => {
-      expect(() => functionCall()).toThrow();
-    });
-  });
-});
-```
+- Not applicable - No test framework configured
 
 **Patterns:**
-- Use beforeEach for per-test setup
-- Use afterEach to restore mocks
-- Arrange/Act/Assert structure
-- One assertion focus per test
+- Not applicable
 
-## Recommended Mocking
+## Mocking
 
 **Framework:**
-- Vitest built-in mocking (vi)
-- Mock modules at top of test file
+- Not applicable
+
+**Patterns:**
+- Not applicable
 
 **What to Mock:**
-- Supabase client (`src/lib/api/supabaseClient.ts`)
-- Fetch/API calls (`src/lib/api/client.ts`)
-- Environment variables
-- Browser APIs (localStorage, cookies)
+- Not applicable
 
 **What NOT to Mock:**
-- Pure utility functions (`src/lib/utils/`)
-- Type definitions
-- React components (test behavior instead)
+- Not applicable
 
-## Priority Test Areas
+## Fixtures and Factories
 
-**Critical Paths (should test first):**
-1. Authentication flows
-   - `src/lib/api/auth.ts` - login, register, logout
-   - `src/contexts/AuthContext.tsx` - state management
-   - `src/middleware.ts` - route protection
+**Test Data:**
+- Not applicable
 
-2. API client error handling
-   - `src/lib/api/client.ts` - request/response handling
-   - Error state propagation
+**Location:**
+- Not applicable
 
-3. Form validation
-   - `src/lib/validations/auth.ts` - login/register schemas
-   - `src/lib/validations/proposal.ts` - proposal schemas
-
-4. Permission checks
-   - `src/lib/jwt-auth.ts` - token validation
-   - `hasPermission()` function
-
-**Medium Priority:**
-- UI component rendering
-- Utility function correctness
-- Context provider behavior
-
-## Test Coverage Goals
+## Coverage
 
 **Requirements:**
-- No enforced coverage target (new project)
-- Recommend: Start with critical paths
+- No coverage tracking configured
 
-**Suggested Initial Targets:**
-- `src/lib/api/` - 80% coverage
-- `src/lib/validations/` - 100% coverage
-- `src/lib/jwt-auth.ts` - 90% coverage
-- `src/middleware.ts` - 80% coverage
+**Configuration:**
+- Not applicable
 
-## Test Types to Implement
+**View Coverage:**
+- Not applicable
+
+## Test Types
 
 **Unit Tests:**
-- Scope: Individual functions/components in isolation
-- Mocking: Mock all external dependencies
-- Speed: < 100ms per test
-- Priority: High for utility functions and validation
+- Not configured
 
 **Integration Tests:**
-- Scope: Multiple modules together
-- Mocking: Mock external services only
-- Examples: Auth flow, form submission flow
+- Not configured
 
 **E2E Tests:**
-- Framework: Playwright or Cypress (not yet configured)
-- Scope: Full user flows
-- Location: Separate `e2e/` directory
+- Not configured
 
-## Common Patterns to Test
+## Common Patterns
 
 **Async Testing:**
-```typescript
-it('should handle async operation', async () => {
-  const result = await asyncFunction();
-  expect(result).toBe('expected');
-});
-```
+- Not applicable
 
 **Error Testing:**
-```typescript
-it('should throw on invalid input', () => {
-  expect(() => parse(null)).toThrow('Cannot parse null');
-});
+- Not applicable
 
-// Async error
-it('should reject on failure', async () => {
-  await expect(asyncCall()).rejects.toThrow('error');
-});
-```
-
-**API Mocking:**
-```typescript
-import { vi } from 'vitest';
-
-vi.mock('@/lib/api/client', () => ({
-  apiClient: {
-    get: vi.fn(),
-    post: vi.fn(),
-  },
-}));
-```
+**Snapshot Testing:**
+- Not applicable
 
 ---
 
-*Testing analysis: 2026-01-14*
-*Update when test infrastructure is added*
+## Current Status: No Testing Infrastructure
+
+**Analysis Summary:**
+- **Test Framework**: Not detected (no Vitest, Jest, or Playwright)
+- **Test Files**: 0 test files found in codebase
+- **Test Configuration**: No test config files (`vitest.config.*`, `jest.config.*`, `playwright.config.*`)
+- **Test Dependencies**: No test-related packages in `package.json`
+- **Test Scripts**: No test scripts in `package.json`
+
+**Recommendation:**
+This is a production-ready SaaS application with no testing infrastructure. Critical paths that should be tested:
+1. **Authentication flow** - `src/lib/jwt-auth.ts`, `src/app/api/auth/**/route.ts`
+2. **API client** - `src/lib/api/client.ts` (error handling, retry logic)
+3. **Validation schemas** - `src/lib/validations/*.ts`
+4. **Proposal CRUD operations** - `src/lib/api/proposals.ts`
+5. **Permission checking** - `src/lib/auth/server.ts`
+6. **Form validation** - `src/components/forms/ProposalForm.tsx`
+
+**Suggested Testing Stack:**
+- **Unit Tests**: Vitest (fast, compatible with Vite/Next.js)
+- **Integration Tests**: Vitest + MSW (Mock Service Worker)
+- **E2E Tests**: Playwright (for critical user flows)
+
+---
+
+*Testing analysis: 2026-01-16*
+*Update when test patterns change*

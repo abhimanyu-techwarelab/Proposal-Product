@@ -6,6 +6,7 @@ export { Input } from "./Input";
 export { Textarea } from "./Textarea";
 export { Select } from "./Select";
 export { Checkbox } from "./Checkbox";
+export { DatePicker } from "./DatePicker";
 
 // Cards
 export { Card, CardHeader, CardContent, CardFooter, StatsCard } from "./Card";

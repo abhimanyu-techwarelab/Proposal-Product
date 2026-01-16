@@ -1,88 +1,96 @@
 # Technology Stack
 
-**Analysis Date:** 2026-01-14
+**Analysis Date:** 2026-01-16
 
 ## Languages
 
 **Primary:**
-- TypeScript 5.3.3 - All application code (`package.json`, strict mode in `tsconfig.json`)
+- TypeScript 5.9.3 - All application code (`package.json`)
 
 **Secondary:**
-- JavaScript - Configuration files (`next.config.js`, `postcss.config.js`)
-- CSS - Tailwind CSS with custom extensions (`globals.css`, `tailwind.config.ts`)
+- JavaScript/JSX - Configuration files, build scripts
 
 ## Runtime
 
 **Environment:**
-- Node.js 20 (LTS) - Specified in `Dockerfile` (node:20-alpine)
-- No .nvmrc file - Version specified in container
+- Node.js (managed by Next.js 16.0.10) - ES2017 target
+- Browser runtime for client components
 
 **Package Manager:**
-- npm 10.x
+- npm - Node Package Manager
 - Lockfile: `package-lock.json` present
 
 ## Frameworks
 
 **Core:**
-- Next.js 14.2.0 - Full-stack React framework with App Router (`package.json`)
-- React 18.2.0 - UI library (`package.json`)
-- React DOM 18.2.0 - React rendering (`package.json`)
+- Next.js 16.0.10 - Full-stack React framework with App Router (`package.json`)
+- React 19.2.0 - UI library
+- React DOM 19.2.0 - DOM rendering
 
 **Testing:**
-- Not configured - No test framework installed
+- Not detected - No test framework configured
 
 **Build/Dev:**
-- TypeScript 5.3.3 - Compilation (`package.json`)
-- PostCSS 8.4.33 - CSS processing (`postcss.config.js`)
-- Autoprefixer 10.4.17 - CSS vendor prefixing (`postcss.config.js`)
-- Tailwind CSS 3.4.1 - Utility-first styling (`tailwind.config.ts`)
+- Turbopack - Build system (dev mode with `--turbopack` flag) - `package.json` scripts
+- TypeScript 5.9.3 - Type checking and compilation
+- PostCSS 8.5.6 - CSS processing (`postcss.config.js`)
+- Autoprefixer 10.4.22 - CSS vendor prefixing
 
 ## Key Dependencies
 
 **Critical:**
-- @supabase/supabase-js 2.89.0 - Database, auth, storage client (`src/lib/api/supabaseClient.ts`)
-- jose 5.2.0 - JWT token handling (`src/lib/jwt-auth.ts`)
-- zod 3.22.4 - Schema validation (`src/lib/validations/`)
-
-**UI/UX:**
-- lucide-react 0.316.0 - Icon library (`package.json`)
-- framer-motion 12.26.1 - Animations (`package.json`)
-- clsx 2.1.0 + tailwind-merge 2.2.0 - Class utilities (`src/lib/utils/index.ts`)
-- date-fns 3.3.0 - Date formatting (`src/lib/utils/index.ts`)
+- zod 3.22.4 - TypeScript-first schema validation (`package.json`)
+- jose 5.2.0 - JWT handling and token management
+- @supabase/supabase-js 2.89.0 - Supabase client for database and storage
 
 **Infrastructure:**
-- Next.js built-ins - API routes, middleware, server components
+- Tailwind CSS 3.4.17 - Utility-first CSS framework (`tailwind.config.ts`)
+- Tailwind Merge 2.6.0 - Class merging utility
+- Class Variance Authority 0.7.1 - CSS variant management
+- clsx 2.1.0 - Conditional class names
+
+**UI Components:**
+- Radix UI components - Headless UI primitives:
+  - @radix-ui/react-collapsible 1.1.12
+  - @radix-ui/react-scroll-area 1.2.10
+  - @radix-ui/react-slot 1.2.4
+- Lucide React 0.511.0 - Icon library
+
+**Animation:**
+- Framer Motion 12.26.1 - React animation library
+- Motion 12.26.2 - Motion primitives
+
+**Date & Time:**
+- date-fns 3.3.0 - Date manipulation and formatting
+- React Day Picker 9.13.0 - Date picker component
 
 ## Configuration
 
 **Environment:**
-- `.env` - Development configuration (localhost API, Supabase credentials)
-- `.env.docker.example` - Production template with PostgreSQL, pgAdmin
-- Key variables:
-  - `NEXT_PUBLIC_API_URL` - Backend API endpoint
-  - `JWT_SECRET` - JWT signing key
-  - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase public key
+- `.env.example` - Template for environment variables
+- `.env.docker.example` - Docker environment configuration
+- Required env vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `JWT_SECRET`
 
 **Build:**
-- `tsconfig.json` - TypeScript with path aliases (`@/*` → `./src/*`)
-- `next.config.js` - Next.js with CORS headers for API routes
-- `tailwind.config.ts` - Custom color schemes (primary, success, warning, danger)
-- `postcss.config.js` - PostCSS plugins
+- `next.config.js` - Next.js configuration with CORS headers for `/api/*` routes
+- `tsconfig.json` - TypeScript strict mode, ES2017 target, path alias `@/*` → `./src/*`
+- `tailwind.config.ts` - Custom dark theme with primary/success/warning/danger colors
+- `postcss.config.js` - PostCSS with tailwindcss + autoprefixer
+- `eslint.config.mjs` - ESLint with Next.js core-web-vitals preset
 
 ## Platform Requirements
 
 **Development:**
-- Any platform with Node.js 20+
-- No external dependencies required for local dev
+- Any platform with Node.js 18+
+- npm for package management
+- Backend API running at `NEXT_PUBLIC_API_URL` (default: http://localhost:3001)
 
 **Production:**
-- Docker containerized (multi-stage build in `Dockerfile`)
-- Port 3000 for frontend (Next.js)
-- Requires backend API service (port 3001)
-- PostgreSQL via Supabase cloud or Docker (`docker-compose.yml`)
+- Deployment target: Next.js compatible platforms (Vercel, Docker, etc.)
+- Node.js runtime environment
+- Environment variables configured externally
 
 ---
 
-*Stack analysis: 2026-01-14*
+*Stack analysis: 2026-01-16*
 *Update after major dependency changes*

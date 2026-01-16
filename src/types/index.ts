@@ -4,6 +4,7 @@
 
 export enum ProposalStatus {
   PENDING = 'pending',
+  PROCESSING = 'processing',
   APPROVAL_PENDING = 'approval_pending',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
@@ -206,10 +207,30 @@ export interface ProposalUpdateInput extends Partial<ProposalCreateInput> {
   id: string;
 }
 
-export interface ProposalGenerateInput extends ProposalCreateInput {
-  proposal_id: string;
-  document_signed_urls: string[];
-  audio_signed_urls: string[];
+export interface ProposalGenerateInput {
+  subscription_id: string;
+  template_id?: string;
+  created_by: string;
+  title: string;
+  client_name: string;
+  client_email: string;
+  industry?: string;
+  summary: string;
+  goals: string;
+  scope: string;
+  deliverables: string[];
+  milestones: Omit<Milestone, 'id'>[];
+  start_date: string;
+  end_date: string;
+  date_of_proposal: string;
+  total_budget: number;
+  currency: Currency;
+  billing_type: BillingType;
+  team_members: Omit<TeamMember, 'id'>[];
+  submitted_to: string[];
+  links: string[];
+  document_storage_paths: string[];
+  audio_storage_paths: string[];
 }
 
 export interface ProposalGenerateResponse {
@@ -225,11 +246,14 @@ export interface ProposalGenerateResponse {
 
 export interface Template {
   id: string;
-  organization_id: string;
+  organization_id?: string;
   name: string;
   description?: string;
-  content: Partial<ProposalCreateInput>;
-  is_default: boolean;
+  content?: Partial<ProposalCreateInput>;
+  preview_image?: string;
+  html?: string;
+  is_default?: boolean;
+  is_deleted?: boolean;
   created_by: string;
   created_at: string;
   updated_at: string;

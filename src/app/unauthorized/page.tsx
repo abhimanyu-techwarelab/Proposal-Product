@@ -1,9 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function UnauthorizedPage() {
+function UnauthorizedContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason");
 
@@ -39,5 +40,13 @@ export default function UnauthorizedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UnauthorizedPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black text-slate-400">Loading...</div>}>
+      <UnauthorizedContent />
+    </Suspense>
   );
 }

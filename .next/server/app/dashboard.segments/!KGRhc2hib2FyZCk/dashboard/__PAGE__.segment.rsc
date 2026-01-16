@@ -1,0 +1,8 @@
+1:"$Sreact.fragment"
+2:I[3374,["/_next/static/chunks/8edff33e1474bbc6.js","/_next/static/chunks/833a918637b43aa7.js","/_next/static/chunks/6ce93cfbf1272a85.js","/_next/static/chunks/4cbdbdf5b1653882.js","/_next/static/chunks/5fc8d53dc15e20ea.js","/_next/static/chunks/11a410bdfa2a5590.js"],"PageHeader"]
+3:I[54189,["/_next/static/chunks/8edff33e1474bbc6.js","/_next/static/chunks/833a918637b43aa7.js","/_next/static/chunks/6ce93cfbf1272a85.js","/_next/static/chunks/4cbdbdf5b1653882.js","/_next/static/chunks/5fc8d53dc15e20ea.js","/_next/static/chunks/11a410bdfa2a5590.js"],"DashboardSummaryCards"]
+4:I[50003,["/_next/static/chunks/8edff33e1474bbc6.js","/_next/static/chunks/833a918637b43aa7.js","/_next/static/chunks/6ce93cfbf1272a85.js","/_next/static/chunks/4cbdbdf5b1653882.js","/_next/static/chunks/5fc8d53dc15e20ea.js","/_next/static/chunks/11a410bdfa2a5590.js"],"RecentProposalsTable"]
+5:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"OutletBoundary"]
+6:"$Sreact.suspense"
+0:{"buildId":"Gr8sAHq0iwHr8qjU-1-En","rsc":["$","$1","c",{"children":[["$","div",null,{"children":[["$","$L2",null,{"title":"Dashboard","description":"Overview of your proposal activity and performance"}],["$","$L3",null,{}],["$","div",null,{"className":"mt-8","children":[["$","h2",null,{"className":"mb-4 text-lg font-semibold text-white","children":"Recent Proposals"}],["$","$L4",null,{}]]}]]}],[["$","script","script-0",{"src":"/_next/static/chunks/11a410bdfa2a5590.js","async":true}]],["$","$L5",null,{"children":["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]}]]}],"loading":null,"isPartial":false}
+7:null
