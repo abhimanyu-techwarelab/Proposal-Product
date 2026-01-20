@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
   PROPOSAL_APPROVE: (id: string) => `/product/proposals/${id}/approve`,
   PROPOSAL_REJECT: (id: string) => `/product/proposals/${id}/reject`,
   PROPOSAL_GENERATE: "/product/proposals/generate",
+  PROPOSAL_EXTRACT_FIELDS: "/product/proposals/extract-fields",
 
   // Templates
   TEMPLATES: "/templates",

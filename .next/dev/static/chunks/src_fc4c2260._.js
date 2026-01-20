@@ -1581,7 +1581,7 @@ __turbopack_context__.s([
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/types/index.ts [app-client] (ecmascript)");
 ;
-const API_BASE_URL = ("TURBOPACK compile-time value", "https://abhimanyu-3000.tl-workspace.techwarelab.com") || "http://localhost:3000";
+const API_BASE_URL = ("TURBOPACK compile-time value", "https://abhimanyu-4200.tl-workspace.techwarelab.com") || "http://localhost:3000";
 const API_ENDPOINTS = {
     // Auth
     AUTH_LOGIN: "/auth/login",
@@ -1597,6 +1597,7 @@ const API_ENDPOINTS = {
     PROPOSAL_APPROVE: (id)=>`/product/proposals/${id}/approve`,
     PROPOSAL_REJECT: (id)=>`/product/proposals/${id}/reject`,
     PROPOSAL_GENERATE: "/product/proposals/generate",
+    PROPOSAL_EXTRACT_FIELDS: "/product/proposals/extract-fields",
     // Templates
     TEMPLATES: "/templates",
     TEMPLATE_BY_ID: (id)=>`/templates/${id}`,
@@ -2267,7 +2268,9 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 __turbopack_context__.s([
     "LoginTransitionLoader",
-    ()=>LoginTransitionLoader
+    ()=>LoginTransitionLoader,
+    "LogoutTransitionLoader",
+    ()=>LogoutTransitionLoader
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Loading$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/Loading.tsx [app-client] (ecmascript)");
@@ -2326,8 +2329,61 @@ function LoginTransitionLoader({ show }) {
     }, this);
 }
 _c = LoginTransitionLoader;
-var _c;
+function LogoutTransitionLoader({ show }) {
+    if (!show) return null;
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "fixed inset-0 z-[100] flex items-center justify-center bg-black",
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "flex flex-col items-center gap-6",
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Loading$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Spinner"], {
+                    size: "lg"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/PostLoginLoader.tsx",
+                    lineNumber: 36,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "text-center",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-lg font-medium text-white",
+                            children: "Signing out"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/PostLoginLoader.tsx",
+                            lineNumber: 38,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm text-slate-400 mt-1",
+                            children: "See you soon..."
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/PostLoginLoader.tsx",
+                            lineNumber: 39,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/PostLoginLoader.tsx",
+                    lineNumber: 37,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/PostLoginLoader.tsx",
+            lineNumber: 35,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "[project]/src/components/PostLoginLoader.tsx",
+        lineNumber: 34,
+        columnNumber: 5
+    }, this);
+}
+_c1 = LogoutTransitionLoader;
+var _c, _c1;
 __turbopack_context__.k.register(_c, "LoginTransitionLoader");
+__turbopack_context__.k.register(_c1, "LogoutTransitionLoader");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
@@ -2391,6 +2447,9 @@ function LoginPageContent() {
             }
             // Show loader immediately on login page
             setShowTransitionLoader(true);
+            // Ensure loader shows for minimum 1 second for better UX
+            // The loader continues showing until page navigation completes (initialization)
+            await new Promise((resolve)=>setTimeout(resolve, 1000));
             // Redirect to the validated safe URL
             // Use window.location.href to force full page reload and ensure cookie is available
             window.location.href = redirectUrl;
@@ -2417,7 +2476,7 @@ function LoginPageContent() {
                 show: showTransitionLoader
             }, void 0, false, {
                 fileName: "[project]/src/app/(auth)/login/page.tsx",
-                lineNumber: 80,
+                lineNumber: 84,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$login$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["LoginPage"], {
@@ -2429,7 +2488,7 @@ function LoginPageContent() {
                 error: error
             }, void 0, false, {
                 fileName: "[project]/src/app/(auth)/login/page.tsx",
-                lineNumber: 81,
+                lineNumber: 85,
                 columnNumber: 7
             }, this)
         ]
@@ -2449,17 +2508,17 @@ function LoginPageRoute() {
             children: "Loading..."
         }, void 0, false, {
             fileName: "[project]/src/app/(auth)/login/page.tsx",
-            lineNumber: 95,
+            lineNumber: 99,
             columnNumber: 25
         }, void 0),
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LoginPageContent, {}, void 0, false, {
             fileName: "[project]/src/app/(auth)/login/page.tsx",
-            lineNumber: 96,
+            lineNumber: 100,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/(auth)/login/page.tsx",
-        lineNumber: 95,
+        lineNumber: 99,
         columnNumber: 5
     }, this);
 }

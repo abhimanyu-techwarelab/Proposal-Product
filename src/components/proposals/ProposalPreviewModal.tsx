@@ -11,6 +11,7 @@ interface ProposalPreviewModalProps {
   onClose: () => void;
   proposalId: string;
   proposalTitle: string;
+  footerActions?: React.ReactNode;
 }
 
 export function ProposalPreviewModal({
@@ -18,6 +19,7 @@ export function ProposalPreviewModal({
   onClose,
   proposalId,
   proposalTitle,
+  footerActions,
 }: ProposalPreviewModalProps) {
   const [htmlContent, setHtmlContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -113,15 +115,19 @@ export function ProposalPreviewModal({
               </Button>
             </div>
           ) : htmlContent ? (
-            <iframe
-              srcDoc={htmlContent}
-              className="w-full h-full min-h-[70vh] border-0 bg-white rounded-lg"
-              title={`Preview of ${proposalTitle}`}
-              sandbox="allow-same-origin"
-              style={{
-                display: "block",
-              }}
-            />
+            <div className="w-full h-[55vh] overflow-hidden bg-white rounded-lg">
+              <iframe
+                srcDoc={htmlContent}
+                className="border-0 bg-white origin-top-left"
+                title={`Preview of ${proposalTitle}`}
+                sandbox="allow-same-origin"
+                style={{
+                  transform: "scale(0.65)",
+                  width: "153.85%",
+                  height: "153.85%",
+                }}
+              />
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center px-4">
               <svg
@@ -143,6 +149,13 @@ export function ProposalPreviewModal({
             </div>
           )}
         </div>
+
+        {/* Footer Actions */}
+        {footerActions && (
+          <div className="flex items-center justify-end gap-3 border-t border-[#B87333]/30 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
+            {footerActions}
+          </div>
+        )}
       </div>
     </Modal>
   );

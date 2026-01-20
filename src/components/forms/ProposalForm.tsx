@@ -15,7 +15,7 @@ import {
   DatePicker,
 } from '@/components/ui';
 import { Badge } from '@/components/ui/Badge';
-import { proposalsApi, templatesApi, subscriptionsApi, ApiRequestError } from '@/lib/api';
+import { proposalsApi, templatesApi, subscriptionsApi, ApiRequestError, ExtractedFields } from '@/lib/api';
 import { insertProposal } from '@/lib/api/supabaseProposals';
 import { proposalCreateSchema } from '@/lib/validations';
 import { generateId } from '@/lib/utils';
@@ -23,6 +23,7 @@ import { supabase } from '@/lib/api/supabaseClient';
 import {
   generateAllSignedUrls,
   STORAGE_BUCKETS,
+  deleteFileFromStorage,
 } from '@/lib/storage';
 import {
   Currency,
@@ -51,6 +52,7 @@ interface PendingFile {
   name: string;
   file: File;
   size: number;
+  path?: string; // Storage path after upload (used for autofill and submit)
 }
 
 interface UploadedFile {
@@ -163,6 +165,9 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   const [isAddingDocuments, setIsAddingDocuments] = useState(false);
   const [isAddingAudio, setIsAddingAudio] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Extraction state for autofill
+  const [isExtracting, setIsExtracting] = useState(false);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -321,7 +326,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     }
   };
 
-  // Store files locally (upload happens on submit)
+  // Upload files immediately to Supabase and trigger extraction
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -329,26 +334,56 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     setUploadError(null);
     setIsAddingDocuments(true);
 
-    const newFiles: PendingFile[] = Array.from(files).map((file) => ({
-      id: generateId(),
-      name: file.name,
-      file,
-      size: file.size,
-    }));
+    try {
+      const uploadedPaths: string[] = [];
+      const newFiles: PendingFile[] = [];
 
-    // Show uploading state for 1 second
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      for (const file of Array.from(files)) {
+        console.log(`[Upload] Starting document upload: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
 
-    setPendingDocuments((prev) => [...prev, ...newFiles]);
-    setIsAddingDocuments(false);
+        // Upload to Supabase immediately
+        const { path, url, error } = await uploadFileToSupabase(
+          file,
+          STORAGE_BUCKETS.DOCUMENTS
+        );
 
-    // Reset input
-    if (documentInputRef.current) {
-      documentInputRef.current.value = '';
+        if (error) {
+          console.error(`[Upload] Document upload failed: ${file.name} - ${error}`);
+          throw new Error(`Failed to upload ${file.name}: ${error}`);
+        }
+
+        console.log(`[Upload] Document uploaded successfully: ${file.name} -> ${path}`);
+        uploadedPaths.push(path);
+        newFiles.push({
+          id: generateId(),
+          name: file.name,
+          file,
+          size: file.size,
+          path, // Store path for later use
+        });
+      }
+
+      setPendingDocuments((prev) => [...prev, ...newFiles]);
+
+      // Trigger extraction automatically with all files
+      const allDocPaths = [...pendingDocuments.map((f) => f.path), ...uploadedPaths].filter(
+        Boolean
+      ) as string[];
+      const allAudioPaths = pendingAudio.map((f) => f.path).filter(Boolean) as string[];
+
+      triggerFieldExtraction(allDocPaths, allAudioPaths);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      setUploadError(message);
+    } finally {
+      setIsAddingDocuments(false);
+      if (documentInputRef.current) {
+        documentInputRef.current.value = '';
+      }
     }
   };
 
-  // Store files locally (upload happens on submit)
+  // Upload files immediately to Supabase and trigger extraction
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -356,30 +391,78 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     setUploadError(null);
     setIsAddingAudio(true);
 
-    const newFiles: PendingFile[] = Array.from(files).map((file) => ({
-      id: generateId(),
-      name: file.name,
-      file,
-      size: file.size,
-    }));
+    try {
+      const uploadedPaths: string[] = [];
+      const newFiles: PendingFile[] = [];
 
-    // Show uploading state for 1 second
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      for (const file of Array.from(files)) {
+        console.log(`[Upload] Starting audio upload: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
 
-    setPendingAudio((prev) => [...prev, ...newFiles]);
-    setIsAddingAudio(false);
+        // Upload to Supabase immediately
+        const { path, url, error } = await uploadFileToSupabase(
+          file,
+          STORAGE_BUCKETS.AUDIO
+        );
 
-    // Reset input
-    if (audioInputRef.current) {
-      audioInputRef.current.value = '';
+        if (error) {
+          console.error(`[Upload] Audio upload failed: ${file.name} - ${error}`);
+          throw new Error(`Failed to upload ${file.name}: ${error}`);
+        }
+
+        console.log(`[Upload] Audio uploaded successfully: ${file.name} -> ${path}`);
+        uploadedPaths.push(path);
+        newFiles.push({
+          id: generateId(),
+          name: file.name,
+          file,
+          size: file.size,
+          path, // Store path for later use
+        });
+      }
+
+      setPendingAudio((prev) => [...prev, ...newFiles]);
+
+      // Trigger extraction automatically with all files
+      const allDocPaths = pendingDocuments.map((f) => f.path).filter(Boolean) as string[];
+      const allAudioPaths = [...pendingAudio.map((f) => f.path), ...uploadedPaths].filter(
+        Boolean
+      ) as string[];
+
+      triggerFieldExtraction(allDocPaths, allAudioPaths);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed';
+      setUploadError(message);
+    } finally {
+      setIsAddingAudio(false);
+      if (audioInputRef.current) {
+        audioInputRef.current.value = '';
+      }
     }
   };
 
-  const removeDocument = (fileId: string) => {
+  const removeDocument = async (fileId: string) => {
+    const file = pendingDocuments.find((f) => f.id === fileId);
+    // Delete from storage if already uploaded
+    if (file?.path) {
+      console.log(`[Delete] Removing document from storage: ${file.name} -> ${file.path}`);
+      await deleteFileFromStorage(STORAGE_BUCKETS.DOCUMENTS, file.path);
+      console.log(`[Delete] Document removed successfully: ${file.name}`);
+    } else if (file) {
+      console.log(`[Delete] Removing local document (not uploaded): ${file.name}`);
+    }
     setPendingDocuments((prev) => prev.filter((f) => f.id !== fileId));
   };
 
-  const removeAudioFile = (fileId: string) => {
+  const removeAudioFile = async (fileId: string) => {
+    const file = pendingAudio.find((f) => f.id === fileId);
+    // Delete from storage if already uploaded
+    if (file?.path) {
+      console.log(`[Delete] Removing audio from storage: ${file.name} -> ${file.path}`);
+      await deleteFileFromStorage(STORAGE_BUCKETS.AUDIO, file.path);
+      console.log(`[Delete] Audio removed successfully: ${file.name}`);
+    } else if (file) {
+      console.log(`[Delete] Removing local audio (not uploaded): ${file.name}`);
+    }
     setPendingAudio((prev) => prev.filter((f) => f.id !== fileId));
   };
 
@@ -387,6 +470,169 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  // ============================================================================
+  // Field Extraction for Autofill
+  // ============================================================================
+
+  const applyExtractedFields = (fields: ExtractedFields) => {
+    // Single-value fields - only set if empty (preserves user input)
+    if (fields.title && !title) setTitle(fields.title);
+    if (fields.clientName && !clientName) setClientName(fields.clientName);
+    if (fields.clientEmail && !clientEmail) setClientEmail(fields.clientEmail);
+    if (fields.industry && !industry) setIndustry(fields.industry);
+    if (fields.startDate && !startDate) setStartDate(fields.startDate);
+    if (fields.endDate && !endDate) setEndDate(fields.endDate);
+    if (fields.totalBudget !== undefined && totalBudget === 0) setTotalBudget(fields.totalBudget);
+    if (fields.currency && currency === Currency.USD) setCurrency(fields.currency as Currency);
+    if (fields.billingType && billingType === BillingType.FIXED) setBillingType(fields.billingType as BillingType);
+
+    // Text fields that can be merged/appended from multiple sources
+    if (fields.summary) {
+      setSummary((prev) => {
+        if (!prev) return fields.summary!;
+        // Append if new content is different and not already included
+        if (!prev.includes(fields.summary!)) {
+          return `${prev}\n\n${fields.summary}`;
+        }
+        return prev;
+      });
+    }
+    if (fields.goals) {
+      setGoals((prev) => {
+        if (!prev) return fields.goals!;
+        if (!prev.includes(fields.goals!)) {
+          return `${prev}\n\n${fields.goals}`;
+        }
+        return prev;
+      });
+    }
+    if (fields.scope) {
+      setScope((prev) => {
+        if (!prev) return fields.scope!;
+        if (!prev.includes(fields.scope!)) {
+          return `${prev}\n\n${fields.scope}`;
+        }
+        return prev;
+      });
+    }
+
+    // Arrays - merge new extracted data with existing (deduplicate)
+    if (fields.deliverables && fields.deliverables.length > 0) {
+      setDeliverables((prev) => {
+        const newItems = fields.deliverables!.filter((item) => !prev.includes(item));
+        return [...prev, ...newItems];
+      });
+    }
+
+    if (fields.milestones && fields.milestones.length > 0) {
+      setMilestones((prev) => {
+        const existingTitles = prev.map((m) => m.title.toLowerCase());
+        const newMilestones = fields.milestones!
+          .filter((m) => !existingTitles.includes(m.title.toLowerCase()))
+          .map((m) => ({
+            id: generateId(),
+            title: m.title,
+          }));
+        return [...prev, ...newMilestones];
+      });
+    }
+
+    if (fields.teamMembers && fields.teamMembers.length > 0) {
+      setTeamMembers((prev) => {
+        const existingRoles = prev.map((t) => t.role.toLowerCase());
+        const newMembers = fields.teamMembers!
+          .filter((t) => !existingRoles.includes(t.role.toLowerCase()))
+          .map((t) => ({
+            id: generateId(),
+            role: t.role,
+            experience: t.experience,
+          }));
+        return [...prev, ...newMembers];
+      });
+    }
+
+    if (fields.links && fields.links.length > 0) {
+      setLinks((prev) => {
+        const newLinks = fields.links!.filter((link) => !prev.includes(link));
+        return [...prev, ...newLinks];
+      });
+    }
+
+    if (fields.recipients && fields.recipients.length > 0) {
+      setRecipients((prev) => {
+        const existingNames = prev.map((r) => r.name.toLowerCase());
+        const newRecipients = fields.recipients!
+          .filter((r) => !existingNames.includes(r.name.toLowerCase()))
+          .map((r) => ({
+            id: generateId(),
+            salutation: r.salutation,
+            name: r.name,
+          }));
+        return [...prev, ...newRecipients];
+      });
+    }
+  };
+
+  const triggerFieldExtraction = async (
+    documentPaths: string[],
+    audioPaths: string[]
+  ) => {
+    if (documentPaths.length === 0 && audioPaths.length === 0) return;
+
+    setIsExtracting(true);
+
+    try {
+      // Generate signed URLs for the uploaded files
+      const { documentUrls, audioUrls, errors } = await generateAllSignedUrls(
+        documentPaths,
+        audioPaths
+      );
+
+      if (documentUrls.length === 0 && audioUrls.length === 0) {
+        console.warn('[Extraction] Failed to generate signed URLs for extraction');
+        return;
+      }
+
+      // Call extraction API
+      console.log('[Extraction] Calling extract-fields API with:', {
+        document_urls: documentUrls,
+        audio_urls: audioUrls,
+      });
+
+      const response = await proposalsApi.extractFields({
+        document_urls: documentUrls,
+        audio_urls: audioUrls,
+      });
+
+      console.log('[Extraction] API response:', response);
+
+      // Handle both wrapped (response.data.fields) and direct (response.fields) response formats
+      const extractedFields = (response as any).fields || response.data?.fields;
+
+      if (response.success && extractedFields) {
+        console.log('[Extraction] Applying extracted fields:', extractedFields);
+        applyExtractedFields(extractedFields);
+      } else {
+        console.warn('[Extraction] No fields found in response:', response);
+      }
+    } catch (error: any) {
+      console.error('[Extraction] Field extraction failed:', error);
+      console.error('[Extraction] Error details:', {
+        message: error?.message,
+        status: error?.status,
+        code: error?.code,
+        name: error?.name,
+      });
+      // Check for timeout/network errors
+      if (error?.code === 'NETWORK_ERROR' || error?.message?.includes('Failed to fetch')) {
+        console.warn('[Extraction] Request timed out or network error - extraction may still be processing on server');
+      }
+      // Non-blocking - user can still fill form manually
+    } finally {
+      setIsExtracting(false);
+    }
   };
 
   // ============================================================================
@@ -514,47 +760,71 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         productUser.organization_id
       );
 
-      // Step 2: Upload pending files to Supabase Storage
+      // Step 2: Get file paths (files already uploaded during autofill, skip re-upload)
       const uploadedDocs: UploadedFile[] = [];
       const uploadedAudioFiles: UploadedFile[] = [];
 
-      // Upload documents
+      // Process documents - only upload if not already uploaded
       for (const pendingFile of pendingDocuments) {
-        const { path, url, error } = await uploadFileToSupabase(
-          pendingFile.file,
-          STORAGE_BUCKETS.DOCUMENTS
-        );
-        if (error) {
-          throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+        if (pendingFile.path) {
+          // Already uploaded during autofill
+          uploadedDocs.push({
+            id: pendingFile.id,
+            name: pendingFile.name,
+            path: pendingFile.path,
+            url: '',
+            size: pendingFile.size,
+          });
+        } else {
+          // Upload now (edge case: file added after extraction)
+          const { path, url, error } = await uploadFileToSupabase(
+            pendingFile.file,
+            STORAGE_BUCKETS.DOCUMENTS
+          );
+          if (error) {
+            throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+          }
+          uploadedDocs.push({
+            id: pendingFile.id,
+            name: pendingFile.name,
+            path,
+            url,
+            size: pendingFile.size,
+          });
         }
-        uploadedDocs.push({
-          id: pendingFile.id,
-          name: pendingFile.name,
-          path,
-          url,
-          size: pendingFile.size,
-        });
       }
 
-      // Upload audio files
+      // Process audio files - only upload if not already uploaded
       for (const pendingFile of pendingAudio) {
-        const { path, url, error } = await uploadFileToSupabase(
-          pendingFile.file,
-          STORAGE_BUCKETS.AUDIO
-        );
-        if (error) {
-          throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+        if (pendingFile.path) {
+          // Already uploaded during autofill
+          uploadedAudioFiles.push({
+            id: pendingFile.id,
+            name: pendingFile.name,
+            path: pendingFile.path,
+            url: '',
+            size: pendingFile.size,
+          });
+        } else {
+          // Upload now (edge case: file added after extraction)
+          const { path, url, error } = await uploadFileToSupabase(
+            pendingFile.file,
+            STORAGE_BUCKETS.AUDIO
+          );
+          if (error) {
+            throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+          }
+          uploadedAudioFiles.push({
+            id: pendingFile.id,
+            name: pendingFile.name,
+            path,
+            url,
+            size: pendingFile.size,
+          });
         }
-        uploadedAudioFiles.push({
-          id: pendingFile.id,
-          name: pendingFile.name,
-          path,
-          url,
-          size: pendingFile.size,
-        });
       }
 
-      // Step 3: Generate signed URLs for uploaded files
+      // Step 3: Generate signed URLs for all files
       const documentPaths = uploadedDocs.map((f) => f.path);
       const audioPaths = uploadedAudioFiles.map((f) => f.path);
 
@@ -950,6 +1220,25 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           </CardContent>
         </Card>
       </div>
+
+      {/* Extraction Progress - shows when autofill is in progress */}
+      {isExtracting && (
+        <div className="animate-fadeSlideIn border border-[#B87333]/30 bg-slate-900/60 backdrop-blur-sm rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Loader2 className="h-5 w-5 animate-spin text-[#DA8A67]" />
+              <div className="absolute inset-0 animate-ping rounded-full bg-[#B87333]/20" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Auto-filling form fields...</p>
+              <p className="text-xs text-slate-400">Analyzing uploaded files</p>
+            </div>
+          </div>
+          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-slate-800">
+            <div className="h-full animate-pulse bg-gradient-to-r from-[#B87333] to-[#DA8A67] w-2/3 rounded-full transition-all duration-1000" />
+          </div>
+        </div>
+      )}
 
       {/* Basic Information */}
       <Card>

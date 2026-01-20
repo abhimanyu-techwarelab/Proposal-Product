@@ -7,7 +7,7 @@ export { subscriptionsApi } from './subscriptions';
 export { usersApi } from './users';
 export { rolesApi } from './roles';
 export type { LoginInput, RegisterInput, AuthResult } from './auth';
-export type { ProposalsListResponse, ProposalApproveInput, ProposalRejectInput } from './proposals';
+export type { ProposalsListResponse, ProposalApproveInput, ProposalRejectInput, ExtractedFields, ExtractFieldsInput, ExtractFieldsResponse } from './proposals';
 export type { TemplatesListResponse } from './templates';
 export type { SubscriptionResponse } from './subscriptions';
 export type { User, UsersListResponse, UserFilters, CreateUserDto, UpdateUserDto } from './users';

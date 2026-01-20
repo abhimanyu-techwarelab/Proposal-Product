@@ -22,3 +22,23 @@ export function LoginTransitionLoader({ show }: { show: boolean }) {
     </div>
   );
 }
+
+/**
+ * LogoutTransitionLoader - Shows the loader during logout.
+ * Use this to show a loader for minimum 1 second or until logout completes.
+ */
+export function LogoutTransitionLoader({ show }: { show: boolean }) {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
+      <div className="flex flex-col items-center gap-6">
+        <Spinner size="lg" />
+        <div className="text-center">
+          <p className="text-lg font-medium text-white">Signing out</p>
+          <p className="text-sm text-slate-400 mt-1">See you soon...</p>
+        </div>
+      </div>
+    </div>
+  );
+}

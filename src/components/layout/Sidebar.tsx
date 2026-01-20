@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { UserRole } from "@/types";
+import { LogoutTransitionLoader } from "@/components/PostLoginLoader";
 
 // ============================================================================
 // Types
@@ -106,6 +107,16 @@ export function Sidebar() {
     toggleSidebar,
     toggleMobileSidebar,
   } = useSidebar();
+  const [showLogoutLoader, setShowLogoutLoader] = useState(false);
+
+  const handleLogout = async () => {
+    setShowLogoutLoader(true);
+    // Ensure loader shows for minimum 1 second for better UX
+    await Promise.all([
+      logout(),
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+    ]);
+  };
 
   // Filter nav items based on permissions (matching Admin Panel pattern)
   const visibleNavItems = useMemo(() => {
@@ -150,6 +161,9 @@ export function Sidebar() {
 
   return (
     <>
+      {/* Logout loader */}
+      <LogoutTransitionLoader show={showLogoutLoader} />
+
       {/* Mobile backdrop */}
       {isMobileOpen && (
         <div
@@ -343,7 +357,7 @@ export function Sidebar() {
                   <Settings className="h-4 w-4" />
                 </Link>
                 <button
-                  onClick={() => logout()}
+                  onClick={handleLogout}
                   className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors flex-shrink-0"
                   title="Logout"
                 >

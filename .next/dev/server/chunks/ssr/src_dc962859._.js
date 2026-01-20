@@ -696,7 +696,7 @@ const proposalsApi = {
     /**
    * Get rendered HTML preview of a proposal
    */ getPreview: async (id)=>{
-        const apiUrl = ("TURBOPACK compile-time value", "https://abhimanyu-3000.tl-workspace.techwarelab.com") || "http://localhost:3001";
+        const apiUrl = ("TURBOPACK compile-time value", "https://abhimanyu-4200.tl-workspace.techwarelab.com") || "http://localhost:3001";
         const backendUrl = apiUrl.replace(/\/api$/, "") || "http://localhost:3001";
         // Get token from API endpoint
         const tokenResponse = await fetch("/api/auth/token", {
@@ -746,6 +746,12 @@ const proposalsApi = {
    * Submits to /product/proposals/generate endpoint
    */ generate: async (data)=>{
         return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_GENERATE, data);
+    },
+    /**
+   * Extract form fields from uploaded documents and audio
+   * Parses content and uses AI to extract proposal data
+   */ extractFields: async (data)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_EXTRACT_FIELDS, data);
     }
 };
 const proposalsServerApi = {
@@ -921,6 +927,21 @@ const usersApi = {
    * Get a single user by ID
    */ getById: async (id)=>{
         return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].USER_BY_ID(id));
+    },
+    /**
+   * Create a new user
+   */ create: async (dto)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(`${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].USERS}/create`, dto);
+    },
+    /**
+   * Update an existing user
+   */ update: async (id, dto)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].put(`${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].USERS}/update/${id}`, dto);
+    },
+    /**
+   * Delete a user (soft delete)
+   */ delete: async (id)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].delete(`${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].USERS}/delete/${id}`);
     }
 };
 }),
@@ -1355,6 +1376,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$x$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__X$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/x.js [app-ssr] (ecmascript) <export default as X>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/refresh-cw.js [app-ssr] (ecmascript) <export default as RefreshCw>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/eye.js [app-ssr] (ecmascript) <export default as Eye>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/loader-circle.js [app-ssr] (ecmascript) <export default as Loader2>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$contexts$2f$AuthContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/contexts/AuthContext.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/src/components/ui/index.ts [app-ssr] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/Button.tsx [app-ssr] (ecmascript)");
@@ -1443,6 +1465,8 @@ function ProposalForm({ templateId, onChangeTemplate }) {
     const [isAddingDocuments, setIsAddingDocuments] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isAddingAudio, setIsAddingAudio] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [uploadError, setUploadError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    // Extraction state for autofill
+    const [isExtracting, setIsExtracting] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     // Form state
     const [title, setTitle] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
     const [clientName, setClientName] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])('');
@@ -1576,64 +1600,279 @@ function ProposalForm({ templateId, onChangeTemplate }) {
             };
         }
     };
-    // Store files locally (upload happens on submit)
+    // Upload files immediately to Supabase and trigger extraction
     const handleDocumentUpload = async (e)=>{
         const files = e.target.files;
         if (!files || files.length === 0) return;
         setUploadError(null);
         setIsAddingDocuments(true);
-        const newFiles = Array.from(files).map((file)=>({
-                id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
-                name: file.name,
-                file,
-                size: file.size
-            }));
-        // Show uploading state for 1 second
-        await new Promise((resolve)=>setTimeout(resolve, 1000));
-        setPendingDocuments((prev)=>[
-                ...prev,
-                ...newFiles
-            ]);
-        setIsAddingDocuments(false);
-        // Reset input
-        if (documentInputRef.current) {
-            documentInputRef.current.value = '';
+        try {
+            const uploadedPaths = [];
+            const newFiles = [];
+            for (const file of Array.from(files)){
+                console.log(`[Upload] Starting document upload: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
+                // Upload to Supabase immediately
+                const { path, url, error } = await uploadFileToSupabase(file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].DOCUMENTS);
+                if (error) {
+                    console.error(`[Upload] Document upload failed: ${file.name} - ${error}`);
+                    throw new Error(`Failed to upload ${file.name}: ${error}`);
+                }
+                console.log(`[Upload] Document uploaded successfully: ${file.name} -> ${path}`);
+                uploadedPaths.push(path);
+                newFiles.push({
+                    id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
+                    name: file.name,
+                    file,
+                    size: file.size,
+                    path
+                });
+            }
+            setPendingDocuments((prev)=>[
+                    ...prev,
+                    ...newFiles
+                ]);
+            // Trigger extraction automatically with all files
+            const allDocPaths = [
+                ...pendingDocuments.map((f)=>f.path),
+                ...uploadedPaths
+            ].filter(Boolean);
+            const allAudioPaths = pendingAudio.map((f)=>f.path).filter(Boolean);
+            triggerFieldExtraction(allDocPaths, allAudioPaths);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Upload failed';
+            setUploadError(message);
+        } finally{
+            setIsAddingDocuments(false);
+            if (documentInputRef.current) {
+                documentInputRef.current.value = '';
+            }
         }
     };
-    // Store files locally (upload happens on submit)
+    // Upload files immediately to Supabase and trigger extraction
     const handleAudioUpload = async (e)=>{
         const files = e.target.files;
         if (!files || files.length === 0) return;
         setUploadError(null);
         setIsAddingAudio(true);
-        const newFiles = Array.from(files).map((file)=>({
-                id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
-                name: file.name,
-                file,
-                size: file.size
-            }));
-        // Show uploading state for 1 second
-        await new Promise((resolve)=>setTimeout(resolve, 1000));
-        setPendingAudio((prev)=>[
-                ...prev,
-                ...newFiles
-            ]);
-        setIsAddingAudio(false);
-        // Reset input
-        if (audioInputRef.current) {
-            audioInputRef.current.value = '';
+        try {
+            const uploadedPaths = [];
+            const newFiles = [];
+            for (const file of Array.from(files)){
+                console.log(`[Upload] Starting audio upload: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
+                // Upload to Supabase immediately
+                const { path, url, error } = await uploadFileToSupabase(file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].AUDIO);
+                if (error) {
+                    console.error(`[Upload] Audio upload failed: ${file.name} - ${error}`);
+                    throw new Error(`Failed to upload ${file.name}: ${error}`);
+                }
+                console.log(`[Upload] Audio uploaded successfully: ${file.name} -> ${path}`);
+                uploadedPaths.push(path);
+                newFiles.push({
+                    id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
+                    name: file.name,
+                    file,
+                    size: file.size,
+                    path
+                });
+            }
+            setPendingAudio((prev)=>[
+                    ...prev,
+                    ...newFiles
+                ]);
+            // Trigger extraction automatically with all files
+            const allDocPaths = pendingDocuments.map((f)=>f.path).filter(Boolean);
+            const allAudioPaths = [
+                ...pendingAudio.map((f)=>f.path),
+                ...uploadedPaths
+            ].filter(Boolean);
+            triggerFieldExtraction(allDocPaths, allAudioPaths);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Upload failed';
+            setUploadError(message);
+        } finally{
+            setIsAddingAudio(false);
+            if (audioInputRef.current) {
+                audioInputRef.current.value = '';
+            }
         }
     };
-    const removeDocument = (fileId)=>{
+    const removeDocument = async (fileId)=>{
+        const file = pendingDocuments.find((f)=>f.id === fileId);
+        // Delete from storage if already uploaded
+        if (file?.path) {
+            console.log(`[Delete] Removing document from storage: ${file.name} -> ${file.path}`);
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteFileFromStorage"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].DOCUMENTS, file.path);
+            console.log(`[Delete] Document removed successfully: ${file.name}`);
+        } else if (file) {
+            console.log(`[Delete] Removing local document (not uploaded): ${file.name}`);
+        }
         setPendingDocuments((prev)=>prev.filter((f)=>f.id !== fileId));
     };
-    const removeAudioFile = (fileId)=>{
+    const removeAudioFile = async (fileId)=>{
+        const file = pendingAudio.find((f)=>f.id === fileId);
+        // Delete from storage if already uploaded
+        if (file?.path) {
+            console.log(`[Delete] Removing audio from storage: ${file.name} -> ${file.path}`);
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteFileFromStorage"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].AUDIO, file.path);
+            console.log(`[Delete] Audio removed successfully: ${file.name}`);
+        } else if (file) {
+            console.log(`[Delete] Removing local audio (not uploaded): ${file.name}`);
+        }
         setPendingAudio((prev)=>prev.filter((f)=>f.id !== fileId));
     };
     const formatFileSize = (bytes)=>{
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+    // ============================================================================
+    // Field Extraction for Autofill
+    // ============================================================================
+    const applyExtractedFields = (fields)=>{
+        // Single-value fields - only set if empty (preserves user input)
+        if (fields.title && !title) setTitle(fields.title);
+        if (fields.clientName && !clientName) setClientName(fields.clientName);
+        if (fields.clientEmail && !clientEmail) setClientEmail(fields.clientEmail);
+        if (fields.industry && !industry) setIndustry(fields.industry);
+        if (fields.startDate && !startDate) setStartDate(fields.startDate);
+        if (fields.endDate && !endDate) setEndDate(fields.endDate);
+        if (fields.totalBudget !== undefined && totalBudget === 0) setTotalBudget(fields.totalBudget);
+        if (fields.currency && currency === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Currency"].USD) setCurrency(fields.currency);
+        if (fields.billingType && billingType === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["BillingType"].FIXED) setBillingType(fields.billingType);
+        // Text fields that can be merged/appended from multiple sources
+        if (fields.summary) {
+            setSummary((prev)=>{
+                if (!prev) return fields.summary;
+                // Append if new content is different and not already included
+                if (!prev.includes(fields.summary)) {
+                    return `${prev}\n\n${fields.summary}`;
+                }
+                return prev;
+            });
+        }
+        if (fields.goals) {
+            setGoals((prev)=>{
+                if (!prev) return fields.goals;
+                if (!prev.includes(fields.goals)) {
+                    return `${prev}\n\n${fields.goals}`;
+                }
+                return prev;
+            });
+        }
+        if (fields.scope) {
+            setScope((prev)=>{
+                if (!prev) return fields.scope;
+                if (!prev.includes(fields.scope)) {
+                    return `${prev}\n\n${fields.scope}`;
+                }
+                return prev;
+            });
+        }
+        // Arrays - merge new extracted data with existing (deduplicate)
+        if (fields.deliverables && fields.deliverables.length > 0) {
+            setDeliverables((prev)=>{
+                const newItems = fields.deliverables.filter((item)=>!prev.includes(item));
+                return [
+                    ...prev,
+                    ...newItems
+                ];
+            });
+        }
+        if (fields.milestones && fields.milestones.length > 0) {
+            setMilestones((prev)=>{
+                const existingTitles = prev.map((m)=>m.title.toLowerCase());
+                const newMilestones = fields.milestones.filter((m)=>!existingTitles.includes(m.title.toLowerCase())).map((m)=>({
+                        id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
+                        title: m.title
+                    }));
+                return [
+                    ...prev,
+                    ...newMilestones
+                ];
+            });
+        }
+        if (fields.teamMembers && fields.teamMembers.length > 0) {
+            setTeamMembers((prev)=>{
+                const existingRoles = prev.map((t)=>t.role.toLowerCase());
+                const newMembers = fields.teamMembers.filter((t)=>!existingRoles.includes(t.role.toLowerCase())).map((t)=>({
+                        id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
+                        role: t.role,
+                        experience: t.experience
+                    }));
+                return [
+                    ...prev,
+                    ...newMembers
+                ];
+            });
+        }
+        if (fields.links && fields.links.length > 0) {
+            setLinks((prev)=>{
+                const newLinks = fields.links.filter((link)=>!prev.includes(link));
+                return [
+                    ...prev,
+                    ...newLinks
+                ];
+            });
+        }
+        if (fields.recipients && fields.recipients.length > 0) {
+            setRecipients((prev)=>{
+                const existingNames = prev.map((r)=>r.name.toLowerCase());
+                const newRecipients = fields.recipients.filter((r)=>!existingNames.includes(r.name.toLowerCase())).map((r)=>({
+                        id: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateId"])(),
+                        salutation: r.salutation,
+                        name: r.name
+                    }));
+                return [
+                    ...prev,
+                    ...newRecipients
+                ];
+            });
+        }
+    };
+    const triggerFieldExtraction = async (documentPaths, audioPaths)=>{
+        if (documentPaths.length === 0 && audioPaths.length === 0) return;
+        setIsExtracting(true);
+        try {
+            // Generate signed URLs for the uploaded files
+            const { documentUrls, audioUrls, errors } = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateAllSignedUrls"])(documentPaths, audioPaths);
+            if (documentUrls.length === 0 && audioUrls.length === 0) {
+                console.warn('[Extraction] Failed to generate signed URLs for extraction');
+                return;
+            }
+            // Call extraction API
+            console.log('[Extraction] Calling extract-fields API with:', {
+                document_urls: documentUrls,
+                audio_urls: audioUrls
+            });
+            const response = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$proposals$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["proposalsApi"].extractFields({
+                document_urls: documentUrls,
+                audio_urls: audioUrls
+            });
+            console.log('[Extraction] API response:', response);
+            // Handle both wrapped (response.data.fields) and direct (response.fields) response formats
+            const extractedFields = response.fields || response.data?.fields;
+            if (response.success && extractedFields) {
+                console.log('[Extraction] Applying extracted fields:', extractedFields);
+                applyExtractedFields(extractedFields);
+            } else {
+                console.warn('[Extraction] No fields found in response:', response);
+            }
+        } catch (error) {
+            console.error('[Extraction] Field extraction failed:', error);
+            console.error('[Extraction] Error details:', {
+                message: error?.message,
+                status: error?.status,
+                code: error?.code,
+                name: error?.name
+            });
+            // Check for timeout/network errors
+            if (error?.code === 'NETWORK_ERROR' || error?.message?.includes('Failed to fetch')) {
+                console.warn('[Extraction] Request timed out or network error - extraction may still be processing on server');
+            }
+        // Non-blocking - user can still fill form manually
+        } finally{
+            setIsExtracting(false);
+        }
     };
     // ============================================================================
     // Validation Helpers
@@ -1747,38 +1986,62 @@ function ProposalForm({ templateId, onChangeTemplate }) {
             setIsSubmitting(true);
             // Step 1: Get active subscription
             const subscription = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$subscriptions$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["subscriptionsApi"].getActiveByOrganization(productUser.organization_id);
-            // Step 2: Upload pending files to Supabase Storage
+            // Step 2: Get file paths (files already uploaded during autofill, skip re-upload)
             const uploadedDocs = [];
             const uploadedAudioFiles = [];
-            // Upload documents
+            // Process documents - only upload if not already uploaded
             for (const pendingFile of pendingDocuments){
-                const { path, url, error } = await uploadFileToSupabase(pendingFile.file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].DOCUMENTS);
-                if (error) {
-                    throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+                if (pendingFile.path) {
+                    // Already uploaded during autofill
+                    uploadedDocs.push({
+                        id: pendingFile.id,
+                        name: pendingFile.name,
+                        path: pendingFile.path,
+                        url: '',
+                        size: pendingFile.size
+                    });
+                } else {
+                    // Upload now (edge case: file added after extraction)
+                    const { path, url, error } = await uploadFileToSupabase(pendingFile.file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].DOCUMENTS);
+                    if (error) {
+                        throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+                    }
+                    uploadedDocs.push({
+                        id: pendingFile.id,
+                        name: pendingFile.name,
+                        path,
+                        url,
+                        size: pendingFile.size
+                    });
                 }
-                uploadedDocs.push({
-                    id: pendingFile.id,
-                    name: pendingFile.name,
-                    path,
-                    url,
-                    size: pendingFile.size
-                });
             }
-            // Upload audio files
+            // Process audio files - only upload if not already uploaded
             for (const pendingFile of pendingAudio){
-                const { path, url, error } = await uploadFileToSupabase(pendingFile.file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].AUDIO);
-                if (error) {
-                    throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+                if (pendingFile.path) {
+                    // Already uploaded during autofill
+                    uploadedAudioFiles.push({
+                        id: pendingFile.id,
+                        name: pendingFile.name,
+                        path: pendingFile.path,
+                        url: '',
+                        size: pendingFile.size
+                    });
+                } else {
+                    // Upload now (edge case: file added after extraction)
+                    const { path, url, error } = await uploadFileToSupabase(pendingFile.file, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["STORAGE_BUCKETS"].AUDIO);
+                    if (error) {
+                        throw new Error(`Failed to upload ${pendingFile.name}: ${error}`);
+                    }
+                    uploadedAudioFiles.push({
+                        id: pendingFile.id,
+                        name: pendingFile.name,
+                        path,
+                        url,
+                        size: pendingFile.size
+                    });
                 }
-                uploadedAudioFiles.push({
-                    id: pendingFile.id,
-                    name: pendingFile.name,
-                    path,
-                    url,
-                    size: pendingFile.size
-                });
             }
-            // Step 3: Generate signed URLs for uploaded files
+            // Step 3: Generate signed URLs for all files
             const documentPaths = uploadedDocs.map((f)=>f.path);
             const audioPaths = uploadedAudioFiles.map((f)=>f.path);
             const { documentUrls: signedDocUrls, audioUrls: signedAudioUrls, errors: signedUrlErrors } = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$storage$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["generateAllSignedUrls"])(documentPaths, audioPaths);
@@ -1943,7 +2206,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 className: "h-5 w-5 text-[#DA8A67]"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 726,
+                                lineNumber: 996,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1956,7 +2219,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: "Using template:"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 729,
+                                                lineNumber: 999,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1964,7 +2227,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: loadedTemplate.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 730,
+                                                lineNumber: 1000,
                                                 columnNumber: 17
                                             }, this),
                                             loadedTemplate.is_default && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1973,13 +2236,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: "Default"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 732,
+                                                lineNumber: 1002,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 728,
+                                        lineNumber: 998,
                                         columnNumber: 15
                                     }, this),
                                     loadedTemplate.description && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1987,19 +2250,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                         children: loadedTemplate.description
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 736,
+                                        lineNumber: 1006,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 727,
+                                lineNumber: 997,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 725,
+                        lineNumber: 995,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2014,13 +2277,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     className: "h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 746,
+                                    lineNumber: 1016,
                                     columnNumber: 25
                                 }, void 0),
                                 children: "View"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 741,
+                                lineNumber: 1011,
                                 columnNumber: 13
                             }, this),
                             onChangeTemplate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2032,25 +2295,25 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     className: "h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 756,
+                                    lineNumber: 1026,
                                     columnNumber: 27
                                 }, void 0),
                                 children: "Change Template"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 751,
+                                lineNumber: 1021,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 740,
+                        lineNumber: 1010,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 724,
+                lineNumber: 994,
                 columnNumber: 9
             }, this),
             loadedTemplate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Modal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Modal"], {
@@ -2063,12 +2326,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                     onSelect: ()=>setShowPreviewModal(false)
                 }, void 0, false, {
                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                    lineNumber: 772,
+                    lineNumber: 1042,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 767,
+                lineNumber: 1037,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Modal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Modal"], {
@@ -2085,7 +2348,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             className: "h-12 w-12 animate-spin rounded-full border-4 border-[#B87333] border-t-transparent mb-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 790,
+                            lineNumber: 1060,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -2097,7 +2360,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 792,
+                            lineNumber: 1062,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2114,13 +2377,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 800,
+                                    lineNumber: 1070,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 798,
+                            lineNumber: 1068,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2128,7 +2391,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             children: "Your proposal will be available in the Proposals page once generated."
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 808,
+                            lineNumber: 1078,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2139,18 +2402,18 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             children: "View Proposals"
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 813,
+                            lineNumber: 1083,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                    lineNumber: 789,
+                    lineNumber: 1059,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 781,
+                lineNumber: 1051,
                 columnNumber: 7
             }, this),
             isLoadingTemplate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2162,19 +2425,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             className: "h-4 w-4 animate-spin rounded-full border-2 border-[#B87333] border-t-transparent"
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 828,
+                            lineNumber: 1098,
                             columnNumber: 13
                         }, this),
                         "Loading template..."
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                    lineNumber: 827,
+                    lineNumber: 1097,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 826,
+                lineNumber: 1096,
                 columnNumber: 9
             }, this),
             submitError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2182,7 +2445,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                 children: submitError
             }, void 0, false, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 835,
+                lineNumber: 1105,
                 columnNumber: 9
             }, this),
             uploadError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2190,7 +2453,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                 children: uploadError
             }, void 0, false, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 842,
+                lineNumber: 1112,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2203,7 +2466,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 description: "PDF, DOC, DOCX"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 851,
+                                lineNumber: 1121,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2218,7 +2481,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                         className: "hidden"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 856,
+                                        lineNumber: 1126,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2229,7 +2492,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 className: `h-10 w-10 mb-2 transition-colors ${isAddingDocuments ? 'text-[#DA8A67] animate-pulse' : 'text-slate-400 group-hover:text-[#DA8A67]'}`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 868,
+                                                lineNumber: 1138,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2237,13 +2500,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: isAddingDocuments ? 'Uploading...' : 'Click to upload'
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 869,
+                                                lineNumber: 1139,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 864,
+                                        lineNumber: 1134,
                                         columnNumber: 13
                                     }, this),
                                     pendingDocuments.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2255,7 +2518,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                         className: "h-5 w-5 text-[#DA8A67] flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 880,
+                                                        lineNumber: 1150,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2266,7 +2529,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                                 children: file.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                                lineNumber: 882,
+                                                                lineNumber: 1152,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2274,13 +2537,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                                 children: formatFileSize(file.size)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                                lineNumber: 885,
+                                                                lineNumber: 1155,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 881,
+                                                        lineNumber: 1151,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2291,35 +2554,35 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                            lineNumber: 892,
+                                                            lineNumber: 1162,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 887,
+                                                        lineNumber: 1157,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, file.id, true, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 876,
+                                                lineNumber: 1146,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 874,
+                                        lineNumber: 1144,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 855,
+                                lineNumber: 1125,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 850,
+                        lineNumber: 1120,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2329,7 +2592,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 description: "MP3, WAV, M4A"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 903,
+                                lineNumber: 1173,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2344,7 +2607,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                         className: "hidden"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 908,
+                                        lineNumber: 1178,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2355,7 +2618,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 className: `h-10 w-10 mb-2 transition-colors ${isAddingAudio ? 'text-[#DA8A67] animate-pulse' : 'text-slate-400 group-hover:text-[#DA8A67]'}`
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 920,
+                                                lineNumber: 1190,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2363,13 +2626,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: isAddingAudio ? 'Uploading...' : 'Click to upload'
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 921,
+                                                lineNumber: 1191,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 916,
+                                        lineNumber: 1186,
                                         columnNumber: 13
                                     }, this),
                                     pendingAudio.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2381,7 +2644,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                         className: "h-5 w-5 text-[#DA8A67] flex-shrink-0"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 932,
+                                                        lineNumber: 1202,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2392,7 +2655,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                                 children: file.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                                lineNumber: 934,
+                                                                lineNumber: 1204,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2400,13 +2663,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                                 children: formatFileSize(file.size)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                                lineNumber: 937,
+                                                                lineNumber: 1207,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 933,
+                                                        lineNumber: 1203,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2417,42 +2680,122 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                            lineNumber: 944,
+                                                            lineNumber: 1214,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                        lineNumber: 939,
+                                                        lineNumber: 1209,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, file.id, true, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 928,
+                                                lineNumber: 1198,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 926,
+                                        lineNumber: 1196,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 907,
+                                lineNumber: 1177,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 902,
+                        lineNumber: 1172,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 848,
+                lineNumber: 1118,
                 columnNumber: 7
+            }, this),
+            isExtracting && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "animate-fadeSlideIn border border-[#B87333]/30 bg-slate-900/60 backdrop-blur-sm rounded-xl p-4",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "relative",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                        className: "h-5 w-5 animate-spin text-[#DA8A67]"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                        lineNumber: 1229,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "absolute inset-0 animate-ping rounded-full bg-[#B87333]/20"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                        lineNumber: 1230,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                lineNumber: 1228,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex-1",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-sm font-medium text-white",
+                                        children: "Auto-filling form fields..."
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                        lineNumber: 1233,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-xs text-slate-400",
+                                        children: "Analyzing uploaded files"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                        lineNumber: 1234,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                                lineNumber: 1232,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                        lineNumber: 1227,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mt-3 h-1 w-full overflow-hidden rounded-full bg-slate-800",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "h-full animate-pulse bg-gradient-to-r from-[#B87333] to-[#DA8A67] w-2/3 rounded-full transition-all duration-1000"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                            lineNumber: 1238,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                        lineNumber: 1237,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/forms/ProposalForm.tsx",
+                lineNumber: 1226,
+                columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
                 children: [
@@ -2461,7 +2804,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "Enter the proposal details"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 956,
+                        lineNumber: 1245,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2480,12 +2823,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                         required: true
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 960,
+                                        lineNumber: 1249,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 959,
+                                    lineNumber: 1248,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2498,7 +2841,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 970,
+                                    lineNumber: 1259,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2512,7 +2855,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 979,
+                                    lineNumber: 1268,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -2526,7 +2869,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     placeholder: "Select industry"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 989,
+                                    lineNumber: 1278,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$DatePicker$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DatePicker"], {
@@ -2537,24 +2880,24 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 996,
+                                    lineNumber: 1285,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 958,
+                            lineNumber: 1247,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 957,
+                        lineNumber: 1246,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 955,
+                lineNumber: 1244,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2564,7 +2907,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "Describe the project in detail"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1009,
+                        lineNumber: 1298,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2580,7 +2923,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 required: true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1014,
+                                lineNumber: 1303,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Textarea$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -2593,7 +2936,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 required: true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1023,
+                                lineNumber: 1312,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Textarea$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -2606,19 +2949,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 required: true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1032,
+                                lineNumber: 1321,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1013,
+                        lineNumber: 1302,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1008,
+                lineNumber: 1297,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2628,7 +2971,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "Set the project schedule"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1046,
+                        lineNumber: 1335,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2646,7 +2989,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1049,
+                                    lineNumber: 1338,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$DatePicker$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DatePicker"], {
@@ -2661,24 +3004,24 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1059,
+                                    lineNumber: 1348,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1048,
+                            lineNumber: 1337,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1047,
+                        lineNumber: 1336,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1045,
+                lineNumber: 1334,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2688,7 +3031,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "Set the project budget"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1076,
+                        lineNumber: 1365,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2707,7 +3050,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1079,
+                                    lineNumber: 1368,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -2721,7 +3064,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1090,
+                                    lineNumber: 1379,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -2735,24 +3078,24 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     required: true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1100,
+                                    lineNumber: 1389,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1078,
+                            lineNumber: 1367,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1077,
+                        lineNumber: 1366,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1075,
+                lineNumber: 1364,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2762,7 +3105,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "List the project deliverables"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1116,
+                        lineNumber: 1405,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2785,12 +3128,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             }
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1123,
+                                            lineNumber: 1412,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1122,
+                                        lineNumber: 1411,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2802,20 +3145,20 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 className: "mr-1 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1136,
+                                                lineNumber: 1425,
                                                 columnNumber: 15
                                             }, this),
                                             "Add"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1135,
+                                        lineNumber: 1424,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1121,
+                                lineNumber: 1410,
                                 columnNumber: 11
                             }, this),
                             errors.deliverables && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2823,7 +3166,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 children: errors.deliverables
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1141,
+                                lineNumber: 1430,
                                 columnNumber: 13
                             }, this),
                             deliverables.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2836,7 +3179,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: deliverable
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1150,
+                                                lineNumber: 1439,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2847,23 +3190,23 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                     className: "h-3.5 w-3.5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                    lineNumber: 1156,
+                                                    lineNumber: 1445,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1151,
+                                                lineNumber: 1440,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, index, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1146,
+                                        lineNumber: 1435,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1144,
+                                lineNumber: 1433,
                                 columnNumber: 13
                             }, this),
                             deliverables.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2871,19 +3214,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 children: 'No deliverables added. Enter a deliverable and click "Add".'
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1163,
+                                lineNumber: 1452,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1120,
+                        lineNumber: 1409,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1115,
+                lineNumber: 1404,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2901,19 +3244,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     className: "mr-1 h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1177,
+                                    lineNumber: 1466,
                                     columnNumber: 15
                                 }, void 0),
                                 "Add"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1176,
+                            lineNumber: 1465,
                             columnNumber: 13
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1172,
+                        lineNumber: 1461,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2923,7 +3266,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             children: 'No milestones added. Click "Add" to create a milestone.'
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1184,
+                            lineNumber: 1473,
                             columnNumber: 13
                         }, this) : milestones.map((milestone, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4",
@@ -2934,12 +3277,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             className: "h-5 w-5"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1194,
+                                            lineNumber: 1483,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1193,
+                                        lineNumber: 1482,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2952,12 +3295,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             required: true
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1197,
+                                            lineNumber: 1486,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1196,
+                                        lineNumber: 1485,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2968,29 +3311,29 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1212,
+                                            lineNumber: 1501,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1207,
+                                        lineNumber: 1496,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, milestone.id, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1189,
+                                lineNumber: 1478,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1182,
+                        lineNumber: 1471,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1171,
+                lineNumber: 1460,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -3008,19 +3351,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     className: "mr-1 h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1227,
+                                    lineNumber: 1516,
                                     columnNumber: 15
                                 }, void 0),
                                 "Add"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1226,
+                            lineNumber: 1515,
                             columnNumber: 13
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1222,
+                        lineNumber: 1511,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -3030,7 +3373,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             children: 'No team members added. Click "Add" to add a team member.'
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1234,
+                            lineNumber: 1523,
                             columnNumber: 13
                         }, this) : teamMembers.map((member, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4",
@@ -3047,7 +3390,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1244,
+                                                lineNumber: 1533,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -3059,13 +3402,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1254,
+                                                lineNumber: 1543,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1243,
+                                        lineNumber: 1532,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3076,29 +3419,29 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1270,
+                                            lineNumber: 1559,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1265,
+                                        lineNumber: 1554,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, member.id, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1239,
+                                lineNumber: 1528,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1232,
+                        lineNumber: 1521,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1221,
+                lineNumber: 1510,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -3108,7 +3451,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         description: "Add relevant links (optional)"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1280,
+                        lineNumber: 1569,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -3133,12 +3476,12 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             }
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1287,
+                                            lineNumber: 1576,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1286,
+                                        lineNumber: 1575,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3150,20 +3493,20 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 className: "mr-1 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1302,
+                                                lineNumber: 1591,
                                                 columnNumber: 15
                                             }, this),
                                             "Add"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1301,
+                                        lineNumber: 1590,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1285,
+                                lineNumber: 1574,
                                 columnNumber: 11
                             }, this),
                             links.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3176,7 +3519,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 children: link
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1313,
+                                                lineNumber: 1602,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3187,23 +3530,23 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                     className: "h-3.5 w-3.5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                    lineNumber: 1319,
+                                                    lineNumber: 1608,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1314,
+                                                lineNumber: 1603,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, index, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1309,
+                                        lineNumber: 1598,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1307,
+                                lineNumber: 1596,
                                 columnNumber: 13
                             }, this),
                             links.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3211,19 +3554,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                 children: 'No links added. Enter a URL and click "Add".'
                             }, void 0, false, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1326,
+                                lineNumber: 1615,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1284,
+                        lineNumber: 1573,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1279,
+                lineNumber: 1568,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -3241,19 +3584,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                     className: "mr-1 h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                    lineNumber: 1340,
+                                    lineNumber: 1629,
                                     columnNumber: 15
                                 }, void 0),
                                 "Add"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1339,
+                            lineNumber: 1628,
                             columnNumber: 13
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1335,
+                        lineNumber: 1624,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -3263,7 +3606,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                             children: 'No recipients added. Click "Add" to add a recipient.'
                         }, void 0, false, {
                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                            lineNumber: 1347,
+                            lineNumber: 1636,
                             columnNumber: 13
                         }, this) : recipients.map((recipient, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4",
@@ -3298,7 +3641,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1357,
+                                                lineNumber: 1646,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -3310,13 +3653,13 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                                lineNumber: 1373,
+                                                lineNumber: 1662,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1356,
+                                        lineNumber: 1645,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3327,29 +3670,29 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                            lineNumber: 1389,
+                                            lineNumber: 1678,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                        lineNumber: 1384,
+                                        lineNumber: 1673,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, recipient.id, true, {
                                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                                lineNumber: 1352,
+                                lineNumber: 1641,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1345,
+                        lineNumber: 1634,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1334,
+                lineNumber: 1623,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3363,7 +3706,7 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         children: "Cancel"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1399,
+                        lineNumber: 1688,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3372,19 +3715,19 @@ function ProposalForm({ templateId, onChangeTemplate }) {
                         children: "Create Proposal"
                     }, void 0, false, {
                         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                        lineNumber: 1407,
+                        lineNumber: 1696,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/forms/ProposalForm.tsx",
-                lineNumber: 1398,
+                lineNumber: 1687,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/forms/ProposalForm.tsx",
-        lineNumber: 721,
+        lineNumber: 991,
         columnNumber: 5
     }, this);
 }

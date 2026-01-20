@@ -40,7 +40,9 @@ export default async function ProposalsPage({ searchParams }: ProposalsPageProps
       />
 
       {/* Filters */}
-      <ProposalFilters currentFilters={filters} />
+      <Suspense fallback={null}>
+        <ProposalFilters currentFilters={filters} />
+      </Suspense>
 
       {/* Table */}
       <div className="mt-6">

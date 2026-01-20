@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Eye, CheckCircle, XCircle } from "lucide-react";
+import { Eye, Edit, CheckCircle, XCircle } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -350,6 +350,11 @@ export function ApprovalsTable({ filters }: ApprovalsTableProps) {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
+                  <Link href={`/proposals/${proposal.id}/edit`}>
+                    <Button variant="ghost" size="sm" title="Edit">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -398,6 +403,32 @@ export function ApprovalsTable({ filters }: ApprovalsTableProps) {
           }}
           proposalId={selectedProposal.id}
           proposalTitle={selectedProposal.title}
+          footerActions={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPreviewModalOpen(false);
+                  handleRejectClick(selectedProposal.id);
+                }}
+                className="text-red-400 border-red-400/50 hover:bg-red-500/20"
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Reject
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPreviewModalOpen(false);
+                  handleApproveClick(selectedProposal.id);
+                }}
+                className="text-green-400 border-green-400/50 hover:bg-green-500/20"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Approve
+              </Button>
+            </>
+          }
         />
       )}
 
@@ -419,21 +450,38 @@ export function ApprovalsTable({ filters }: ApprovalsTableProps) {
             rows={4}
           />
         </div>
-        <ModalFooter>
+        <ModalFooter className="justify-between !px-0">
           <Button
-            variant="outline"
-            onClick={handleCancelApprove}
+            variant="ghost"
+            size="sm"
+            title="Preview"
+            onClick={() => {
+              const proposal = proposals.find((p) => p.id === approvingProposalId);
+              if (proposal) {
+                setSelectedProposal(proposal);
+                setPreviewModalOpen(true);
+              }
+            }}
             disabled={approving}
           >
-            Cancel
+            <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleConfirmApprove}
-            isLoading={approving}
-          >
-            Approve Proposal
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleCancelApprove}
+              disabled={approving}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleConfirmApprove}
+              isLoading={approving}
+            >
+              Approve Proposal
+            </Button>
+          </div>
         </ModalFooter>
       </Modal>
 
@@ -456,21 +504,38 @@ export function ApprovalsTable({ filters }: ApprovalsTableProps) {
             required
           />
         </div>
-        <ModalFooter>
+        <ModalFooter className="justify-between !px-0">
           <Button
-            variant="outline"
-            onClick={handleCancelReject}
+            variant="ghost"
+            size="sm"
+            title="Preview"
+            onClick={() => {
+              const proposal = proposals.find((p) => p.id === rejectingProposalId);
+              if (proposal) {
+                setSelectedProposal(proposal);
+                setPreviewModalOpen(true);
+              }
+            }}
             disabled={rejecting}
           >
-            Cancel
+            <Eye className="h-4 w-4" />
           </Button>
-          <Button
-            variant="danger"
-            onClick={handleConfirmReject}
-            isLoading={rejecting}
-          >
-            Reject Proposal
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleCancelReject}
+              disabled={rejecting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmReject}
+              isLoading={rejecting}
+            >
+              Reject Proposal
+            </Button>
+          </div>
         </ModalFooter>
       </Modal>
     </div>

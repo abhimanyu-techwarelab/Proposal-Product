@@ -51,6 +51,10 @@ function LoginPageContent() {
       // Show loader immediately on login page
       setShowTransitionLoader(true);
 
+      // Ensure loader shows for minimum 1 second for better UX
+      // The loader continues showing until page navigation completes (initialization)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Redirect to the validated safe URL
       // Use window.location.href to force full page reload and ensure cookie is available
       window.location.href = redirectUrl;

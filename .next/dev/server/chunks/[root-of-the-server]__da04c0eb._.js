@@ -284,7 +284,7 @@ async function GET(request) {
         }
         // Fetch user data from backend using /users/me endpoint (no permission required)
         // Derive backend URL from NEXT_PUBLIC_API_URL (remove /api suffix if present)
-        const apiUrl = ("TURBOPACK compile-time value", "https://abhimanyu-3000.tl-workspace.techwarelab.com") || 'http://localhost:3000';
+        const apiUrl = ("TURBOPACK compile-time value", "https://abhimanyu-4200.tl-workspace.techwarelab.com") || 'http://localhost:3000';
         let backendUrl = apiUrl.replace(/\/api$/, '') || 'http://localhost:3000';
         // Ensure HTTP for localhost (fix SSL errors in development)
         if (backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) {

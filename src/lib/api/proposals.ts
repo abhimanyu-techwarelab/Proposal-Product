@@ -28,6 +28,41 @@ export interface ProposalRejectInput {
   reason: string;
 }
 
+export interface ExtractedFields {
+  title?: string;
+  clientName?: string;
+  clientEmail?: string;
+  industry?: string;
+  summary?: string;
+  goals?: string;
+  scope?: string;
+  startDate?: string;
+  endDate?: string;
+  totalBudget?: number;
+  currency?: string;
+  billingType?: string;
+  deliverables?: string[];
+  milestones?: Array<{ title: string }>;
+  teamMembers?: Array<{ role: string; experience: string }>;
+  links?: string[];
+  recipients?: Array<{ salutation: string; name: string }>;
+}
+
+export interface ExtractFieldsInput {
+  document_urls: string[];
+  audio_urls?: string[];
+}
+
+export interface ExtractFieldsResponse {
+  success: boolean;
+  fields: ExtractedFields;
+  sources: {
+    documents: number;
+    audio: number;
+  };
+  confidence: "high" | "medium" | "low";
+}
+
 // ============================================================================
 // Client-Side API (for Client Components)
 // ============================================================================
@@ -161,6 +196,19 @@ export const proposalsApi = {
   ): Promise<ApiResponse<ProposalGenerateResponse>> => {
     return apiClient.post<ProposalGenerateResponse>(
       API_ENDPOINTS.PROPOSAL_GENERATE,
+      data
+    );
+  },
+
+  /**
+   * Extract form fields from uploaded documents and audio
+   * Parses content and uses AI to extract proposal data
+   */
+  extractFields: async (
+    data: ExtractFieldsInput
+  ): Promise<ApiResponse<ExtractFieldsResponse>> => {
+    return apiClient.post<ExtractFieldsResponse>(
+      API_ENDPOINTS.PROPOSAL_EXTRACT_FIELDS,
       data
     );
   },

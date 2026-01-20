@@ -1,57 +1,105 @@
-[00:00:02.161] Server  LOG      ✓ Ready in 1517ms
-[00:00:05.354] Server  LOG      ○ Compiling /_not-found/page ...
-[00:00:07.996] Server  WARN     ⚠ Cross origin request detected from abhimanyu-82.tl-workspace.techwarelab.com to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+[00:00:01.603] Server  LOG      ✓ Ready in 1250ms
+[00:00:08.637] Server  LOG      ○ Compiling /approvals ...
+[00:00:15.430] Server  WARN    Error: Route "/approvals" used `searchParams.search`. `searchParams` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[00:00:16.749] Server  WARN     ⚠ Cross origin request detected from abhimanyu-82.tl-workspace.techwarelab.com to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
 Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
-[00:00:08.047] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:15.702] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:00:16.200] Server  LOG     [/api/auth/me] Token present: true
-[00:00:16.202] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
-[00:00:17.123] Server  LOG     [/api/auth/me] Backend response status: 200
-[00:00:17.354] Browser LOG     [AuthContext] /api/auth/me response status: 200
-[00:00:17.354] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
-[00:00:17.354] Browser LOG     [AuthContext] productUser set successfully
-[00:03:23.241] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:23.476] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:03:23.699] Browser LOG     [AuthContext] /api/auth/me response status: 401
-[00:03:23.699] Browser LOG     [AuthContext] User not authenticated (401)
-[00:03:23.933] Browser ERROR   Error fetching proposals: {"code":"Unauthorized","name":"ApiRequestError","status":401}
-[00:03:25.751] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:26.031] Browser LOG     THREE.WebGLRenderer 89
-[00:03:38.930] Server  LOG     [LOGIN] Attempting to connect to backend: https://abhimanyu-3000.tl-workspace.techwarelab.com/auth/login
-[00:03:43.278] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:43.992] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:03:44.134] Server  LOG     [/api/auth/me] Token present: true
-[00:03:44.135] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
-[00:03:44.856] Server  LOG     [/api/auth/me] Backend response status: 200
-[00:03:45.047] Browser LOG     [AuthContext] /api/auth/me response status: 200
-[00:03:45.047] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
-[00:03:45.047] Browser LOG     [AuthContext] productUser set successfully
-[00:05:11.661] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:11.967] Browser LOG     THREE.WebGLRenderer 89
-[00:05:13.139] Server  LOG     [LOGIN] Attempting to connect to backend: https://abhimanyu-3000.tl-workspace.techwarelab.com/auth/login
-[00:05:14.452] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:14.603] Server  LOG     [/api/auth/me] Token present: true
-[00:05:14.603] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
-[00:05:14.654] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:05:14.683] Server  LOG     [/api/auth/me] Backend response status: 200
-[00:05:14.873] Browser LOG     [AuthContext] /api/auth/me response status: 200
-[00:05:14.873] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
-[00:05:14.873] Browser LOG     [AuthContext] productUser set successfully
-[00:05:20.730] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:23.337] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:23.447] Server  LOG     [/api/auth/me] Token present: true
-[00:05:23.448] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
-[00:05:23.502] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:05:23.594] Server  LOG     [/api/auth/me] Backend response status: 200
-[00:05:23.769] Browser LOG     [AuthContext] /api/auth/me response status: 200
-[00:05:23.769] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
-[00:05:23.769] Browser LOG     [AuthContext] productUser set successfully
-[00:05:32.044] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:34.638] Server  LOG     [/api/auth/me] Token present: true
-[00:05:34.639] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-3000.tl-workspace.techwarelab.com/users/me"
-[00:05:34.648] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:34.648] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
-[00:05:34.780] Server  LOG     [/api/auth/me] Backend response status: 200
-[00:05:34.947] Browser LOG     [AuthContext] /api/auth/me response status: 200
-[00:05:34.947] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
-[00:05:34.947] Browser LOG     [AuthContext] productUser set successfully
+[00:00:16.789] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:17.765] Server  LOG     [/api/auth/me] Token present: true
+[00:00:17.767] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-4200.tl-workspace.techwarelab.com/users/me"
+[00:00:17.884] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:00:18.071] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:00:18.883] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:00:18.883] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:00:18.883] Browser LOG     [AuthContext] productUser set successfully
+[00:02:40.612] Server  LOG      ✓ Compiled in 270ms
+[00:03:16.060] Server  LOG      ✓ Compiled in 302ms
+[00:03:32.209] Server  LOG      ✓ Compiled in 210ms
+[00:03:51.964] Server  LOG      ✓ Compiled in 858ms
+[00:04:42.168] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[00:04:43.236] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905158739-4neoo0w0w.docx
+[00:05:11.960] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905158739-4neoo0w0w.docx
+[00:05:16.150] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905158739-4neoo0w0w.docx
+[00:05:17.144] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905158739-4neoo0w0w.docx
+[00:05:18.973] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[00:05:18.973] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[00:05:18.973] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[00:05:27.628] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[00:05:27.974] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905204196-1hbyjek4v.docx
+[00:05:45.279] Browser LOG     [Upload] Starting audio upload: test_audio_freshnow.mp3 (19521.0 KB)
+[00:06:21.454] Browser LOG     [Upload] Audio uploaded successfully: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905221857-l6hph8l0l.mp3
+[00:07:51.955] Browser ERROR   Field extraction failed: {"code":"NETWORK_ERROR","name":"ApiRequestError","status":500}
+[00:10:50.221] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905204196-1hbyjek4v.docx
+[00:10:50.651] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[00:10:52.478] Browser LOG     [Delete] Removing audio from storage: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905221857-l6hph8l0l.mp3
+[00:10:52.697] Browser LOG     [Delete] Audio removed successfully: test_audio_freshnow.mp3
+[00:11:30.866] Server  LOG      ✓ Compiled in 540ms
+[00:13:21.852] Server  LOG      ✓ Compiled in 294ms
+[00:15:01.321] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[00:15:02.003] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905777831-xzg1j46zh.docx
+[00:15:02.246] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":[],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905777831-xzg1j46zh.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA1Nzc3ODMxLXh6ZzFqNDZ6aC5kb2N4IiwiaWF0IjoxNzY4OTA1Nzc5LCJleHAiOjE3Njg5MDkzNzl9.lo4dQp4ZYYKfmM6TfGrfjwAmza8loyyl0tfWfMEzaLE"]}
+[00:15:08.226] Browser LOG     [Extraction] API response: {"confidence":"medium","fields":{"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"},"sources":{"audio":0,"documents":1},"success":true}
+[00:15:17.992] Browser LOG     [Upload] Starting audio upload: test_audio_freshnow.mp3 (19521.0 KB)
+[00:15:28.791] Browser LOG     [Upload] Audio uploaded successfully: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905794498-bqsanhje2.mp3
+[00:15:29.120] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-audio/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905794498-bqsanhje2.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1hdWRpby8yMTZlYTA3NS03MmVkLTQ2MmYtYTQwNC1lYjQ5YTA5MTg3MDIvOWMzMWZlODMtOGJlNi00NjA1LWE1NDUtZWU2ZjFjZThmODhiLzE3Njg5MDU3OTQ0OTgtYnFzYW5oamUyLm1wMyIsImlhdCI6MTc2ODkwNTgwNSwiZXhwIjoxNzY4OTA5NDA1fQ.OaBoi3UxUYimTLA8Fo1smTHVolUbr0-cIKfn_P5H6FA"],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905777831-xzg1j46zh.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA1Nzc3ODMxLXh6ZzFqNDZ6aC5kb2N4IiwiaWF0IjoxNzY4OTA1ODA1LCJleHAiOjE3Njg5MDk0MDV9.XhQvUJ2AIcRyHvj663dy7S6jxCZIC7EHDI0YaZznAAQ"]}
+[00:16:59.367] Browser ERROR   [Extraction] Field extraction failed: {"code":"NETWORK_ERROR","name":"ApiRequestError","status":500}
+[00:16:59.367] Browser ERROR   [Extraction] Error details: {"code":"NETWORK_ERROR","message":"Failed to fetch","name":"ApiRequestError","status":500}
+[00:25:46.856] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905777831-xzg1j46zh.docx
+[00:25:47.474] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[00:25:48.790] Browser LOG     [Delete] Removing audio from storage: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768905794498-bqsanhje2.mp3
+[00:25:49.056] Browser LOG     [Delete] Audio removed successfully: test_audio_freshnow.mp3
+[00:26:52.736] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:26:52.962] Server  LOG     [/api/auth/me] Token present: true
+[00:26:52.963] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-4200.tl-workspace.techwarelab.com/users/me"
+[00:26:53.129] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[00:26:53.353] Server  LOG     [/api/auth/me] Backend response status: 200
+[00:26:53.509] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[00:26:53.509] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[00:26:53.509] Browser LOG     [AuthContext] productUser set successfully
+[00:26:57.725] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[00:26:58.235] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906494275-8fkbkn48z.docx
+[00:26:58.421] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":[],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906494275-8fkbkn48z.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA2NDk0Mjc1LThma2JrbjQ4ei5kb2N4IiwiaWF0IjoxNzY4OTA2NDk1LCJleHAiOjE3Njg5MTAwOTV9.8i0CSy0ScJJsHgzBEZhA2M-_Cc4NxSGcIK78VlO979A"]}
+[00:27:01.813] Browser LOG     [Upload] Starting audio upload: test_audio_freshnow.mp3 (19521.0 KB)
+[00:27:03.614] Browser LOG     [Extraction] API response: {"confidence":"medium","fields":{"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Modules include Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, and Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"},"sources":{"audio":0,"documents":1},"success":true}
+[00:27:13.014] Browser LOG     [Upload] Audio uploaded successfully: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906498362-f5c7yh549.mp3
+[00:27:13.514] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-audio/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906498362-f5c7yh549.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1hdWRpby8yMTZlYTA3NS03MmVkLTQ2MmYtYTQwNC1lYjQ5YTA5MTg3MDIvOWMzMWZlODMtOGJlNi00NjA1LWE1NDUtZWU2ZjFjZThmODhiLzE3Njg5MDY0OTgzNjItZjVjN3loNTQ5Lm1wMyIsImlhdCI6MTc2ODkwNjUxMCwiZXhwIjoxNzY4OTEwMTEwfQ.SPaAi3TgBux3IdIQyZ1d942uDQmorOAZ-Ddcluvshqc"],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906494275-8fkbkn48z.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA2NDk0Mjc1LThma2JrbjQ4ei5kb2N4IiwiaWF0IjoxNzY4OTA2NTA5LCJleHAiOjE3Njg5MTAxMDl9.GvcTVDMrAldQtK2Rp7JwNDiHuzzJ9oMUIh0i76M9dbM"]}
+[00:28:43.903] Browser ERROR   [Extraction] Field extraction failed: {"code":"NETWORK_ERROR","name":"ApiRequestError","status":500}
+[00:28:43.903] Browser ERROR   [Extraction] Error details: {"code":"NETWORK_ERROR","message":"Failed to fetch","name":"ApiRequestError","status":500}
+[00:30:50.042] Server  LOG      ✓ Compiled in 715ms
+[00:31:25.809] Server  LOG      ✓ Compiled in 235ms
+[00:32:40.572] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[00:32:41.693] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906837127-nxg2zbtmc.docx
+[00:32:41.832] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":[],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906837127-nxg2zbtmc.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA2ODM3MTI3LW54ZzJ6YnRtYy5kb2N4IiwiaWF0IjoxNzY4OTA2ODM4LCJleHAiOjE3Njg5MTA0Mzh9.jN_F1UkJuhIY18d2HqgE_CL6LHstFy1W4haWzBR59og"]}
+[00:32:45.066] Browser LOG     [Upload] Starting audio upload: test_audio_freshnow.mp3 (19521.0 KB)
+[00:32:48.288] Browser LOG     [Extraction] API response: {"confidence":"medium","fields":{"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Modules include Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, and Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"},"sources":{"audio":0,"documents":1},"success":true}
+[00:32:48.288] Browser LOG     [Extraction] Applying extracted fields: {"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Modules include Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, and Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"}
+[00:32:52.344] Browser LOG     [Upload] Audio uploaded successfully: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906841620-qql201zuk.mp3
+[00:32:52.749] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-audio/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906841620-qql201zuk.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1hdWRpby8yMTZlYTA3NS03MmVkLTQ2MmYtYTQwNC1lYjQ5YTA5MTg3MDIvOWMzMWZlODMtOGJlNi00NjA1LWE1NDUtZWU2ZjFjZThmODhiLzE3Njg5MDY4NDE2MjAtcXFsMjAxenVrLm1wMyIsImlhdCI6MTc2ODkwNjg0OSwiZXhwIjoxNzY4OTEwNDQ5fQ.v722CGkYMEYZF12qpvWCGDVET_U-hGXvR2MJSfkKzPg"],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906837127-nxg2zbtmc.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA2ODM3MTI3LW54ZzJ6YnRtYy5kb2N4IiwiaWF0IjoxNzY4OTA2ODQ5LCJleHAiOjE3Njg5MTA0NDl9.MHB_n-594yhsYXD9WeHzJLc6XoZr8TIXHTC1_Sed2GA"]}
+[00:34:22.888] Browser ERROR   [Extraction] Field extraction failed: {"code":"NETWORK_ERROR","name":"ApiRequestError","status":500}
+[00:34:22.888] Browser ERROR   [Extraction] Error details: {"code":"NETWORK_ERROR","message":"Failed to fetch","name":"ApiRequestError","status":500}
+[00:34:22.889] Browser WARN    [Extraction] Request timed out or network error - extraction may still be processing on server
+[01:00:52.888] Browser LOG     [Delete] Removing document from storage: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906837127-nxg2zbtmc.docx
+[01:00:53.576] Browser LOG     [Delete] Document removed successfully: Untitled document.docx
+[01:00:53.798] Browser LOG     [Delete] Removing audio from storage: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768906841620-qql201zuk.mp3
+[01:00:53.981] Browser LOG     [Delete] Audio removed successfully: test_audio_freshnow.mp3
+[01:00:58.899] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:00:59.194] Server  LOG     [/api/auth/me] Token present: true
+[01:00:59.195] Server  LOG     [/api/auth/me] Fetching from backend: "https://abhimanyu-4200.tl-workspace.techwarelab.com/users/me"
+[01:00:59.317] Browser LOG     [AuthContext] Fetching current user from /api/auth/me...
+[01:00:59.819] Server  LOG     [/api/auth/me] Backend response status: 200
+[01:01:00.026] Browser LOG     [AuthContext] /api/auth/me response status: 200
+[01:01:00.026] Browser LOG     [AuthContext] User data received: {"email":"product@techwarelab.com","first_name":"Product","id":"9c31fe83-8be6-4605-a545-ee6f1ce8f88b","last_name":"admin","organization_id":"216ea075-72ed-462f-a404-eb49a0918702","profile_image":null,"role_id":"01a0120c-5762-4af2-ab1a-8cf73696c577"}
+[01:01:00.026] Browser LOG     [AuthContext] productUser set successfully
+[01:01:15.551] Browser LOG     [Upload] Starting document upload: Untitled document.docx (9.1 KB)
+[01:01:15.974] Browser LOG     [Upload] Document uploaded successfully: Untitled document.docx -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768908552079-56gmtuhcn.docx
+[01:01:16.177] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":[],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768908552079-56gmtuhcn.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA4NTUyMDc5LTU2Z210dWhjbi5kb2N4IiwiaWF0IjoxNzY4OTA4NTUyLCJleHAiOjE3Njg5MTIxNTJ9.FbpiCzSM6Ej5KomTTe9e-2DLYWac73yr-Yn8c9i5-rk"]}
+[01:01:22.109] Browser LOG     [Extraction] API response: {"confidence":"medium","fields":{"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Modules include Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, and Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"},"sources":{"audio":0,"documents":1},"success":true}
+[01:01:22.109] Browser LOG     [Extraction] Applying extracted fields: {"goals":"Consolidate functions in Zoho for data visibility, efficiency, and informed decisions.","industry":"Other","scope":"Modules include Financial Management, VAT and Compliance, Sales and Receivables, Purchase and Payables, Inventory and Warehouse Management, Operations and Field Service, Sales, Marketing, Business Development, Project Planning and Management, Manpower Management, CRM and Customer Support, Reporting and Analytics, and Integrations.","summary":"Implement a fully integrated Zoho business management system covering finance, sales, purchases, inventory, CRM, operations, projects, and HR.","title":"Zoho Implementation (FreshNow)"}
+[01:01:30.295] Browser LOG     [Upload] Starting audio upload: test_audio_freshnow.mp3 (19521.0 KB)
+[01:01:39.593] Browser LOG     [Upload] Audio uploaded successfully: test_audio_freshnow.mp3 -> 216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768908566824-dcrsaf2yg.mp3
+[01:01:39.952] Browser LOG     [Extraction] Calling extract-fields API with: {"audio_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-audio/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768908566824-dcrsaf2yg.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1hdWRpby8yMTZlYTA3NS03MmVkLTQ2MmYtYTQwNC1lYjQ5YTA5MTg3MDIvOWMzMWZlODMtOGJlNi00NjA1LWE1NDUtZWU2ZjFjZThmODhiLzE3Njg5MDg1NjY4MjQtZGNyc2FmMnlnLm1wMyIsImlhdCI6MTc2ODkwODU3NiwiZXhwIjoxNzY4OTEyMTc2fQ.bdQ31EpPnGDntInCZKAUu6RmkKsKDsdjdWWZsFLZI64"],"document_urls":["https://yoxtsymyhtuhdnaszkzq.supabase.co/storage/v1/object/sign/proposal-documents/216ea075-72ed-462f-a404-eb49a0918702/9c31fe83-8be6-4605-a545-ee6f1ce8f88b/1768908552079-56gmtuhcn.docx?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV82MTc5MjI4Mi0yYjA4LTRiZmEtYWU1Ni1lZGNkZjIyN2ZhYWUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwcm9wb3NhbC1kb2N1bWVudHMvMjE2ZWEwNzUtNzJlZC00NjJmLWE0MDQtZWI0OWEwOTE4NzAyLzljMzFmZTgzLThiZTYtNDYwNS1hNTQ1LWVlNmYxY2U4Zjg4Yi8xNzY4OTA4NTUyMDc5LTU2Z210dWhjbi5kb2N4IiwiaWF0IjoxNzY4OTA4NTc2LCJleHAiOjE3Njg5MTIxNzZ9.V5dBYrzJ6YbjiD21VCFyxJ9RSZmL-SnJmV_qdDEX8Ro"]}
+[01:03:10.932] Browser ERROR   [Extraction] Field extraction failed: {"code":"NETWORK_ERROR","name":"ApiRequestError","status":500}
+[01:03:10.932] Browser ERROR   [Extraction] Error details: {"code":"NETWORK_ERROR","message":"Failed to fetch","name":"ApiRequestError","status":500}
+[01:03:10.932] Browser WARN    [Extraction] Request timed out or network error - extraction may still be processing on server
+[01:05:36.288] Server  LOG      ✓ Compiled in 1445ms
+[01:07:01.688] Server  LOG      ✓ Compiled in 271ms
+[01:41:55.237] Server  LOG      ○ Compiling /login ...
