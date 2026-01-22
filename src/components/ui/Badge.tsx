@@ -73,11 +73,13 @@ export function StatusBadge({ status, size = 'md', className }: StatusBadgeProps
   const config = PROPOSAL_STATUS_CONFIG[status];
 
   const variantMap: Record<ProposalStatus, BadgeVariant> = {
+    [ProposalStatus.DRAFT]: 'default',
     [ProposalStatus.PENDING]: 'default',
     [ProposalStatus.PROCESSING]: 'primary',
     [ProposalStatus.APPROVAL_PENDING]: 'warning',
     [ProposalStatus.COMPLETED]: 'success',
     [ProposalStatus.REJECTED]: 'danger',
+    [ProposalStatus.FAILED]: 'danger',
   };
 
   return (
@@ -85,11 +87,13 @@ export function StatusBadge({ status, size = 'md', className }: StatusBadgeProps
       <span
         className={cn(
           'mr-1.5 h-1.5 w-1.5 rounded-full',
+          status === ProposalStatus.DRAFT && 'bg-slate-400',
           status === ProposalStatus.PENDING && 'bg-slate-500',
           status === ProposalStatus.PROCESSING && 'bg-blue-500',
           status === ProposalStatus.APPROVAL_PENDING && 'bg-warning-500',
           status === ProposalStatus.COMPLETED && 'bg-success-500',
-          status === ProposalStatus.REJECTED && 'bg-danger-500'
+          status === ProposalStatus.REJECTED && 'bg-danger-500',
+          status === ProposalStatus.FAILED && 'bg-danger-500'
         )}
       />
       {config.label}

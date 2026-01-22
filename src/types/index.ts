@@ -3,12 +3,16 @@
 // ============================================================================
 
 export enum ProposalStatus {
+  DRAFT = 'draft',
   PENDING = 'pending',
   PROCESSING = 'processing',
   APPROVAL_PENDING = 'approval_pending',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
+  FAILED = 'failed',
 }
+
+export type ExtractionStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export enum Currency {
   USD = 'USD',
@@ -176,6 +180,9 @@ export interface Proposal {
   approved_by_user?: User;
   generated_pdf_path?: string;
   rejection_reason?: string;
+  extraction_job_id?: string;
+  extraction_progress?: number;
+  extraction_status?: ExtractionStatus;
   created_at: string;
   updated_at: string;
 }

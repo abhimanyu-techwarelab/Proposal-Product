@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Trash2, GripVertical, Upload, FileText, Music, X, RefreshCw, Eye, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui';
 import { Badge } from '@/components/ui/Badge';
 import { proposalsApi, templatesApi, subscriptionsApi, ApiRequestError, ExtractedFields } from '@/lib/api';
+import { ExtractionStatus } from '@/types';
 import { insertProposal } from '@/lib/api/supabaseProposals';
 import { proposalCreateSchema } from '@/lib/validations';
 import { generateId } from '@/lib/utils';
@@ -50,7 +51,7 @@ import { TemplatePreview } from '@/components/templates/TemplatePreview';
 interface PendingFile {
   id: string;
   name: string;
-  file: File;
+  file?: File; // Optional - not present when loading from draft
   size: number;
   path?: string; // Storage path after upload (used for autofill and submit)
 }
@@ -145,6 +146,9 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   const router = useRouter();
   const { productUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [draftSavedMessage, setDraftSavedMessage] = useState<string | null>(null);
+  const [isFormDirty, setIsFormDirty] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -168,6 +172,14 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
   // Extraction state for autofill
   const [isExtracting, setIsExtracting] = useState(false);
+
+  // Proposal state for background processing
+  const searchParams = useSearchParams();
+  const [proposalId, setProposalId] = useState<string | null>(null);
+  const [extractionStatus, setExtractionStatus] = useState<ExtractionStatus | 'idle'>('idle');
+  const [extractionProgress, setExtractionProgress] = useState(0);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -194,6 +206,11 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   const [teamMembers, setTeamMembers] = useState<TeamMemberInput[]>([]);
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState('');
+
+  // Helper to mark form as dirty (user made changes)
+  const markDirty = () => {
+    if (!isFormDirty) setIsFormDirty(true);
+  };
 
   // ============================================================================
   // Template Loading
@@ -287,6 +304,408 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   // ============================================================================
+  // Draft & Extraction Handling
+  // ============================================================================
+
+  // Reset form to initial state (for fresh /proposals/new navigation)
+  const resetForm = () => {
+    console.log('[ProposalForm] Resetting form to initial state');
+    setProposalId(null);
+    setTitle('');
+    setClientName('');
+    setClientEmail('');
+    setIndustry('');
+    setSummary('');
+    setGoals('');
+    setScope('');
+    setStartDate('');
+    setEndDate('');
+    setDateOfProposal(new Date().toISOString().split('T')[0]);
+    setTotalBudget(0);
+    setCurrency(Currency.USD);
+    setBillingType(BillingType.FIXED);
+    setRecipients([]);
+    setDeliverables([]);
+    setDeliverableInput('');
+    setMilestones([]);
+    setTeamMembers([]);
+    setLinks([]);
+    setLinkInput('');
+    setPendingDocuments([]);
+    setPendingAudio([]);
+    setExtractionStatus('idle');
+    setExtractionProgress(0);
+    setShowProcessingModal(false);
+    setDraftSavedMessage(null);
+    setSubmitError(null);
+    setErrors({});
+    setIsFormDirty(false);
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  };
+
+  // Handle URL changes - load draft or reset form
+  useEffect(() => {
+    const draftIdFromUrl = searchParams.get('draft_id');
+    console.log('[ProposalForm] URL change - draft_id:', draftIdFromUrl, 'Current:', proposalId);
+
+    if (!draftIdFromUrl && proposalId) {
+      // Navigated to fresh /proposals/new (no draft_id) but form has data - reset
+      resetForm();
+    } else if (draftIdFromUrl && draftIdFromUrl !== proposalId) {
+      // New or different draft_id in URL - load it
+      console.log('[ProposalForm] Loading draft:', draftIdFromUrl);
+      loadDraft(draftIdFromUrl);
+    }
+    // If draftIdFromUrl === proposalId, do nothing (already loaded)
+  }, [searchParams]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Helper to extract filename from storage path
+  const getFileNameFromPath = (path: string): string => {
+    const parts = path.split('/');
+    return parts[parts.length - 1] || path;
+  };
+
+  // Load an existing draft proposal
+  const loadDraft = async (id: string) => {
+    try {
+      const response = await proposalsApi.getById(id);
+
+      // Handle both wrapped (ApiResponse) and direct response formats
+      const responseData = response.success && response.data ? response.data : response;
+      const draft = responseData as any;
+
+      if (draft && draft.id) {
+        setProposalId(id);
+
+        // Apply draft fields to form
+        if (draft.title) setTitle(draft.title);
+        if (draft.client_name) setClientName(draft.client_name);
+        if (draft.client_email) setClientEmail(draft.client_email);
+        if (draft.industry) setIndustry(draft.industry);
+        if (draft.summary) setSummary(draft.summary);
+        if (draft.goals) setGoals(draft.goals);
+        if (draft.scope) setScope(draft.scope);
+        if (draft.start_date) setStartDate(draft.start_date);
+        if (draft.end_date) setEndDate(draft.end_date);
+        if (draft.total_budget) setTotalBudget(draft.total_budget);
+        if (draft.currency) setCurrency(draft.currency as any);
+        if (draft.billing_type) setBillingType(draft.billing_type as any);
+
+        // Load uploaded documents from draft
+        const documentPaths = draft.document_storage_paths || draft.document_path || [];
+        if (documentPaths.length > 0) {
+          const loadedDocs: PendingFile[] = documentPaths.map((path: string) => ({
+            id: generateId(),
+            name: getFileNameFromPath(path),
+            size: 0, // Size unknown for already uploaded files
+            path: path,
+          }));
+          setPendingDocuments(loadedDocs);
+        }
+
+        // Load uploaded audio files from draft
+        const audioPaths = draft.audio_storage_paths || draft.audio_path || [];
+        if (audioPaths.length > 0) {
+          const loadedAudio: PendingFile[] = audioPaths.map((path: string) => ({
+            id: generateId(),
+            name: getFileNameFromPath(path),
+            size: 0, // Size unknown for already uploaded files
+            path: path,
+          }));
+          setPendingAudio(loadedAudio);
+        }
+
+        // Check extraction status - first try from draft response, then from API
+        let currentExtractionStatus = draft.extraction_status as ExtractionStatus | undefined;
+        let currentExtractionProgress = draft.extraction_progress ?? 0;
+        const hasUploadedFiles = documentPaths.length > 0 || audioPaths.length > 0;
+
+        console.log('[LoadDraft] Extraction status from draft:', currentExtractionStatus, 'Progress:', currentExtractionProgress, 'Has files:', hasUploadedFiles);
+
+        // Always fetch latest status from API if extraction might be in progress
+        // This ensures we get the most up-to-date progress when returning to the page
+        const shouldFetchLatestStatus =
+          !currentExtractionStatus ||
+          currentExtractionStatus === 'processing' ||
+          currentExtractionStatus === 'pending';
+
+        if (shouldFetchLatestStatus) {
+          try {
+            const statusResponse = await proposalsApi.getExtractionStatus(id);
+            const statusData = statusResponse.success && statusResponse.data ? statusResponse.data : statusResponse;
+            const status = statusData as { extraction_status: ExtractionStatus; extraction_progress: number };
+            currentExtractionStatus = status.extraction_status;
+            currentExtractionProgress = status.extraction_progress ?? 0;
+            console.log('[LoadDraft] Extraction status from API:', currentExtractionStatus, 'Progress:', currentExtractionProgress);
+          } catch (err) {
+            console.error('[LoadDraft] Failed to get extraction status:', err);
+          }
+        }
+
+        // Determine if extraction is in progress
+        const isExtractionInProgress =
+          currentExtractionStatus === 'processing' ||
+          currentExtractionStatus === 'pending' ||
+          // If there are files but no extraction status or not completed, assume processing
+          (hasUploadedFiles && currentExtractionStatus !== 'completed' && currentExtractionStatus !== 'failed');
+
+        console.log('[LoadDraft] Is extraction in progress:', isExtractionInProgress);
+
+        if (isExtractionInProgress) {
+          console.log('[LoadDraft] Showing processing modal and starting polling');
+          setExtractionStatus('processing');
+          setExtractionProgress(currentExtractionProgress || 0);
+          setShowProcessingModal(true);
+          startExtractionPolling(id);
+        } else if (currentExtractionStatus) {
+          setExtractionStatus(currentExtractionStatus);
+          setExtractionProgress(currentExtractionProgress);
+        }
+      }
+    } catch (error) {
+      console.error('[LoadDraft] Failed to load draft:', error);
+    }
+  };
+
+  // Create a draft proposal and queue extraction
+  const createDraftProposal = async (
+    audioPaths: string[],
+    documentPaths: string[]
+  ): Promise<string | null> => {
+    console.log('[CreateDraft] Starting draft creation...', {
+      productUser: !!productUser,
+      templateId,
+      audioPaths,
+      documentPaths,
+    });
+
+    if (!productUser || !templateId) {
+      console.log('[CreateDraft] Skipped - missing productUser or templateId');
+      return null;
+    }
+
+    try {
+      // Get subscription for the organization
+      console.log('[CreateDraft] Getting subscription for org:', productUser.organization_id);
+      const subscription = await subscriptionsApi.getActiveByOrganization(
+        productUser.organization_id
+      );
+      console.log('[CreateDraft] Got subscription:', subscription.id);
+
+      console.log('[CreateDraft] Calling createDraft API...');
+      const response = await proposalsApi.createDraft({
+        template_id: templateId,
+        subscription_id: subscription.id,
+        audio_storage_paths: audioPaths,
+        document_storage_paths: documentPaths,
+        title: title || undefined,
+        client_name: clientName || undefined,
+        client_email: clientEmail || undefined,
+        industry: industry || undefined,
+        summary: summary || undefined,
+        goals: goals || undefined,
+        scope: scope || undefined,
+      });
+
+      console.log('[CreateDraft] API response:', response);
+
+      // Handle both wrapped (ApiResponse) and direct response formats
+      const responseData = response.success && response.data ? response.data : response;
+      const draftData = responseData as { success?: boolean; id?: string; extraction_job_id?: string | null };
+
+      if (draftData.id) {
+        const newDraftId = draftData.id;
+        console.log('[CreateDraft] Draft created successfully:', newDraftId);
+        setProposalId(newDraftId);
+        setExtractionStatus('processing');
+        setExtractionProgress(0);
+
+        // Update URL so user can return
+        const newUrl = `/proposals/new?template_id=${templateId}&draft_id=${newDraftId}`;
+        window.history.replaceState({}, '', newUrl);
+
+        // Show processing modal
+        setShowProcessingModal(true);
+
+        // Start polling for extraction status
+        startExtractionPolling(newDraftId);
+
+        return newDraftId;
+      } else {
+        console.log('[CreateDraft] API response not successful or missing id:', responseData);
+      }
+    } catch (error) {
+      console.error('[CreateDraft] Failed to create draft:', error);
+      // Show error to user
+      setUploadError(
+        error instanceof Error
+          ? `Failed to create draft: ${error.message}`
+          : 'Failed to create draft proposal'
+      );
+    }
+    return null;
+  };
+
+  // Poll for extraction status
+  const startExtractionPolling = (id: string) => {
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const response = await proposalsApi.getExtractionStatus(id);
+
+        // Handle both wrapped (ApiResponse) and direct response formats
+        const responseData = response.success && response.data ? response.data : response;
+        const status = responseData as { extraction_status: ExtractionStatus; extraction_progress: number };
+
+        if (status.extraction_status) {
+          setExtractionProgress(status.extraction_progress);
+          setExtractionStatus(status.extraction_status);
+
+          if (status.extraction_status === 'completed') {
+            // Stop polling
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+
+            // Load the full draft with extracted fields
+            const draftResponse = await proposalsApi.getById(id);
+            // Handle both response formats for draft too
+            const draftData = draftResponse.success && draftResponse.data ? draftResponse.data : draftResponse;
+            if (draftData) {
+              applyDraftFields(draftData);
+            }
+          } else if (status.extraction_status === 'failed') {
+            // Stop polling on failure
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+
+            // Reload the draft to ensure files are still shown
+            const draftResponse = await proposalsApi.getById(id);
+            const draftData = draftResponse.success && draftResponse.data ? draftResponse.data : draftResponse;
+            if (draftData) {
+              applyDraftFields(draftData);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[Polling] Failed to get extraction status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+  };
+
+  // Apply extracted fields from draft to form
+  const applyDraftFields = (draft: any) => {
+    // Apply all fields from draft (preserves user-entered values by using || checks)
+    if (draft.title && !title) setTitle(draft.title);
+    if (draft.client_name && !clientName) setClientName(draft.client_name);
+    if (draft.client_email && !clientEmail) setClientEmail(draft.client_email);
+    if (draft.industry && !industry) setIndustry(draft.industry);
+    if (draft.start_date && !startDate) setStartDate(draft.start_date);
+    if (draft.end_date && !endDate) setEndDate(draft.end_date);
+    if (draft.total_budget && totalBudget === 0) setTotalBudget(draft.total_budget);
+    if (draft.currency) setCurrency(draft.currency as any);
+    if (draft.billing_type) setBillingType(draft.billing_type as any);
+
+    // Merge text fields
+    if (draft.summary) {
+      setSummary((prev) => prev || draft.summary);
+    }
+    if (draft.goals) {
+      setGoals((prev) => prev || draft.goals);
+    }
+    if (draft.scope) {
+      setScope((prev) => prev || draft.scope);
+    }
+
+    // Merge arrays (deliverables, milestones, etc.)
+    if (draft.deliverables && draft.deliverables.length > 0) {
+      setDeliverables((prev) => {
+        const newItems = draft.deliverables.filter((item: string) => !prev.includes(item));
+        return [...prev, ...newItems];
+      });
+    }
+
+    if (draft.milestones && Array.isArray(draft.milestones)) {
+      setMilestones((prev) => {
+        const existingTitles = prev.map((m) => m.title.toLowerCase());
+        const newMilestones = draft.milestones
+          .filter((m: any) => m.title && !existingTitles.includes(m.title.toLowerCase()))
+          .map((m: any) => ({
+            id: generateId(),
+            title: m.title,
+          }));
+        return [...prev, ...newMilestones];
+      });
+    }
+
+    if (draft.team_members && Array.isArray(draft.team_members)) {
+      setTeamMembers((prev) => {
+        const existingRoles = prev.map((t) => t.role.toLowerCase());
+        const newMembers = draft.team_members
+          .filter((t: any) => t.role && !existingRoles.includes(t.role.toLowerCase()))
+          .map((t: any) => ({
+            id: generateId(),
+            role: t.role,
+            experience: t.experience || '',
+          }));
+        return [...prev, ...newMembers];
+      });
+    }
+
+    if (draft.links && Array.isArray(draft.links)) {
+      setLinks((prev) => {
+        const newLinks = draft.links.filter((link: string) => !prev.includes(link));
+        return [...prev, ...newLinks];
+      });
+    }
+
+    // Restore file paths if not already present
+    const documentPaths = draft.document_storage_paths || [];
+    if (documentPaths.length > 0 && pendingDocuments.length === 0) {
+      const loadedDocs: PendingFile[] = documentPaths.map((path: string) => ({
+        id: generateId(),
+        name: getFileNameFromPath(path),
+        size: 0,
+        path: path,
+      }));
+      setPendingDocuments(loadedDocs);
+    }
+
+    const audioPaths = draft.audio_storage_paths || [];
+    if (audioPaths.length > 0 && pendingAudio.length === 0) {
+      const loadedAudio: PendingFile[] = audioPaths.map((path: string) => ({
+        id: generateId(),
+        name: getFileNameFromPath(path),
+        size: 0,
+        path: path,
+      }));
+      setPendingAudio(loadedAudio);
+    }
+  };
+
+  // Check if form should be disabled during extraction
+  const isFormDisabled = extractionStatus === 'processing';
+
+  // ============================================================================
   // File Upload Handlers
   // ============================================================================
 
@@ -365,16 +784,51 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
       setPendingDocuments((prev) => [...prev, ...newFiles]);
 
-      // Trigger extraction automatically with all files
+      // Collect all file paths
       const allDocPaths = [...pendingDocuments.map((f) => f.path), ...uploadedPaths].filter(
         Boolean
       ) as string[];
       const allAudioPaths = pendingAudio.map((f) => f.path).filter(Boolean) as string[];
 
-      triggerFieldExtraction(allDocPaths, allAudioPaths);
+      console.log('[DocUpload] File paths collected:', { allDocPaths, allAudioPaths, proposalId, templateId });
+
+      // If no draft yet, create one and queue extraction
+      if (!proposalId && templateId) {
+        console.log('[DocUpload] Creating new draft...');
+        await createDraftProposal(allAudioPaths, allDocPaths);
+      } else if (proposalId) {
+        console.log('[DocUpload] Draft exists, updating draft and re-triggering extraction...');
+        // Update draft with current file paths and re-trigger extraction
+        try {
+          // Update draft with file paths - backend should re-queue extraction
+          await proposalsApi.updateDraft(proposalId, {
+            document_storage_paths: allDocPaths,
+            audio_storage_paths: allAudioPaths,
+            extraction_status: 'processing',
+            extraction_progress: 0,
+          });
+          console.log('[DocUpload] Draft updated with file paths:', { allDocPaths, allAudioPaths });
+
+          // Show processing modal and start polling
+          setExtractionStatus('processing');
+          setExtractionProgress(0);
+          setShowProcessingModal(true);
+          startExtractionPolling(proposalId);
+        } catch (updateError) {
+          console.error('[DocUpload] Failed to update draft:', updateError);
+          // Fallback to direct extraction
+          setExtractionStatus('processing');
+          setExtractionProgress(0);
+          setShowProcessingModal(true);
+          triggerFieldExtraction(allDocPaths, allAudioPaths);
+        }
+      } else {
+        console.log('[DocUpload] No templateId, skipping draft creation');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       setUploadError(message);
+      console.error('[DocUpload] Upload failed:', error);
     } finally {
       setIsAddingDocuments(false);
       if (documentInputRef.current) {
@@ -422,16 +876,51 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
       setPendingAudio((prev) => [...prev, ...newFiles]);
 
-      // Trigger extraction automatically with all files
+      // Collect all file paths
       const allDocPaths = pendingDocuments.map((f) => f.path).filter(Boolean) as string[];
       const allAudioPaths = [...pendingAudio.map((f) => f.path), ...uploadedPaths].filter(
         Boolean
       ) as string[];
 
-      triggerFieldExtraction(allDocPaths, allAudioPaths);
+      console.log('[AudioUpload] File paths collected:', { allDocPaths, allAudioPaths, proposalId, templateId });
+
+      // If no draft yet, create one and queue extraction
+      if (!proposalId && templateId) {
+        console.log('[AudioUpload] Creating new draft...');
+        await createDraftProposal(allAudioPaths, allDocPaths);
+      } else if (proposalId) {
+        console.log('[AudioUpload] Draft exists, updating draft and re-triggering extraction...');
+        // Update draft with current file paths and re-trigger extraction
+        try {
+          // Update draft with file paths - backend should re-queue extraction
+          await proposalsApi.updateDraft(proposalId, {
+            document_storage_paths: allDocPaths,
+            audio_storage_paths: allAudioPaths,
+            extraction_status: 'processing',
+            extraction_progress: 0,
+          });
+          console.log('[AudioUpload] Draft updated with file paths:', { allDocPaths, allAudioPaths });
+
+          // Show processing modal and start polling
+          setExtractionStatus('processing');
+          setExtractionProgress(0);
+          setShowProcessingModal(true);
+          startExtractionPolling(proposalId);
+        } catch (updateError) {
+          console.error('[AudioUpload] Failed to update draft:', updateError);
+          // Fallback to direct extraction
+          setExtractionStatus('processing');
+          setExtractionProgress(0);
+          setShowProcessingModal(true);
+          triggerFieldExtraction(allDocPaths, allAudioPaths);
+        }
+      } else {
+        console.log('[AudioUpload] No templateId, skipping draft creation');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed';
       setUploadError(message);
+      console.error('[AudioUpload] Upload failed:', error);
     } finally {
       setIsAddingAudio(false);
       if (audioInputRef.current) {
@@ -447,6 +936,21 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       console.log(`[Delete] Removing document from storage: ${file.name} -> ${file.path}`);
       await deleteFileFromStorage(STORAGE_BUCKETS.DOCUMENTS, file.path);
       console.log(`[Delete] Document removed successfully: ${file.name}`);
+
+      // Update draft in DB to remove the file path
+      if (proposalId) {
+        const updatedDocPaths = pendingDocuments
+          .filter((f) => f.id !== fileId && f.path)
+          .map((f) => f.path) as string[];
+        try {
+          await proposalsApi.updateDraft(proposalId, {
+            document_storage_paths: updatedDocPaths,
+          });
+          console.log(`[Delete] Draft updated - removed document path from DB`);
+        } catch (err) {
+          console.error(`[Delete] Failed to update draft in DB:`, err);
+        }
+      }
     } else if (file) {
       console.log(`[Delete] Removing local document (not uploaded): ${file.name}`);
     }
@@ -460,6 +964,21 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       console.log(`[Delete] Removing audio from storage: ${file.name} -> ${file.path}`);
       await deleteFileFromStorage(STORAGE_BUCKETS.AUDIO, file.path);
       console.log(`[Delete] Audio removed successfully: ${file.name}`);
+
+      // Update draft in DB to remove the file path
+      if (proposalId) {
+        const updatedAudioPaths = pendingAudio
+          .filter((f) => f.id !== fileId && f.path)
+          .map((f) => f.path) as string[];
+        try {
+          await proposalsApi.updateDraft(proposalId, {
+            audio_storage_paths: updatedAudioPaths,
+          });
+          console.log(`[Delete] Draft updated - removed audio path from DB`);
+        } catch (err) {
+          console.error(`[Delete] Failed to update draft in DB:`, err);
+        }
+      }
     } else if (file) {
       console.log(`[Delete] Removing local audio (not uploaded): ${file.name}`);
     }
@@ -467,6 +986,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return 'Uploaded';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -579,9 +1099,16 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     documentPaths: string[],
     audioPaths: string[]
   ) => {
-    if (documentPaths.length === 0 && audioPaths.length === 0) return;
+    if (documentPaths.length === 0 && audioPaths.length === 0) {
+      // No files to extract, reset status
+      setExtractionStatus('idle');
+      setShowProcessingModal(false);
+      return;
+    }
 
     setIsExtracting(true);
+    // Simulate progress for synchronous extraction
+    setExtractionProgress(10);
 
     try {
       // Generate signed URLs for the uploaded files
@@ -590,8 +1117,11 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         audioPaths
       );
 
+      setExtractionProgress(30);
+
       if (documentUrls.length === 0 && audioUrls.length === 0) {
         console.warn('[Extraction] Failed to generate signed URLs for extraction');
+        setExtractionStatus('failed');
         return;
       }
 
@@ -601,10 +1131,14 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         audio_urls: audioUrls,
       });
 
+      setExtractionProgress(50);
+
       const response = await proposalsApi.extractFields({
         document_urls: documentUrls,
         audio_urls: audioUrls,
       });
+
+      setExtractionProgress(80);
 
       console.log('[Extraction] API response:', response);
 
@@ -614,8 +1148,11 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       if (response.success && extractedFields) {
         console.log('[Extraction] Applying extracted fields:', extractedFields);
         applyExtractedFields(extractedFields);
+        setExtractionProgress(100);
+        setExtractionStatus('completed');
       } else {
         console.warn('[Extraction] No fields found in response:', response);
+        setExtractionStatus('completed'); // Still mark as completed, just no fields
       }
     } catch (error: any) {
       console.error('[Extraction] Field extraction failed:', error);
@@ -629,6 +1166,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       if (error?.code === 'NETWORK_ERROR' || error?.message?.includes('Failed to fetch')) {
         console.warn('[Extraction] Request timed out or network error - extraction may still be processing on server');
       }
+      setExtractionStatus('failed');
       // Non-blocking - user can still fill form manually
     } finally {
       setIsExtracting(false);
@@ -729,6 +1267,100 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   // ============================================================================
   // Form Handlers
   // ============================================================================
+
+  const handleSaveDraft = async () => {
+    setDraftSavedMessage(null);
+    setSubmitError(null);
+
+    if (!productUser) {
+      setSubmitError('You must be logged in to save a draft');
+      return;
+    }
+
+    try {
+      setIsSavingDraft(true);
+
+      if (proposalId) {
+        // Update existing draft
+        await proposalsApi.updateDraft(proposalId, {
+          title: title || undefined,
+          client_name: clientName || undefined,
+          client_email: clientEmail || undefined,
+          industry: industry || undefined,
+          summary: summary || undefined,
+          goals: goals || undefined,
+          scope: scope || undefined,
+          start_date: startDate || undefined,
+          end_date: endDate || undefined,
+          total_budget: totalBudget || undefined,
+          currency: currency || undefined,
+          billing_type: billingType || undefined,
+          deliverables: deliverables.filter(d => d.trim() !== ''),
+          milestones: milestones.filter(m => m.title.trim() !== '').map(({ id, ...m }) => m) as any,
+          team_members: teamMembers.filter(t => t.role.trim() !== '').map(({ id, ...t }) => t) as any,
+          links: links.filter(l => l.trim() !== ''),
+          submitted_to: recipients
+            .filter(r => r.name.trim() !== '')
+            .map(r => r.salutation && r.name ? `${r.salutation} ${r.name}` : r.name || ''),
+        });
+        setDraftSavedMessage('Draft saved successfully');
+      } else {
+        // Create new draft
+        const subscription = await subscriptionsApi.getActiveByOrganization(
+          productUser.organization_id
+        );
+
+        if (!subscription) {
+          setSubmitError('No active subscription found');
+          return;
+        }
+
+        if (!templateId) {
+          setSubmitError('No template selected');
+          return;
+        }
+
+        const response = await proposalsApi.createDraft({
+          template_id: templateId,
+          subscription_id: subscription.id,
+          title: title || undefined,
+          client_name: clientName || undefined,
+          client_email: clientEmail || undefined,
+          industry: industry || undefined,
+          summary: summary || undefined,
+          goals: goals || undefined,
+          scope: scope || undefined,
+          audio_storage_paths: pendingAudio.map(f => f.path).filter(Boolean) as string[],
+          document_storage_paths: pendingDocuments.map(f => f.path).filter(Boolean) as string[],
+        });
+
+        // Handle both wrapped (ApiResponse) and direct response formats
+        const result = response.success && response.data ? response.data : response;
+        const draftId = (result as any).id;
+
+        if (draftId) {
+          setProposalId(draftId);
+          // Update URL with draft_id without full page reload
+          const url = new URL(window.location.href);
+          url.searchParams.set('draft_id', draftId);
+          window.history.replaceState({}, '', url.toString());
+          setDraftSavedMessage('Draft created successfully');
+        }
+      }
+
+      // Clear dirty state and message after 3 seconds
+      setIsFormDirty(false);
+      setTimeout(() => setDraftSavedMessage(null), 3000);
+    } catch (error) {
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      } else {
+        setSubmitError('Failed to save draft. Please try again.');
+      }
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -845,32 +1477,59 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
       setLoaderStatus('pending');
 
-      // Step 5: POST to backend generate endpoint
-      const result = await proposalsApi.generate({
-        subscription_id: subscription.id,
-        template_id: templateId || undefined,
-        created_by: productUser.id,
-        submitted_to: submittedTo,
-        title,
-        client_name: clientName,
-        client_email: clientEmail,
-        industry: industry || '',
-        summary: summary || '',
-        goals: goals || '',
-        scope: scope || '',
-        start_date: startDate,
-        end_date: endDate,
-        date_of_proposal: dateOfProposal,
-        total_budget: totalBudget,
-        currency,
-        billing_type: billingType,
-        deliverables, // string[]
-        milestones: milestones.map(({ id, ...m }) => m),
-        team_members: teamMembers.map(({ id, ...t }) => t),
-        links, // string[]
-        document_storage_paths: signedDocUrls,
-        audio_storage_paths: signedAudioUrls,
-      });
+      // Step 5: Submit - either submit draft or create new proposal
+      if (proposalId) {
+        // Update draft with final form data and submit
+        await proposalsApi.updateDraft(proposalId, {
+          title,
+          client_name: clientName,
+          client_email: clientEmail,
+          industry: industry || undefined,
+          summary: summary || undefined,
+          goals: goals || undefined,
+          scope: scope || undefined,
+          start_date: startDate,
+          end_date: endDate,
+          total_budget: totalBudget,
+          currency,
+          billing_type: billingType,
+          deliverables,
+          milestones: milestones.map(({ id, ...m }) => m) as any,
+          team_members: teamMembers.map(({ id, ...t }) => t) as any,
+          links,
+          submitted_to: submittedTo,
+        });
+
+        // Submit the draft for generation
+        await proposalsApi.submitDraft(proposalId);
+      } else {
+        // Create new proposal directly (legacy flow)
+        await proposalsApi.generate({
+          subscription_id: subscription.id,
+          template_id: templateId || undefined,
+          created_by: productUser.id,
+          submitted_to: submittedTo,
+          title,
+          client_name: clientName,
+          client_email: clientEmail,
+          industry: industry || '',
+          summary: summary || '',
+          goals: goals || '',
+          scope: scope || '',
+          start_date: startDate,
+          end_date: endDate,
+          date_of_proposal: dateOfProposal,
+          total_budget: totalBudget,
+          currency,
+          billing_type: billingType,
+          deliverables,
+          milestones: milestones.map(({ id, ...m }) => m),
+          team_members: teamMembers.map(({ id, ...t }) => t),
+          links,
+          document_storage_paths: signedDocUrls,
+          audio_storage_paths: signedAudioUrls,
+        });
+      }
 
       // Keep modal showing - user can click View Proposals to navigate
       // The modal will stay open showing "Pending" status
@@ -899,6 +1558,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   // Simplified deliverables handlers (string array)
   const addDeliverable = () => {
     if (deliverableInput.trim()) {
+      markDirty();
       setDeliverables([...deliverables, deliverableInput.trim()]);
       setDeliverableInput('');
       // Clear deliverables error if any
@@ -907,14 +1567,17 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   const removeDeliverable = (index: number) => {
+    markDirty();
     setDeliverables(deliverables.filter((_, i) => i !== index));
   };
 
   const addMilestone = () => {
+    markDirty();
     setMilestones([...milestones, getInitialMilestone()]);
   };
 
   const removeMilestone = (id: string) => {
+    markDirty();
     setMilestones(milestones.filter((m) => m.id !== id));
   };
 
@@ -923,16 +1586,19 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     field: keyof MilestoneInput,
     value: string | number
   ) => {
+    markDirty();
     setMilestones(
       milestones.map((m) => (m.id === id ? { ...m, [field]: value } : m))
     );
   };
 
   const addTeamMember = () => {
+    markDirty();
     setTeamMembers([...teamMembers, getInitialTeamMember()]);
   };
 
   const removeTeamMember = (id: string) => {
+    markDirty();
     setTeamMembers(teamMembers.filter((t) => t.id !== id));
   };
 
@@ -941,6 +1607,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     field: keyof TeamMemberInput,
     value: string | number | undefined
   ) => {
+    markDirty();
     setTeamMembers(
       teamMembers.map((t) => (t.id === id ? { ...t, [field]: value } : t))
     );
@@ -952,6 +1619,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       // Basic URL validation
       try {
         new URL(linkInput.trim());
+        markDirty();
         setLinks([...links, linkInput.trim()]);
         setLinkInput('');
         setErrors((prev) => ({ ...prev, linkInput: undefined }));
@@ -962,14 +1630,17 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   const removeLink = (index: number) => {
+    markDirty();
     setLinks(links.filter((_, i) => i !== index));
   };
 
   const addRecipient = () => {
+    markDirty();
     setRecipients([...recipients, getInitialRecipient()]);
   };
 
   const removeRecipient = (id: string) => {
+    markDirty();
     setRecipients(recipients.filter((r) => r.id !== id));
   };
 
@@ -978,6 +1649,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     field: keyof RecipientInput,
     value: string
   ) => {
+    markDirty();
     setRecipients(
       recipients.map((r) => (r.id === id ? { ...r, [field]: value } : r))
     );
@@ -1047,7 +1719,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         </Modal>
       )}
 
-      {/* Loader Modal */}
+      {/* Loader Modal - for final submission */}
       <Modal
         isOpen={showLoaderModal}
         onClose={() => {}}
@@ -1088,6 +1760,89 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           >
             View Proposals
           </Button>
+        </div>
+      </Modal>
+
+      {/* Processing Modal - for background extraction */}
+      <Modal
+        isOpen={showProcessingModal}
+        onClose={() => setShowProcessingModal(false)}
+        closeOnOverlayClick={false}
+        closeOnEsc={true}
+        showCloseButton={false}
+        size="sm"
+      >
+        <div className="flex flex-col items-center justify-center py-8">
+          {extractionStatus === 'processing' ? (
+            <>
+              <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#B87333] border-t-transparent mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Processing Your Files
+              </h3>
+              <p className="text-sm text-slate-400 text-center max-w-sm mb-4">
+                We're extracting information from your uploaded files. This may take a few minutes for large audio files.
+              </p>
+
+              {/* Progress bar */}
+              <div className="w-full max-w-xs mb-4">
+                <div className="flex justify-between text-xs text-slate-400 mb-1">
+                  <span>Extracting fields...</span>
+                  <span>{extractionProgress}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#B87333] to-[#DA8A67] rounded-full transition-all duration-500"
+                    style={{ width: `${extractionProgress}%` }}
+                  />
+                </div>
+              </div>
+            </>
+          ) : extractionStatus === 'completed' ? (
+            <>
+              <div className="h-12 w-12 rounded-full bg-success-500/20 flex items-center justify-center mb-4">
+                <svg className="h-6 w-6 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Extraction Complete
+              </h3>
+              <p className="text-sm text-slate-400 text-center max-w-sm mb-4">
+                Fields have been auto-filled. Please review and complete the remaining fields.
+              </p>
+            </>
+          ) : extractionStatus === 'failed' ? (
+            <>
+              <div className="h-12 w-12 rounded-full bg-danger-500/20 flex items-center justify-center mb-4">
+                <svg className="h-6 w-6 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Extraction Failed
+              </h3>
+              <p className="text-sm text-slate-400 text-center max-w-sm mb-4">
+                We couldn't extract fields from your files. You can still fill the form manually.
+              </p>
+            </>
+          ) : null}
+
+          {/* Action buttons */}
+          <div className="flex gap-3 mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/proposals')}
+            >
+              View Proposals
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setShowProcessingModal(false)}
+            >
+              {extractionStatus === 'processing' ? 'Wait Here' : 'Continue Editing'}
+            </Button>
+          </div>
         </div>
       </Modal>
 
@@ -1221,8 +1976,8 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         </Card>
       </div>
 
-      {/* Extraction Progress - shows when autofill is in progress */}
-      {isExtracting && (
+      {/* Extraction Progress - shows when background extraction is in progress */}
+      {(isExtracting || extractionStatus === 'processing') && (
         <div className="animate-fadeSlideIn border border-[#B87333]/30 bg-slate-900/60 backdrop-blur-sm rounded-xl p-4">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -1230,18 +1985,37 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               <div className="absolute inset-0 animate-ping rounded-full bg-[#B87333]/20" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">Auto-filling form fields...</p>
-              <p className="text-xs text-slate-400">Analyzing uploaded files</p>
+              <p className="text-sm font-medium text-white">
+                {extractionStatus === 'processing' ? 'Extracting fields from files...' : 'Auto-filling form fields...'}
+              </p>
+              <p className="text-xs text-slate-400">
+                {extractionStatus === 'processing'
+                  ? `Progress: ${extractionProgress}% - Form inputs are disabled until complete`
+                  : 'Analyzing uploaded files'}
+              </p>
             </div>
+            {extractionStatus === 'processing' && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowProcessingModal(true)}
+              >
+                View Details
+              </Button>
+            )}
           </div>
-          <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-slate-800">
-            <div className="h-full animate-pulse bg-gradient-to-r from-[#B87333] to-[#DA8A67] w-2/3 rounded-full transition-all duration-1000" />
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+            <div
+              className="h-full bg-gradient-to-r from-[#B87333] to-[#DA8A67] rounded-full transition-all duration-500"
+              style={{ width: extractionStatus === 'processing' ? `${extractionProgress}%` : '66%' }}
+            />
           </div>
         </div>
       )}
 
       {/* Basic Information */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader title="Basic Information" description="Enter the proposal details" />
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
@@ -1249,38 +2023,42 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               <Input
                 label="Proposal Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => { markDirty(); setTitle(e.target.value); }}
                 onBlur={() => validateField('title', title)}
                 error={errors.title}
                 placeholder="e.g., Website Redesign Project"
                 required
+                disabled={isFormDisabled}
               />
             </div>
             <Input
               label="Client Name"
               value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
+              onChange={(e) => { markDirty(); setClientName(e.target.value); }}
               onBlur={() => validateField('client_name', clientName)}
               error={errors.client_name}
               placeholder="e.g., Acme Corporation"
               required
+              disabled={isFormDisabled}
             />
             <Input
               label="Client Email"
               type="email"
               value={clientEmail}
-              onChange={(e) => setClientEmail(e.target.value)}
+              onChange={(e) => { markDirty(); setClientEmail(e.target.value); }}
               onBlur={() => validateField('client_email', clientEmail)}
               error={errors.client_email}
               placeholder="e.g., contact@acme.com"
               required
+              disabled={isFormDisabled}
             />
             <Select
               label="Industry"
               value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
+              onChange={(e) => { markDirty(); setIndustry(e.target.value); }}
               options={INDUSTRY_OPTIONS.map((ind) => ({ value: ind, label: ind }))}
               placeholder="Select industry"
+              disabled={isFormDisabled}
             />
             <DatePicker
               label="Proposal Date"
@@ -1288,13 +2066,14 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               onChange={(value) => setDateOfProposal(value)}
               error={errors.date_of_proposal}
               required
+              disabled={isFormDisabled}
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Project Description */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Project Description"
           description="Describe the project in detail"
@@ -1303,7 +2082,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           <Textarea
             label="Summary"
             value={summary}
-            onChange={(e) => setSummary(e.target.value)}
+            onChange={(e) => { markDirty(); setSummary(e.target.value); }}
             error={errors.summary}
             placeholder="Brief overview of the project..."
             rows={3}
@@ -1312,7 +2091,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           <Textarea
             label="Goals"
             value={goals}
-            onChange={(e) => setGoals(e.target.value)}
+            onChange={(e) => { markDirty(); setGoals(e.target.value); }}
             error={errors.goals}
             placeholder="What are the key objectives of this project?"
             rows={4}
@@ -1321,7 +2100,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           <Textarea
             label="Scope"
             value={scope}
-            onChange={(e) => setScope(e.target.value)}
+            onChange={(e) => { markDirty(); setScope(e.target.value); }}
             error={errors.scope}
             placeholder="Define what is included and excluded from this project..."
             rows={4}
@@ -1331,7 +2110,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Timeline */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader title="Timeline" description="Set the project schedule" />
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
@@ -1339,6 +2118,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               label="Start Date"
               value={startDate}
               onChange={(value) => {
+                markDirty();
                 setStartDate(value);
                 validateField('start_date', value);
               }}
@@ -1349,6 +2129,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               label="End Date"
               value={endDate}
               onChange={(value) => {
+                markDirty();
                 setEndDate(value);
                 validateField('end_date', value);
               }}
@@ -1361,7 +2142,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Budget */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader title="Budget & Billing" description="Set the project budget" />
         <CardContent>
           <div className="grid gap-6 md:grid-cols-3">
@@ -1369,7 +2150,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
               label="Total Budget"
               type="number"
               value={totalBudget}
-              onChange={(e) => setTotalBudget(Number(e.target.value))}
+              onChange={(e) => { markDirty(); setTotalBudget(Number(e.target.value)); }}
               onBlur={() => validateField('total_budget', totalBudget)}
               error={errors.total_budget}
               min={0}
@@ -1379,7 +2160,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
             <Select
               label="Currency"
               value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
+              onChange={(e) => { markDirty(); setCurrency(e.target.value as Currency); }}
               options={Object.entries(CURRENCY_CONFIG).map(([value, config]) => ({
                 value,
                 label: `${config.symbol} ${config.name}`,
@@ -1389,7 +2170,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
             <Select
               label="Billing Type"
               value={billingType}
-              onChange={(e) => setBillingType(e.target.value as BillingType)}
+              onChange={(e) => { markDirty(); setBillingType(e.target.value as BillingType); }}
               options={Object.entries(BILLING_TYPE_CONFIG).map(([value, config]) => ({
                 value,
                 label: config.label,
@@ -1401,7 +2182,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Deliverables - Simplified string input */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Deliverables"
           description="List the project deliverables"
@@ -1457,7 +2238,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Milestones */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Milestones"
           description="Define milestones (optional)"
@@ -1507,7 +2288,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Team Members */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Team Members"
           description="Add team members working on this project (optional)"
@@ -1565,7 +2346,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Links - Simplified URL input */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Reference Links"
           description="Add relevant links (optional)"
@@ -1620,7 +2401,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       </Card>
 
       {/* Submit To */}
-      <Card>
+      <Card className={isFormDisabled ? 'opacity-60 pointer-events-none' : ''}>
         <CardHeader
           title="Submit To"
           description="Add recipients for this proposal (optional)"
@@ -1683,22 +2464,46 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         </CardContent>
       </Card>
 
-      {/* Submit */}
-      <div className="flex items-center justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          isLoading={isSubmitting}
-        >
-          Create Proposal
-        </Button>
+      {/* Form Actions */}
+      <div className="flex items-center justify-between">
+        {/* Left side - Save Draft (only shown when form has unsaved changes) */}
+        <div className="flex items-center gap-3">
+          {isFormDirty && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSaveDraft}
+              isLoading={isSavingDraft}
+              disabled={isFormDisabled || isSubmitting || isSavingDraft}
+            >
+              {proposalId ? 'Save Draft' : 'Save as Draft'}
+            </Button>
+          )}
+          {draftSavedMessage && (
+            <span className="text-sm text-success-400 animate-fade-in">
+              {draftSavedMessage}
+            </span>
+          )}
+        </div>
+
+        {/* Right side - Cancel and Submit */}
+        <div className="flex items-center gap-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.back()}
+            disabled={isSubmitting || isSavingDraft}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            disabled={isFormDisabled || isSubmitting || isSavingDraft}
+          >
+            {proposalId ? 'Generate Proposal' : 'Create Proposal'}
+          </Button>
+        </div>
       </div>
     </form>
   );

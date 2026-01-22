@@ -31,6 +31,10 @@ export const API_ENDPOINTS = {
   PROPOSAL_REJECT: (id: string) => `/product/proposals/${id}/reject`,
   PROPOSAL_GENERATE: "/product/proposals/generate",
   PROPOSAL_EXTRACT_FIELDS: "/product/proposals/extract-fields",
+  PROPOSAL_DRAFT: "/product/proposals/draft",
+  PROPOSAL_DRAFT_UPDATE: (id: string) => `/product/proposals/${id}/draft`,
+  PROPOSAL_EXTRACTION_STATUS: (id: string) => `/product/proposals/${id}/extraction-status`,
+  PROPOSAL_SUBMIT: (id: string) => `/product/proposals/${id}/submit`,
 
   // Templates
   TEMPLATES: "/templates",
@@ -62,6 +66,12 @@ export const PROPOSAL_STATUS_CONFIG: Record<
   ProposalStatus,
   { label: string; color: string; bgColor: string; borderColor: string }
 > = {
+  [ProposalStatus.DRAFT]: {
+    label: "Draft",
+    color: "text-slate-600",
+    bgColor: "bg-slate-50",
+    borderColor: "border-slate-300",
+  },
   [ProposalStatus.PENDING]: {
     label: "Pending",
     color: "text-slate-700",
@@ -88,6 +98,12 @@ export const PROPOSAL_STATUS_CONFIG: Record<
   },
   [ProposalStatus.REJECTED]: {
     label: "Rejected",
+    color: "text-danger-700",
+    bgColor: "bg-danger-50",
+    borderColor: "border-danger-200",
+  },
+  [ProposalStatus.FAILED]: {
+    label: "Failed",
     color: "text-danger-700",
     bgColor: "bg-danger-50",
     borderColor: "border-danger-200",
@@ -309,12 +325,14 @@ export const VALID_STATUS_TRANSITIONS: Record<
   ProposalStatus,
   ProposalStatus[]
 > = {
+  [ProposalStatus.DRAFT]: [ProposalStatus.PROCESSING],
   [ProposalStatus.PENDING]: [ProposalStatus.PROCESSING],
-  [ProposalStatus.PROCESSING]: [ProposalStatus.APPROVAL_PENDING],
+  [ProposalStatus.PROCESSING]: [ProposalStatus.APPROVAL_PENDING, ProposalStatus.FAILED],
   [ProposalStatus.APPROVAL_PENDING]: [
     ProposalStatus.COMPLETED,
     ProposalStatus.REJECTED,
   ],
   [ProposalStatus.COMPLETED]: [], // Terminal state
   [ProposalStatus.REJECTED]: [ProposalStatus.APPROVAL_PENDING], // Can be resubmitted
+  [ProposalStatus.FAILED]: [ProposalStatus.PROCESSING], // Can retry
 };

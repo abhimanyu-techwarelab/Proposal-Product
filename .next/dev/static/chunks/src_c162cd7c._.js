@@ -875,6 +875,29 @@ const proposalsApi = {
    * Parses content and uses AI to extract proposal data
    */ extractFields: async (data)=>{
         return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_EXTRACT_FIELDS, data);
+    },
+    // ============================================================================
+    // Draft Proposal Methods
+    // ============================================================================
+    /**
+   * Create a draft proposal and optionally queue field extraction
+   */ createDraft: async (data)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_DRAFT, data);
+    },
+    /**
+   * Update an existing draft proposal
+   */ updateDraft: async (id, data)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].patch(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_DRAFT_UPDATE(id), data);
+    },
+    /**
+   * Get extraction status for a draft proposal
+   */ getExtractionStatus: async (id)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_EXTRACTION_STATUS(id));
+    },
+    /**
+   * Submit a draft for AI generation
+   */ submitDraft: async (id)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_SUBMIT(id), {});
     }
 };
 const proposalsServerApi = {
@@ -1294,6 +1317,9 @@ function ProposalsTable({ filters }) {
                                     audio_path: [],
                                     document_path: [],
                                     status: p.status || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING,
+                                    extraction_status: p.extraction_status,
+                                    extraction_progress: p.extraction_progress,
+                                    template_id: p.template_id,
                                     created_by: "",
                                     created_at: p.created_at,
                                     updated_at: p.created_at
@@ -1361,22 +1387,22 @@ function ProposalsTable({ filters }) {
                         children: "Loading proposals..."
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 225,
+                        lineNumber: 232,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                    lineNumber: 224,
+                    lineNumber: 231,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 223,
+                lineNumber: 230,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-            lineNumber: 222,
+            lineNumber: 229,
             columnNumber: 7
         }, this);
     }
@@ -1393,22 +1419,22 @@ function ProposalsTable({ filters }) {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 239,
+                        lineNumber: 246,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                    lineNumber: 238,
+                    lineNumber: 245,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 237,
+                lineNumber: 244,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-            lineNumber: 236,
+            lineNumber: 243,
             columnNumber: 7
         }, this);
     }
@@ -1424,27 +1450,27 @@ function ProposalsTable({ filters }) {
                             children: "Create Proposal"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                            lineNumber: 257,
+                            lineNumber: 264,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 256,
+                        lineNumber: 263,
                         columnNumber: 15
                     }, void 0)
                 }, void 0, false, {
                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                    lineNumber: 252,
+                    lineNumber: 259,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 251,
+                lineNumber: 258,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-            lineNumber: 250,
+            lineNumber: 257,
             columnNumber: 7
         }, this);
     }
@@ -1460,42 +1486,42 @@ function ProposalsTable({ filters }) {
                                     children: "Title"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 271,
+                                    lineNumber: 278,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                     children: "Client"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 272,
+                                    lineNumber: 279,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                     children: "Industry"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 273,
+                                    lineNumber: 280,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                     children: "Value"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 274,
+                                    lineNumber: 281,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                     children: "Status"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 275,
+                                    lineNumber: 282,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
                                     children: "Date"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 276,
+                                    lineNumber: 283,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableHead"], {
@@ -1503,18 +1529,18 @@ function ProposalsTable({ filters }) {
                                     children: "Actions"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                    lineNumber: 277,
+                                    lineNumber: 284,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                            lineNumber: 270,
+                            lineNumber: 277,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 269,
+                        lineNumber: 276,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableBody"], {
@@ -1523,24 +1549,24 @@ function ProposalsTable({ filters }) {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                            href: `/proposals/${proposal.id}`,
+                                            href: proposal.status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT ? `/proposals/new?draft_id=${proposal.id}` : `/proposals/${proposal.id}`,
                                             className: "block hover:text-[#DA8A67] transition-colors",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "font-medium text-white",
                                                 children: proposal.title || "Untitled Proposal"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                lineNumber: 288,
+                                                lineNumber: 299,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                            lineNumber: 284,
+                                            lineNumber: 291,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 283,
+                                        lineNumber: 290,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1551,7 +1577,7 @@ function ProposalsTable({ filters }) {
                                                     children: proposal.client_name || "-"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                    lineNumber: 295,
+                                                    lineNumber: 306,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1559,18 +1585,18 @@ function ProposalsTable({ filters }) {
                                                     children: proposal.client_email
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                    lineNumber: 296,
+                                                    lineNumber: 307,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                            lineNumber: 294,
+                                            lineNumber: 305,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 293,
+                                        lineNumber: 304,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1578,7 +1604,7 @@ function ProposalsTable({ filters }) {
                                         children: proposal.industry || "-"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 301,
+                                        lineNumber: 312,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1586,20 +1612,73 @@ function ProposalsTable({ filters }) {
                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatCurrency"])(proposal.total_budget, proposal.currency)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 304,
+                                        lineNumber: 315,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StatusBadge"], {
-                                            status: proposal.status
-                                        }, void 0, false, {
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex flex-col gap-1",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["StatusBadge"], {
+                                                    status: proposal.status
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                    lineNumber: 320,
+                                                    columnNumber: 19
+                                                }, this),
+                                                proposal.status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT && proposal.extraction_status === "processing" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex items-center gap-1 text-xs text-slate-400",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: "h-1.5 w-16 overflow-hidden rounded-full bg-slate-700",
+                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "h-full bg-[#B87333] rounded-full transition-all duration-300",
+                                                                style: {
+                                                                    width: `${proposal.extraction_progress || 0}%`
+                                                                }
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                                lineNumber: 325,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                            lineNumber: 324,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            children: [
+                                                                proposal.extraction_progress || 0,
+                                                                "%"
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                            lineNumber: 332,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                    lineNumber: 323,
+                                                    columnNumber: 23
+                                                }, this),
+                                                proposal.status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT && proposal.extraction_status === "failed" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-xs text-danger-500",
+                                                    children: "Extraction failed"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
+                                                    lineNumber: 337,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
                                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                            lineNumber: 308,
+                                            lineNumber: 319,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 307,
+                                        lineNumber: 318,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1607,7 +1686,7 @@ function ProposalsTable({ filters }) {
                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["formatDate"])(proposal.date_of_proposal)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 310,
+                                        lineNumber: 343,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Table$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TableCell"], {
@@ -1623,16 +1702,16 @@ function ProposalsTable({ filters }) {
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                        lineNumber: 321,
+                                                        lineNumber: 354,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                    lineNumber: 315,
+                                                    lineNumber: 348,
                                                     columnNumber: 19
                                                 }, this),
                                                 canEditProposal(proposal) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                                    href: `/proposals/${proposal.id}/edit`,
+                                                    href: proposal.status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT ? `/proposals/new?${proposal.template_id ? `template_id=${proposal.template_id}&` : ''}draft_id=${proposal.id}` : `/proposals/${proposal.id}/edit`,
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                         variant: "ghost",
                                                         size: "sm",
@@ -1641,17 +1720,17 @@ function ProposalsTable({ filters }) {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                            lineNumber: 326,
+                                                            lineNumber: 363,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                        lineNumber: 325,
+                                                        lineNumber: 362,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                    lineNumber: 324,
+                                                    lineNumber: 357,
                                                     columnNumber: 21
                                                 }, this),
                                                 canDeleteProposal(proposal) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1664,40 +1743,40 @@ function ProposalsTable({ filters }) {
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                        lineNumber: 338,
+                                                        lineNumber: 375,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                                    lineNumber: 331,
+                                                    lineNumber: 368,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                            lineNumber: 314,
+                                            lineNumber: 347,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                        lineNumber: 313,
+                                        lineNumber: 346,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, proposal.id, true, {
                                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                                lineNumber: 282,
+                                lineNumber: 289,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 280,
+                        lineNumber: 287,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 268,
+                lineNumber: 275,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1709,7 +1788,7 @@ function ProposalsTable({ filters }) {
                         totalItems: meta.total
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 350,
+                        lineNumber: 387,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f28$dashboard$292f$proposals$2f$components$2f$ProposalsTablePagination$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalsTablePagination"], {
@@ -1717,13 +1796,13 @@ function ProposalsTable({ filters }) {
                         totalPages: meta.total_pages
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                        lineNumber: 355,
+                        lineNumber: 392,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 349,
+                lineNumber: 386,
                 columnNumber: 7
             }, this),
             selectedProposal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$proposals$2f$ProposalPreviewModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProposalPreviewModal"], {
@@ -1736,7 +1815,7 @@ function ProposalsTable({ filters }) {
                 proposalTitle: selectedProposal.title
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 363,
+                lineNumber: 400,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$Modal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ConfirmModal"], {
@@ -1751,13 +1830,13 @@ function ProposalsTable({ filters }) {
                 variant: "danger"
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-                lineNumber: 375,
+                lineNumber: 412,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/proposals/components/ProposalsTable.tsx",
-        lineNumber: 267,
+        lineNumber: 274,
         columnNumber: 5
     }, this);
 }

@@ -133,11 +133,13 @@ __turbopack_context__.s([
     ()=>UserRole
 ]);
 var ProposalStatus = /*#__PURE__*/ function(ProposalStatus) {
+    ProposalStatus["DRAFT"] = "draft";
     ProposalStatus["PENDING"] = "pending";
     ProposalStatus["PROCESSING"] = "processing";
     ProposalStatus["APPROVAL_PENDING"] = "approval_pending";
     ProposalStatus["COMPLETED"] = "completed";
     ProposalStatus["REJECTED"] = "rejected";
+    ProposalStatus["FAILED"] = "failed";
     return ProposalStatus;
 }({});
 var Currency = /*#__PURE__*/ function(Currency) {
@@ -239,6 +241,10 @@ const API_ENDPOINTS = {
     PROPOSAL_REJECT: (id)=>`/product/proposals/${id}/reject`,
     PROPOSAL_GENERATE: "/product/proposals/generate",
     PROPOSAL_EXTRACT_FIELDS: "/product/proposals/extract-fields",
+    PROPOSAL_DRAFT: "/product/proposals/draft",
+    PROPOSAL_DRAFT_UPDATE: (id)=>`/product/proposals/${id}/draft`,
+    PROPOSAL_EXTRACTION_STATUS: (id)=>`/product/proposals/${id}/extraction-status`,
+    PROPOSAL_SUBMIT: (id)=>`/product/proposals/${id}/submit`,
     // Templates
     TEMPLATES: "/templates",
     TEMPLATE_BY_ID: (id)=>`/templates/${id}`,
@@ -257,6 +263,12 @@ const API_ENDPOINTS = {
     SUBSCRIPTION_INVOICES: (id)=>`/subscriptions/${id}/invoices`
 };
 const PROPOSAL_STATUS_CONFIG = {
+    [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT]: {
+        label: "Draft",
+        color: "text-slate-600",
+        bgColor: "bg-slate-50",
+        borderColor: "border-slate-300"
+    },
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING]: {
         label: "Pending",
         color: "text-slate-700",
@@ -283,6 +295,12 @@ const PROPOSAL_STATUS_CONFIG = {
     },
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED]: {
         label: "Rejected",
+        color: "text-danger-700",
+        bgColor: "bg-danger-50",
+        borderColor: "border-danger-200"
+    },
+    [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].FAILED]: {
+        label: "Failed",
         color: "text-danger-700",
         bgColor: "bg-danger-50",
         borderColor: "border-danger-200"
@@ -474,11 +492,15 @@ const VALIDATION = {
     MAX_DOCUMENTS: 10
 };
 const VALID_STATUS_TRANSITIONS = {
+    [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT]: [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING
+    ],
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING]: [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING
     ],
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING]: [
-        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING,
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].FAILED
     ],
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING]: [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].COMPLETED,
@@ -487,6 +509,9 @@ const VALID_STATUS_TRANSITIONS = {
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].COMPLETED]: [],
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED]: [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING
+    ],
+    [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].FAILED]: [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING
     ]
 };
 }),
@@ -1249,11 +1274,13 @@ function Badge({ className, variant = 'default', size = 'md', children, ...props
 function StatusBadge({ status, size = 'md', className }) {
     const config = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["PROPOSAL_STATUS_CONFIG"][status];
     const variantMap = {
+        [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT]: 'default',
         [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING]: 'default',
         [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING]: 'primary',
         [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING]: 'warning',
         [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].COMPLETED]: 'success',
-        [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED]: 'danger'
+        [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED]: 'danger',
+        [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].FAILED]: 'danger'
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(Badge, {
         variant: variantMap[status],
@@ -1261,17 +1288,17 @@ function StatusBadge({ status, size = 'md', className }) {
         className: className,
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cn"])('mr-1.5 h-1.5 w-1.5 rounded-full', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING && 'bg-slate-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING && 'bg-blue-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING && 'bg-warning-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].COMPLETED && 'bg-success-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED && 'bg-danger-500')
+                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cn"])('mr-1.5 h-1.5 w-1.5 rounded-full', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT && 'bg-slate-400', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PENDING && 'bg-slate-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].PROCESSING && 'bg-blue-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING && 'bg-warning-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].COMPLETED && 'bg-success-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].REJECTED && 'bg-danger-500', status === __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].FAILED && 'bg-danger-500')
             }, void 0, false, {
                 fileName: "[project]/src/components/ui/Badge.tsx",
-                lineNumber: 85,
+                lineNumber: 87,
                 columnNumber: 7
             }, this),
             config.label
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/ui/Badge.tsx",
-        lineNumber: 84,
+        lineNumber: 86,
         columnNumber: 5
     }, this);
 }

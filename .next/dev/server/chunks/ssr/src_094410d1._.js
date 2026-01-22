@@ -786,6 +786,29 @@ const proposalsApi = {
    * Parses content and uses AI to extract proposal data
    */ extractFields: async (data)=>{
         return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_EXTRACT_FIELDS, data);
+    },
+    // ============================================================================
+    // Draft Proposal Methods
+    // ============================================================================
+    /**
+   * Create a draft proposal and optionally queue field extraction
+   */ createDraft: async (data)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_DRAFT, data);
+    },
+    /**
+   * Update an existing draft proposal
+   */ updateDraft: async (id, data)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].patch(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_DRAFT_UPDATE(id), data);
+    },
+    /**
+   * Get extraction status for a draft proposal
+   */ getExtractionStatus: async (id)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_EXTRACTION_STATUS(id));
+    },
+    /**
+   * Submit a draft for AI generation
+   */ submitDraft: async (id)=>{
+        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].PROPOSAL_SUBMIT(id), {});
     }
 };
 const proposalsServerApi = {

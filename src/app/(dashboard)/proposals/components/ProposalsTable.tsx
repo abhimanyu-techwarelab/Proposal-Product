@@ -22,6 +22,7 @@ import {
   Currency,
   BillingType,
   ProposalFilters,
+  ExtractionStatus,
 } from "@/types";
 import { DEFAULT_PAGE_SIZE } from "@/constants";
 import { ProposalsTablePagination } from "./ProposalsTablePagination";
@@ -49,6 +50,9 @@ interface BackendProposal {
   status?: string;
   date_of_proposal?: string;
   created_at: string;
+  extraction_status?: string;
+  extraction_progress?: number;
+  template_id?: string;
 }
 
 // ============================================================================
@@ -151,6 +155,9 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
               audio_path: [],
               document_path: [],
               status: (p.status as ProposalStatus) || ProposalStatus.PENDING,
+              extraction_status: p.extraction_status as ExtractionStatus | undefined,
+              extraction_progress: p.extraction_progress,
+              template_id: p.template_id,
               created_by: "",
               created_at: p.created_at,
               updated_at: p.created_at,
@@ -282,7 +289,11 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
             <TableRow key={proposal.id} isClickable>
               <TableCell>
                 <Link
-                  href={`/proposals/${proposal.id}`}
+                  href={
+                    proposal.status === ProposalStatus.DRAFT
+                      ? `/proposals/new?draft_id=${proposal.id}`
+                      : `/proposals/${proposal.id}`
+                  }
                   className="block hover:text-[#DA8A67] transition-colors"
                 >
                   <p className="font-medium text-white">
@@ -305,7 +316,29 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
                 {formatCurrency(proposal.total_budget, proposal.currency)}
               </TableCell>
               <TableCell>
-                <StatusBadge status={proposal.status} />
+                <div className="flex flex-col gap-1">
+                  <StatusBadge status={proposal.status} />
+                  {proposal.status === ProposalStatus.DRAFT &&
+                    proposal.extraction_status === "processing" && (
+                      <div className="flex items-center gap-1 text-xs text-slate-400">
+                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-700">
+                          <div
+                            className="h-full bg-[#B87333] rounded-full transition-all duration-300"
+                            style={{
+                              width: `${proposal.extraction_progress || 0}%`,
+                            }}
+                          />
+                        </div>
+                        <span>{proposal.extraction_progress || 0}%</span>
+                      </div>
+                    )}
+                  {proposal.status === ProposalStatus.DRAFT &&
+                    proposal.extraction_status === "failed" && (
+                      <span className="text-xs text-danger-500">
+                        Extraction failed
+                      </span>
+                    )}
+                </div>
               </TableCell>
               <TableCell className="text-slate-500">
                 {formatDate(proposal.date_of_proposal)}
@@ -321,7 +354,11 @@ export function ProposalsTable({ filters }: ProposalsTableProps) {
                     <Eye className="h-4 w-4" />
                   </Button>
                   {canEditProposal(proposal) && (
-                    <Link href={`/proposals/${proposal.id}/edit`}>
+                    <Link href={
+                      proposal.status === ProposalStatus.DRAFT
+                        ? `/proposals/new?${proposal.template_id ? `template_id=${proposal.template_id}&` : ''}draft_id=${proposal.id}`
+                        : `/proposals/${proposal.id}/edit`
+                    }>
                       <Button variant="ghost" size="sm" title="Edit">
                         <Edit className="h-4 w-4" />
                       </Button>

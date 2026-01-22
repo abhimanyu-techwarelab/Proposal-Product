@@ -9,6 +9,7 @@ import {
   ProposalGenerateResponse,
   ApiResponse,
   ApiMeta,
+  ExtractionStatus,
 } from "@/types";
 
 // ============================================================================
@@ -61,6 +62,63 @@ export interface ExtractFieldsResponse {
     audio: number;
   };
   confidence: "high" | "medium" | "low";
+}
+
+export interface CreateDraftInput {
+  template_id: string;
+  subscription_id: string;
+  audio_storage_paths?: string[];
+  document_storage_paths?: string[];
+  title?: string;
+  client_name?: string;
+  client_email?: string;
+  industry?: string;
+  summary?: string;
+  goals?: string;
+  scope?: string;
+}
+
+export interface UpdateDraftInput {
+  audio_storage_paths?: string[];
+  document_storage_paths?: string[];
+  title?: string;
+  client_name?: string;
+  client_email?: string;
+  industry?: string;
+  summary?: string;
+  goals?: string;
+  scope?: string;
+  deliverables?: string[];
+  start_date?: string;
+  end_date?: string;
+  total_budget?: number;
+  currency?: string;
+  billing_type?: string;
+  milestones?: Array<{ title: string }>;
+  team_members?: Array<{ role: string; experience?: string }>;
+
+  links?: string[];
+  submitted_to?: string[];
+  extraction_status?: string;
+  extraction_progress?: number;
+}
+
+export interface CreateDraftResponse {
+  success: boolean;
+  id: string;
+  extraction_job_id: string | null;
+}
+
+export interface ExtractionStatusResponse {
+  extraction_status: ExtractionStatus;
+  extraction_progress: number;
+  extraction_job_id: string | null;
+}
+
+export interface SubmitDraftResponse {
+  success: boolean;
+  id: string;
+  message: string;
 }
 
 // ============================================================================
@@ -210,6 +268,58 @@ export const proposalsApi = {
     return apiClient.post<ExtractFieldsResponse>(
       API_ENDPOINTS.PROPOSAL_EXTRACT_FIELDS,
       data
+    );
+  },
+
+  // ============================================================================
+  // Draft Proposal Methods
+  // ============================================================================
+
+  /**
+   * Create a draft proposal and optionally queue field extraction
+   */
+  createDraft: async (
+    data: CreateDraftInput
+  ): Promise<ApiResponse<CreateDraftResponse>> => {
+    return apiClient.post<CreateDraftResponse>(
+      API_ENDPOINTS.PROPOSAL_DRAFT,
+      data
+    );
+  },
+
+  /**
+   * Update an existing draft proposal
+   */
+  updateDraft: async (
+    id: string,
+    data: UpdateDraftInput
+  ): Promise<ApiResponse<{ success: boolean; proposal: Proposal }>> => {
+    return apiClient.patch<{ success: boolean; proposal: Proposal }>(
+      API_ENDPOINTS.PROPOSAL_DRAFT_UPDATE(id),
+      data
+    );
+  },
+
+  /**
+   * Get extraction status for a draft proposal
+   */
+  getExtractionStatus: async (
+    id: string
+  ): Promise<ApiResponse<ExtractionStatusResponse>> => {
+    return apiClient.get<ExtractionStatusResponse>(
+      API_ENDPOINTS.PROPOSAL_EXTRACTION_STATUS(id)
+    );
+  },
+
+  /**
+   * Submit a draft for AI generation
+   */
+  submitDraft: async (
+    id: string
+  ): Promise<ApiResponse<SubmitDraftResponse>> => {
+    return apiClient.post<SubmitDraftResponse>(
+      API_ENDPOINTS.PROPOSAL_SUBMIT(id),
+      {}
     );
   },
 };
