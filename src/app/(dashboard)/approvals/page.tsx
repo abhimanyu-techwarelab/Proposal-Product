@@ -10,17 +10,18 @@ export const metadata = {
 };
 
 interface ApprovalsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     page?: string;
-  };
+  }>;
 }
 
-export default function ApprovalsPage({ searchParams }: ApprovalsPageProps) {
+export default async function ApprovalsPage({ searchParams }: ApprovalsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const filters = {
     status: ProposalStatus.APPROVAL_PENDING,
-    search: searchParams.search,
-    page: searchParams.page ? parseInt(searchParams.page, 10) : 1,
+    search: resolvedSearchParams.search,
+    page: resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1,
   };
 
   return (

@@ -46,6 +46,8 @@ interface AuthContextValue {
   permissions: string[];
   permissionsLoading: boolean;
   refetchPermissions: () => Promise<void>;
+  refetchUser: () => Promise<void>;
+  profileImageVersion: number;
 }
 
 // ============================================================================
@@ -71,6 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [profileImageVersion, setProfileImageVersion] = useState<number>(Date.now());
   const permissionsLoadRef = React.useRef<Promise<void> | null>(null);
   const userLoadRef = React.useRef<Promise<void> | null>(null);
 
@@ -108,16 +111,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         const userData = await response.json();
         console.log("[AuthContext] User data received:", userData);
-        setProductUser({
-          id: userData.id,
-          user_id: userData.id,
-          organization_id: userData.organization_id,
-          first_name: userData.first_name || "",
-          last_name: userData.last_name || "",
-          email: userData.email || "",
-          profile_image: userData.profile_image || null,
-          role_id: userData.role_id ? Number(userData.role_id) : 4,
+        
+        // Check if profile_image changed to update version for cache-busting
+        const newProfileImage = userData.profile_image || null;
+        setProductUser((prev) => {
+          // If profile image URL changed, update version for cache-busting
+          if (prev?.profile_image !== newProfileImage) {
+            setProfileImageVersion(Date.now());
+          }
+          return {
+            id: userData.id,
+            user_id: userData.id,
+            organization_id: userData.organization_id,
+            first_name: userData.first_name || "",
+            last_name: userData.last_name || "",
+            email: userData.email || "",
+            profile_image: newProfileImage,
+            role_id: userData.role_id ? Number(userData.role_id) : 4,
+          };
         });
+        
+        // Always update version when refetching to ensure cache-busting works
+        // even if URL is the same but image content changed
+        setProfileImageVersion(Date.now());
         console.log("[AuthContext] productUser set successfully");
       } catch (error) {
         console.error("[AuthContext] Error fetching current user:", error);
@@ -301,6 +317,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     permissions,
     permissionsLoading,
     refetchPermissions: loadPermissions,
+    refetchUser: fetchCurrentUser,
+    profileImageVersion,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

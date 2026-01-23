@@ -119,7 +119,15 @@ async function request<T>(
   };
 
   try {
+    console.log('[API Client] Making request to:', url);
+    console.log('[API Client] Method:', fetchConfig.method || 'GET');
+    console.log('[API Client] Body:', body);
+    console.log('[API Client] Headers:', headers);
+    
     let response = await fetch(url, fetchOptions);
+    
+    console.log('[API Client] Response status:', response.status);
+    console.log('[API Client] Response ok:', response.ok);
 
     // If unauthorized, redirect to login (no refresh token flow in Product app)
     if (response.status === 401) {
@@ -131,6 +139,7 @@ async function request<T>(
     }
 
     const responseData = await response.json();
+    console.log('[API Client] Response data:', responseData);
 
     if (!response.ok) {
       throw ApiRequestError.fromApiError(responseData as ApiError, response.status);

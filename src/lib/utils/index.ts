@@ -199,3 +199,38 @@ export function getErrorMessage(error: unknown): string {
   }
   return 'An unexpected error occurred';
 }
+
+// ============================================================================
+// Image Utilities
+// ============================================================================
+
+/**
+ * Appends a cache-busting query parameter to an image URL
+ * This ensures browsers fetch the latest version of the image
+ * Useful for profile images that may be updated but keep the same URL
+ * 
+ * @param url - The image URL to add cache-busting to
+ * @param timestamp - Optional timestamp to use (defaults to current time)
+ *                   Pass a stable value when you want consistent cache-busting
+ */
+export function appendCacheBust(url: string | null | undefined, timestamp?: number): string | null {
+  if (!url) return null;
+  
+  // Don't modify data URLs (from FileReader)
+  if (url.startsWith('data:')) {
+    return url;
+  }
+  
+  // Remove existing cache-busting parameter if present
+  let cleanUrl = url;
+  if (url.includes('?t=') || url.includes('&t=')) {
+    cleanUrl = url.replace(/[?&]t=\d+/g, '');
+    // Clean up any trailing & or ? if they're now at the end
+    cleanUrl = cleanUrl.replace(/[?&]$/, '');
+  }
+  
+  // Append timestamp query parameter
+  const separator = cleanUrl.includes('?') ? '&' : '?';
+  const ts = timestamp ?? Date.now();
+  return `${cleanUrl}${separator}t=${ts}`;
+}

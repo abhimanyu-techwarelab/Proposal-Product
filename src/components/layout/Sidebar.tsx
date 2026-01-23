@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, appendCacheBust } from "@/lib/utils";
 import {
   LayoutDashboard,
   FileText,
@@ -98,7 +98,7 @@ const adminItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, productUser, logout, hasRole, hasPermission } = useAuth();
+  const { user, productUser, logout, hasRole, hasPermission, profileImageVersion } = useAuth();
   const {
     isExpanded,
     isMobileOpen,
@@ -134,6 +134,13 @@ export function Sidebar() {
       return true;
     });
   }, [hasRole, hasPermission]);
+
+  // Cache-bust profile image URL to ensure fresh image after updates
+  // Use profileImageVersion to force refresh even when URL stays the same
+  const profileImageUrl = useMemo(() => {
+    if (!productUser?.profile_image) return null;
+    return appendCacheBust(productUser.profile_image, profileImageVersion);
+  }, [productUser?.profile_image, profileImageVersion]);
 
   const visibleAdminItems = useMemo(() => {
     return adminItems.filter((item) => {
@@ -314,13 +321,14 @@ export function Sidebar() {
             )}
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
-              {productUser?.profile_image ? (
+              {profileImageUrl ? (
                 <Image
                   width={40}
                   height={40}
-                  src={productUser.profile_image}
+                  src={profileImageUrl}
                   alt="User"
                   className="object-cover w-full h-full"
+                  unoptimized
                 />
               ) : (
                 <svg

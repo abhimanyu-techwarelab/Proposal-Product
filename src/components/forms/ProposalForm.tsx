@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Trash2, GripVertical, Upload, FileText, Music, X, RefreshCw, Eye, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Upload, FileText, Music, X, RefreshCw, Eye, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Button,
@@ -203,7 +203,10 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   const [deliverables, setDeliverables] = useState<string[]>([]);
   const [deliverableInput, setDeliverableInput] = useState('');
   const [milestones, setMilestones] = useState<MilestoneInput[]>([]);
+  const [milestoneInput, setMilestoneInput] = useState('');
   const [teamMembers, setTeamMembers] = useState<TeamMemberInput[]>([]);
+  const [teamMemberRoleInput, setTeamMemberRoleInput] = useState('');
+  const [teamMemberExperienceInput, setTeamMemberExperienceInput] = useState('');
   const [links, setLinks] = useState<string[]>([]);
   const [linkInput, setLinkInput] = useState('');
 
@@ -328,7 +331,10 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     setDeliverables([]);
     setDeliverableInput('');
     setMilestones([]);
+    setMilestoneInput('');
     setTeamMembers([]);
+    setTeamMemberRoleInput('');
+    setTeamMemberExperienceInput('');
     setLinks([]);
     setLinkInput('');
     setPendingDocuments([]);
@@ -1572,8 +1578,11 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   const addMilestone = () => {
-    markDirty();
-    setMilestones([...milestones, getInitialMilestone()]);
+    if (milestoneInput.trim()) {
+      markDirty();
+      setMilestones([...milestones, { id: generateId(), title: milestoneInput.trim() }]);
+      setMilestoneInput('');
+    }
   };
 
   const removeMilestone = (id: string) => {
@@ -1581,36 +1590,22 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     setMilestones(milestones.filter((m) => m.id !== id));
   };
 
-  const updateMilestone = (
-    id: string,
-    field: keyof MilestoneInput,
-    value: string | number
-  ) => {
-    markDirty();
-    setMilestones(
-      milestones.map((m) => (m.id === id ? { ...m, [field]: value } : m))
-    );
-  };
-
   const addTeamMember = () => {
-    markDirty();
-    setTeamMembers([...teamMembers, getInitialTeamMember()]);
+    if (teamMemberRoleInput.trim() || teamMemberExperienceInput.trim()) {
+      markDirty();
+      setTeamMembers([...teamMembers, {
+        id: generateId(),
+        role: teamMemberRoleInput.trim(),
+        experience: teamMemberExperienceInput.trim(),
+      }]);
+      setTeamMemberRoleInput('');
+      setTeamMemberExperienceInput('');
+    }
   };
 
   const removeTeamMember = (id: string) => {
     markDirty();
     setTeamMembers(teamMembers.filter((t) => t.id !== id));
-  };
-
-  const updateTeamMember = (
-    id: string,
-    field: keyof TeamMemberInput,
-    value: string | number | undefined
-  ) => {
-    markDirty();
-    setTeamMembers(
-      teamMembers.map((t) => (t.id === id ? { ...t, [field]: value } : t))
-    );
   };
 
   // Simplified links handlers (string array)
@@ -2242,47 +2237,50 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         <CardHeader
           title="Milestones"
           description="Define milestones (optional)"
-          action={
-            <Button type="button" variant="outline" size="sm" onClick={addMilestone}>
+        />
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                value={milestoneInput}
+                onChange={(e) => setMilestoneInput(e.target.value)}
+                placeholder="Enter a milestone"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addMilestone();
+                  }
+                }}
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={addMilestone}>
               <Plus className="mr-1 h-4 w-4" />
               Add
             </Button>
-          }
-        />
-        <CardContent className="space-y-4">
-          {milestones.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">
-              No milestones added. Click "Add" to create a milestone.
-            </p>
-          ) : (
-            milestones.map((milestone, index) => (
-              <div
-                key={milestone.id}
-                className="flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4"
-              >
-                <div className="flex items-center text-slate-400">
-                  <GripVertical className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <Input
-                    label="Title"
-                    value={milestone.title}
-                    onChange={(e) =>
-                      updateMilestone(milestone.id, 'title', e.target.value)
-                    }
-                    error={errors[`milestones.${index}.title`]}
-                    required
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeMilestone(milestone.id)}
-                  className="self-center rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-danger-400 transition-colors"
+          </div>
+          {milestones.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {milestones.map((milestone) => (
+                <div
+                  key={milestone.id}
+                  className="flex items-center gap-2 rounded-lg border border-[#B87333]/30 bg-slate-800/50 px-3 py-2"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))
+                  <span className="text-sm text-white">{milestone.title}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeMilestone(milestone.id)}
+                    className="rounded p-0.5 text-slate-400 hover:text-danger-400 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {milestones.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-2">
+              No milestones added. Enter a milestone and click "Add".
+            </p>
           )}
         </CardContent>
       </Card>
@@ -2292,55 +2290,63 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         <CardHeader
           title="Team Members"
           description="Add team members working on this project (optional)"
-          action={
-            <Button type="button" variant="outline" size="sm" onClick={addTeamMember}>
+        />
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1 grid gap-2 md:grid-cols-2">
+              <Input
+                value={teamMemberRoleInput}
+                onChange={(e) => setTeamMemberRoleInput(e.target.value)}
+                placeholder="Role (e.g., Lead Developer)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTeamMember();
+                  }
+                }}
+              />
+              <Input
+                value={teamMemberExperienceInput}
+                onChange={(e) => setTeamMemberExperienceInput(e.target.value)}
+                placeholder="Experience (e.g., 5 years)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTeamMember();
+                  }
+                }}
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={addTeamMember}>
               <Plus className="mr-1 h-4 w-4" />
               Add
             </Button>
-          }
-        />
-        <CardContent className="space-y-4">
-          {teamMembers.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-4">
-              No team members added. Click "Add" to add a team member.
-            </p>
-          ) : (
-            teamMembers.map((member, index) => (
-              <div
-                key={member.id}
-                className="flex gap-4 rounded-lg border border-[#B87333]/30 bg-slate-800/30 p-4"
-              >
-                <div className="flex-1 grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Role"
-                    value={member.role}
-                    onChange={(e) =>
-                      updateTeamMember(member.id, 'role', e.target.value)
-                    }
-                    error={errors[`team_members.${index}.role`]}
-                    placeholder="e.g., Lead Developer"
-                    required
-                  />
-                  <Input
-                    label="Experience"
-                    value={member.experience}
-                    onChange={(e) =>
-                      updateTeamMember(member.id, 'experience', e.target.value)
-                    }
-                    error={errors[`team_members.${index}.experience`]}
-                    placeholder="e.g., 5 years or Senior level"
-                    required
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeTeamMember(member.id)}
-                  className="self-center rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-danger-400 transition-colors"
+          </div>
+          {teamMembers.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {teamMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-2 rounded-lg border border-[#B87333]/30 bg-slate-800/50 px-3 py-2"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))
+                  <span className="text-sm text-white">
+                    {member.role}{member.experience ? ` - ${member.experience}` : ''}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeTeamMember(member.id)}
+                    className="rounded p-0.5 text-slate-400 hover:text-danger-400 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {teamMembers.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-2">
+              No team members added. Enter role and experience, then click "Add".
+            </p>
           )}
         </CardContent>
       </Card>
