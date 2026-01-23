@@ -1818,6 +1818,8 @@ const VALID_STATUS_TRANSITIONS = {
 "use strict";
 
 __turbopack_context__.s([
+    "appendCacheBust",
+    ()=>appendCacheBust,
     "buildQueryString",
     ()=>buildQueryString,
     "canApproveProposals",
@@ -1976,6 +1978,24 @@ function getErrorMessage(error) {
         return String(error.message);
     }
     return 'An unexpected error occurred';
+}
+function appendCacheBust(url, timestamp) {
+    if (!url) return null;
+    // Don't modify data URLs (from FileReader)
+    if (url.startsWith('data:')) {
+        return url;
+    }
+    // Remove existing cache-busting parameter if present
+    let cleanUrl = url;
+    if (url.includes('?t=') || url.includes('&t=')) {
+        cleanUrl = url.replace(/[?&]t=\d+/g, '');
+        // Clean up any trailing & or ? if they're now at the end
+        cleanUrl = cleanUrl.replace(/[?&]$/, '');
+    }
+    // Append timestamp query parameter
+    const separator = cleanUrl.includes('?') ? '&' : '?';
+    const ts = timestamp ?? Date.now();
+    return `${cleanUrl}${separator}t=${ts}`;
 }
 }),
 "[project]/src/components/ui/Loading.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {

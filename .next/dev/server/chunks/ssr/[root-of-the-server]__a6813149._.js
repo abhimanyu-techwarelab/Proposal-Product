@@ -519,6 +519,8 @@ const VALID_STATUS_TRANSITIONS = {
 "use strict";
 
 __turbopack_context__.s([
+    "appendCacheBust",
+    ()=>appendCacheBust,
     "buildQueryString",
     ()=>buildQueryString,
     "canApproveProposals",
@@ -677,6 +679,24 @@ function getErrorMessage(error) {
         return String(error.message);
     }
     return 'An unexpected error occurred';
+}
+function appendCacheBust(url, timestamp) {
+    if (!url) return null;
+    // Don't modify data URLs (from FileReader)
+    if (url.startsWith('data:')) {
+        return url;
+    }
+    // Remove existing cache-busting parameter if present
+    let cleanUrl = url;
+    if (url.includes('?t=') || url.includes('&t=')) {
+        cleanUrl = url.replace(/[?&]t=\d+/g, '');
+        // Clean up any trailing & or ? if they're now at the end
+        cleanUrl = cleanUrl.replace(/[?&]$/, '');
+    }
+    // Append timestamp query parameter
+    const separator = cleanUrl.includes('?') ? '&' : '?';
+    const ts = timestamp ?? Date.now();
+    return `${cleanUrl}${separator}t=${ts}`;
 }
 }),
 "[project]/src/components/ui/Button.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
@@ -2075,11 +2095,12 @@ const metadata = {
     title: 'Approvals - ProposalGen',
     description: 'Review and approve pending proposals'
 };
-function ApprovalsPage({ searchParams }) {
+async function ApprovalsPage({ searchParams }) {
+    const resolvedSearchParams = await searchParams;
     const filters = {
         status: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].APPROVAL_PENDING,
-        search: searchParams.search,
-        page: searchParams.page ? parseInt(searchParams.page, 10) : 1
+        search: resolvedSearchParams.search,
+        page: resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         children: [
@@ -2088,7 +2109,7 @@ function ApprovalsPage({ searchParams }) {
                 description: "Review and approve proposals awaiting your decision"
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-                lineNumber: 28,
+                lineNumber: 29,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2099,30 +2120,30 @@ function ApprovalsPage({ searchParams }) {
                         columns: 6
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-                        lineNumber: 37,
+                        lineNumber: 38,
                         columnNumber: 21
                     }, void 0),
                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f28$dashboard$292f$approvals$2f$components$2f$ApprovalsTable$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ApprovalsTable"], {
                         filters: filters
                     }, void 0, false, {
                         fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-                        lineNumber: 39,
+                        lineNumber: 40,
                         columnNumber: 11
                     }, this)
                 }, JSON.stringify(filters), false, {
                     fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-                    lineNumber: 35,
+                    lineNumber: 36,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-                lineNumber: 34,
+                lineNumber: 35,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/approvals/page.tsx",
-        lineNumber: 27,
+        lineNumber: 28,
         columnNumber: 5
     }, this);
 }

@@ -82,32 +82,51 @@ export function ProductFeatures() {
     }
   }, [organizationId]);
 
-  // Determine current plan
-  const currentPlan = subscription?.plan_id
-    ? (subscription.plan_id.toLowerCase() as SubscriptionPlan)
+  // Determine current plan using plan.plan_code from the joined plan relation
+  const currentPlan = subscription?.plan?.plan_code
+    ? (subscription.plan.plan_code.toLowerCase() as SubscriptionPlan)
     : SubscriptionPlan.FREE;
 
   const planConfig = SUBSCRIPTION_PLAN_CONFIG[currentPlan] || SUBSCRIPTION_PLAN_CONFIG[SubscriptionPlan.FREE];
 
-  // Map plan features to product features
-  // This is a simplified mapping - in a real app, you'd fetch actual feature flags from the backend
+  // Get feature status from actual plan_features data
   const getFeatureStatus = (featureKey: string): boolean => {
-    switch (featureKey) {
-      case "pdf_generation":
-        return currentPlan !== SubscriptionPlan.FREE;
-      case "custom_branding":
-        return currentPlan === SubscriptionPlan.PROFESSIONAL || currentPlan === SubscriptionPlan.ENTERPRISE;
-      case "api_access":
-        return currentPlan === SubscriptionPlan.PROFESSIONAL || currentPlan === SubscriptionPlan.ENTERPRISE;
-      case "priority_support":
-        return currentPlan === SubscriptionPlan.PROFESSIONAL || currentPlan === SubscriptionPlan.ENTERPRISE;
-      case "audit_logs":
-        return currentPlan === SubscriptionPlan.ENTERPRISE;
-      case "multi_level_approval":
-        return currentPlan === SubscriptionPlan.ENTERPRISE;
-      default:
-        return false;
+    // If no subscription or no plan features, feature is disabled
+    if (!subscription?.plan?.plan_features) {
+      return false;
     }
+
+    // Find the plan feature by its feature key
+    const planFeature = subscription.plan.plan_features.find(
+      (pf) => pf.feature?.key === featureKey
+    );
+
+    if (!planFeature) {
+      return false;
+    }
+
+    // For is_true type features, check is_enabled flag
+    // For limit-number type features, check if limit > 0
+    if (planFeature.feature?.type === 'is_true') {
+      return planFeature.is_enabled === true;
+    } else if (planFeature.feature?.type === 'limit-number') {
+      return planFeature.limit !== null && planFeature.limit > 0;
+    }
+
+    return planFeature.is_enabled === true;
+  };
+
+  // Get feature limit value for display
+  const getFeatureLimit = (featureKey: string): number | null => {
+    if (!subscription?.plan?.plan_features) {
+      return null;
+    }
+
+    const planFeature = subscription.plan.plan_features.find(
+      (pf) => pf.feature?.key === featureKey
+    );
+
+    return planFeature?.limit ?? null;
   };
 
   const features: FeatureItem[] = [

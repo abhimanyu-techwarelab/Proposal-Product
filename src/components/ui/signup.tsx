@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import { PulseBeams } from "./pulse-beams";
 import { GradientButton } from "./gradient-button";
+import { COUNTRIES } from "@/lib/countries";
 
 // --- BEAM CONFIGURATION ---
 
@@ -558,6 +559,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 }) => {
   // Wizard state
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxStepReached, setMaxStepReached] = useState(1);
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -568,6 +570,13 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
     confirmPassword: "",
     organizationName: "",
     organizationSize: "",
+    streetAddress1: "",
+    streetAddress2: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+    phone: "",
   });
 
   // Step-specific errors
@@ -577,11 +586,22 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [highlightedCountryIndex, setHighlightedCountryIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const countryListRef = useRef<HTMLDivElement>(null);
+  const countrySearchStringRef = useRef("");
+  const countrySearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSizeSelect = (value: string) => {
     setFormData((prev) => ({ ...prev, organizationSize: value }));
     setIsDropdownOpen(false);
+  };
+
+  const handleCountrySelect = (value: string) => {
+    setFormData((prev) => ({ ...prev, country: value }));
+    setIsCountryDropdownOpen(false);
   };
 
   // Validation functions
@@ -636,6 +656,30 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
     return Object.keys(errors).length === 0;
   };
 
+  const validateStep4 = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!formData.streetAddress1.trim()) {
+      errors.streetAddress1 = "Street address is required";
+    }
+    if (!formData.city.trim()) {
+      errors.city = "City is required";
+    }
+    if (!formData.state.trim()) {
+      errors.state = "State/Province is required";
+    }
+    if (!formData.zipCode.trim()) {
+      errors.zipCode = "ZIP/Postal code is required";
+    }
+    if (!formData.country.trim()) {
+      errors.country = "Country is required";
+    }
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone number is required";
+    }
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Navigation functions
   const handleNext = () => {
     let isValid = false;
@@ -643,11 +687,15 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
       isValid = validateStep1();
     } else if (currentStep === 2) {
       isValid = validateStep2();
+    } else if (currentStep === 3) {
+      isValid = validateStep3();
     }
 
     if (isValid) {
       setStepErrors({});
-      setCurrentStep((prev) => Math.min(prev + 1, 3));
+      const nextStep = Math.min(currentStep + 1, 4);
+      setCurrentStep(nextStep);
+      setMaxStepReached((prev) => Math.max(prev, nextStep));
     }
   };
 
@@ -657,8 +705,8 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   };
 
   const handleStepClick = (step: number) => {
-    // Only allow navigation to completed or current step
-    if (step <= currentStep) {
+    // Allow navigation to any step up to the maximum step reached
+    if (step <= maxStepReached) {
       setStepErrors({});
       setCurrentStep(step);
     }
@@ -667,27 +715,31 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   // Progress Bar Component
   const ProgressBar = () => {
     const steps = [
-      { number: 1, label: "Personal Info" },
-      { number: 2, label: "Account Details" },
+      { number: 1, label: "Personal" },
+      { number: 2, label: "Account" },
       { number: 3, label: "Organization" },
+      { number: 4, label: "Address" },
     ];
 
     return (
-      <div className="w-full mb-6">
+      <div className="w-full mb-4">
         <div className="flex items-center justify-between relative">
-          {/* Progress line */}
-          <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-700/50 z-0">
+          {/* Progress line - inset to align with step centers */}
+          <div
+            className="absolute top-4 h-0.5 bg-slate-700/50 z-0"
+            style={{ left: "12.5%", right: "12.5%" }}
+          >
             <div
               className="h-full bg-gradient-to-r from-[#B87333] to-[#DA8A67] transition-all duration-500 ease-out"
-              style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+              style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
             />
           </div>
 
           {/* Step indicators */}
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const isCompleted = step.number < currentStep;
             const isCurrent = step.number === currentStep;
-            const isClickable = step.number <= currentStep;
+            const isClickable = step.number <= maxStepReached;
 
             return (
               <div
@@ -699,21 +751,22 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                   onClick={() => handleStepClick(step.number)}
                   disabled={!isClickable}
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300
+                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300
                     ${
                       isCompleted
                         ? "bg-gradient-to-r from-[#B87333] to-[#DA8A67] text-white cursor-pointer hover:scale-110"
                         : isCurrent
-                        ? "bg-[#B87333] text-white ring-4 ring-[#B87333]/30 cursor-pointer"
+                        ? "bg-[#B87333] text-white cursor-pointer animate-ring-pulse"
+                        : isClickable
+                        ? "bg-gradient-to-r from-[#B87333]/70 to-[#DA8A67]/70 text-white cursor-pointer hover:scale-110"
                         : "bg-slate-700 text-slate-400 cursor-not-allowed"
                     }
-                    ${isClickable ? "hover:scale-110" : ""}
                   `}
                 >
                   {isCompleted ? "✓" : step.number}
                 </button>
                 <span
-                  className={`mt-2 text-xs text-center ${
+                  className={`mt-1.5 text-[10px] text-center ${
                     isCurrent ? "text-white" : "text-slate-400"
                   }`}
                 >
@@ -746,8 +799,127 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
     };
   }, [isDropdownOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCountryDropdownOpen(false);
+        setHighlightedCountryIndex(-1);
+        countrySearchStringRef.current = "";
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isCountryDropdownOpen) return;
+
+      const key = event.key;
+
+      if (key === "ArrowDown") {
+        event.preventDefault();
+        setHighlightedCountryIndex((prev) =>
+          prev < COUNTRIES.length - 1 ? prev + 1 : 0
+        );
+      } else if (key === "ArrowUp") {
+        event.preventDefault();
+        setHighlightedCountryIndex((prev) =>
+          prev > 0 ? prev - 1 : COUNTRIES.length - 1
+        );
+      } else if (key === "Enter" && highlightedCountryIndex >= 0) {
+        event.preventDefault();
+        handleCountrySelect(COUNTRIES[highlightedCountryIndex].value);
+        setHighlightedCountryIndex(-1);
+        countrySearchStringRef.current = "";
+      } else if (key === "Escape") {
+        setIsCountryDropdownOpen(false);
+        setHighlightedCountryIndex(-1);
+        countrySearchStringRef.current = "";
+      } else if (key.length === 1 && /[a-zA-Z]/.test(key)) {
+        // Debounced search: accumulate typed letters
+        const newSearchString = countrySearchStringRef.current + key.toLowerCase();
+        countrySearchStringRef.current = newSearchString;
+
+        // Find first country starting with the accumulated search string
+        const index = COUNTRIES.findIndex((c) =>
+          c.label.toLowerCase().startsWith(newSearchString)
+        );
+        if (index !== -1) {
+          setHighlightedCountryIndex(index);
+        }
+
+        // Clear existing timeout
+        if (countrySearchTimeoutRef.current) {
+          clearTimeout(countrySearchTimeoutRef.current);
+        }
+
+        // Reset search string after 500ms of inactivity
+        countrySearchTimeoutRef.current = setTimeout(() => {
+          countrySearchStringRef.current = "";
+        }, 500);
+      }
+    };
+
+    if (isCountryDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCountryDropdownOpen, highlightedCountryIndex]);
+
+  // Scroll highlighted country into view
+  useEffect(() => {
+    if (highlightedCountryIndex >= 0 && countryListRef.current) {
+      const highlightedElement = countryListRef.current.children[
+        highlightedCountryIndex
+      ] as HTMLElement;
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({
+          block: "nearest",
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [highlightedCountryIndex]);
+
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw] relative overflow-hidden bg-black">
+      {/* Pulse animation for current step ring */}
+      <style>{`
+        @keyframes ring-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.35);
+          }
+          50% {
+            box-shadow: 0 0 0 6px rgba(184, 115, 51, 0.15);
+          }
+        }
+        .animate-ring-pulse {
+          animation: ring-pulse 2s ease-in-out infinite;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(51, 65, 85, 0.3);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, #B87333, #DA8A67);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, #DA8A67, #B87333);
+        }
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #B87333 rgba(51, 65, 85, 0.3);
+        }
+      `}</style>
       {/* Pulse beams background */}
       <PulseBeams
         beams={beams}
@@ -788,8 +960,25 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
               className="space-y-2.5 overflow-visible"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (currentStep === 3) {
-                  if (validateStep3()) {
+                if (currentStep === 4) {
+                  if (validateStep4()) {
+                    // Get country label from code
+                    const countryLabel = COUNTRIES.find(
+                      (c) => c.value === formData.country
+                    )?.label || formData.country;
+
+                    // Combine address fields into single address string (including phone)
+                    const addressParts = [
+                      formData.streetAddress1,
+                      formData.streetAddress2,
+                      formData.city,
+                      formData.state,
+                      formData.zipCode,
+                      countryLabel,
+                      formData.phone ? `Phone: ${formData.phone}` : null,
+                    ].filter(Boolean);
+                    const combinedAddress = addressParts.join(", ");
+
                     // Create hidden inputs with form data for FormData compatibility
                     const form = e.currentTarget;
                     const hiddenInputs = [
@@ -808,6 +997,14 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       {
                         name: "organizationSize",
                         value: formData.organizationSize,
+                      },
+                      {
+                        name: "address",
+                        value: combinedAddress,
+                      },
+                      {
+                        name: "country",
+                        value: formData.country,
                       },
                     ];
 
@@ -1130,6 +1327,272 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                       )}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Step 4: Organization Address */}
+              {currentStep === 4 && (
+                <div className="space-y-2">
+                  {/* Street Address Lines */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        Street Address
+                      </label>
+                      <div
+                        className={`rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5 ${
+                          stepErrors.streetAddress1
+                            ? "border-red-500/50"
+                            : "border-[#B87333]/30"
+                        }`}
+                      >
+                        <input
+                          type="text"
+                          placeholder="House/Building, Street"
+                          value={formData.streetAddress1}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              streetAddress1: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                          required
+                        />
+                      </div>
+                      {stepErrors.streetAddress1 && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.streetAddress1}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        Address Line 2 (Optional)
+                      </label>
+                      <div className="rounded-xl border border-[#B87333]/30 bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5">
+                        <input
+                          type="text"
+                          placeholder="Apt, Suite, Unit"
+                          value={formData.streetAddress2}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              streetAddress2: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* City and State */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        City
+                      </label>
+                      <div
+                        className={`rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5 ${
+                          stepErrors.city
+                            ? "border-red-500/50"
+                            : "border-[#B87333]/30"
+                        }`}
+                      >
+                        <input
+                          type="text"
+                          placeholder="City"
+                          value={formData.city}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              city: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                          required
+                        />
+                      </div>
+                      {stepErrors.city && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.city}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        State / Province
+                      </label>
+                      <div
+                        className={`rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5 ${
+                          stepErrors.state
+                            ? "border-red-500/50"
+                            : "border-[#B87333]/30"
+                        }`}
+                      >
+                        <input
+                          type="text"
+                          placeholder="State/Province"
+                          value={formData.state}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              state: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                          required
+                        />
+                      </div>
+                      {stepErrors.state && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.state}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ZIP, Country, and Phone */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        ZIP / Postal
+                      </label>
+                      <div
+                        className={`rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5 ${
+                          stepErrors.zipCode
+                            ? "border-red-500/50"
+                            : "border-[#B87333]/30"
+                        }`}
+                      >
+                        <input
+                          type="text"
+                          placeholder="ZIP Code"
+                          value={formData.zipCode}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              zipCode: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                          required
+                        />
+                      </div>
+                      {stepErrors.zipCode && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.zipCode}
+                        </p>
+                      )}
+                    </div>
+                    <div className="relative" ref={countryDropdownRef}>
+                      <label className="text-xs font-medium text-slate-400">
+                        Country
+                      </label>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newState = !isCountryDropdownOpen;
+                            setIsCountryDropdownOpen(newState);
+                            if (newState) {
+                              // Set highlighted to current selection or -1
+                              const currentIndex = COUNTRIES.findIndex(
+                                (c) => c.value === formData.country
+                              );
+                              setHighlightedCountryIndex(currentIndex);
+                            }
+                          }}
+                          className={`w-full rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus:border-[#B87333]/70 focus:bg-[#B87333]/5 text-left ${
+                            stepErrors.country
+                              ? "border-red-500/50"
+                              : "border-[#B87333]/30"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between px-3 py-2">
+                            <span
+                              className={`text-sm truncate ${
+                                formData.country
+                                  ? "text-white"
+                                  : "text-slate-500"
+                              }`}
+                            >
+                              {formData.country
+                                ? COUNTRIES.find(
+                                    (c) => c.value === formData.country
+                                  )?.label
+                                : "Select"}
+                            </span>
+                            <ChevronDown
+                              className={`w-3 h-3 text-slate-400 transition-transform flex-shrink-0 ${
+                                isCountryDropdownOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </div>
+                        </button>
+
+                        {isCountryDropdownOpen && (
+                          <div
+                            ref={countryListRef}
+                            className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-[#B87333]/30 bg-slate-900/95 backdrop-blur-sm z-[9999] overflow-hidden shadow-2xl max-h-48 overflow-y-auto custom-scrollbar"
+                          >
+                            {COUNTRIES.map((country, index) => (
+                              <button
+                                key={country.value}
+                                type="button"
+                                onClick={() => handleCountrySelect(country.value)}
+                                onMouseEnter={() => setHighlightedCountryIndex(index)}
+                                className={`w-full text-left px-3 py-2 text-sm text-white transition-colors ${
+                                  index === highlightedCountryIndex
+                                    ? "bg-[#B87333]/30"
+                                    : "hover:bg-[#B87333]/20"
+                                }`}
+                              >
+                                {country.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {stepErrors.country && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.country}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-400">
+                        Phone
+                      </label>
+                      <div
+                        className={`rounded-xl border bg-slate-900/60 backdrop-blur-sm transition-colors focus-within:border-[#B87333]/70 focus-within:bg-[#B87333]/5 ${
+                          stepErrors.phone
+                            ? "border-red-500/50"
+                            : "border-[#B87333]/30"
+                        }`}
+                      >
+                        <input
+                          type="tel"
+                          placeholder="Phone"
+                          value={formData.phone}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              phone: e.target.value,
+                            }))
+                          }
+                          className="w-full bg-transparent text-sm px-3 py-2 rounded-xl focus:outline-none text-white placeholder:text-slate-500"
+                          required
+                        />
+                      </div>
+                      {stepErrors.phone && (
+                        <p className="mt-0.5 text-xs text-red-400">
+                          {stepErrors.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Terms and Conditions */}
                   <div className="flex items-center gap-2 relative z-0">
@@ -1173,7 +1636,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 >
                   {isLoading
                     ? "Creating account..."
-                    : currentStep === 3
+                    : currentStep === 4
                     ? "Create Account"
                     : "Next"}
                 </GradientButton>

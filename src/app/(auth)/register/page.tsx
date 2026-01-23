@@ -10,19 +10,64 @@ export default function RegisterPageRoute() {
   const { navigateTo } = useAuthNavigation();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // For now, just redirect to dashboard - auth will be set up later
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 500);
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      // Step 1: Create user
+      const userRes = await fetch("/api/users/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.get("email"),
+          password: formData.get("password"),
+          first_name: formData.get("firstName"),
+          last_name: formData.get("lastName"),
+        }),
+      });
+
+      if (!userRes.ok) {
+        const errorData = await userRes.json();
+        throw new Error(errorData.message || "Failed to create user");
+      }
+
+      const user = await userRes.json();
+
+      // Step 2: Create organization with user_id
+      const orgRes = await fetch("/api/organizations/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          name: formData.get("organizationName"),
+          address: formData.get("address"),
+          organization_size: formData.get("organizationSize"),
+          country: formData.get("country"),
+        }),
+      });
+
+      if (!orgRes.ok) {
+        const errorData = await orgRes.json();
+        throw new Error(errorData.message || "Failed to create organization");
+      }
+
+      // Success - redirect to login
+      router.push("/login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignUp = () => {
-    // For now, just redirect to dashboard - auth will be set up later
+    // Google signup not implemented yet
     router.push("/dashboard");
   };
 
@@ -36,7 +81,7 @@ export default function RegisterPageRoute() {
       onGoogleSignUp={handleGoogleSignUp}
       onSignIn={handleSignIn}
       isLoading={isLoading}
-      error={null}
+      error={error}
     />
   );
 }

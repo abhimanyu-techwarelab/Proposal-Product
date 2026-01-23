@@ -702,7 +702,13 @@ async function request(endpoint, config = {}) {
         body: body ? JSON.stringify(body) : undefined
     };
     try {
+        console.log('[API Client] Making request to:', url);
+        console.log('[API Client] Method:', fetchConfig.method || 'GET');
+        console.log('[API Client] Body:', body);
+        console.log('[API Client] Headers:', headers);
         let response = await fetch(url, fetchOptions);
+        console.log('[API Client] Response status:', response.status);
+        console.log('[API Client] Response ok:', response.ok);
         // If unauthorized, redirect to login (no refresh token flow in Product app)
         if (response.status === 401) {
             if ("TURBOPACK compile-time truthy", 1) {
@@ -712,6 +718,7 @@ async function request(endpoint, config = {}) {
             throw ApiRequestError.fromApiError(responseData, response.status);
         }
         const responseData = await response.json();
+        console.log('[API Client] Response data:', responseData);
         if (!response.ok) {
             throw ApiRequestError.fromApiError(responseData, response.status);
         }

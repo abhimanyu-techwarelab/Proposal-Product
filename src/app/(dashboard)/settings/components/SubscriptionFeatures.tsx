@@ -5,7 +5,7 @@ import { Card, CardHeader, CardContent, Badge } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscriptionsApi, SubscriptionResponse } from "@/lib/api/subscriptions";
 import { SUBSCRIPTION_PLAN_CONFIG } from "@/constants";
-import { SubscriptionPlan, SubscriptionStatus } from "@/types";
+import { SubscriptionPlan } from "@/types";
 import { CheckCircle2, XCircle, Loader2, Calendar, CreditCard } from "lucide-react";
 import { decodeJWT } from "@/lib/jwt-auth";
 
@@ -91,8 +91,9 @@ export function SubscriptionFeatures() {
   }
 
   // Determine current plan (default to FREE if no subscription)
-  const currentPlan = subscription?.plan_id 
-    ? (subscription.plan_id.toLowerCase() as SubscriptionPlan)
+  // Use plan.plan_code from the joined plan relation
+  const currentPlan = subscription?.plan?.plan_code
+    ? (subscription.plan.plan_code.toLowerCase() as SubscriptionPlan)
     : SubscriptionPlan.FREE;
 
   const planConfig = SUBSCRIPTION_PLAN_CONFIG[currentPlan] || SUBSCRIPTION_PLAN_CONFIG[SubscriptionPlan.FREE];
@@ -185,40 +186,43 @@ export function SubscriptionFeatures() {
         />
         <CardContent>
           <div className="space-y-3">
-            {planConfig.features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50"
-              >
-                <CheckCircle2 className="h-5 w-5 text-success-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-slate-300">{feature}</p>
-              </div>
-            ))}
-          </div>
+            {subscription?.plan?.plan_features?.map((planFeature) => {
+              const feature = planFeature.feature;
+              const isLimitType = feature?.type === "limit-number";
+              const isEnabled = isLimitType
+                ? planFeature.limit !== null && planFeature.limit > 0
+                : planFeature.is_enabled;
 
-          {planConfig.proposalLimit > 0 && (
-            <div className="mt-6 p-4 rounded-lg bg-slate-800/30 border border-slate-700/50">
-              <p className="text-sm text-slate-400 mb-2">Usage Limits</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">Proposals</span>
-                  <span className="text-sm text-white font-medium">
-                    {planConfig.proposalLimit === -1
-                      ? "Unlimited"
-                      : `${planConfig.proposalLimit}/month`}
-                  </span>
+              return (
+                <div
+                  key={planFeature.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/50"
+                >
+                  <div className="flex items-center gap-3">
+                    {isEnabled ? (
+                      <CheckCircle2 className="h-5 w-5 text-success-500 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-slate-500 flex-shrink-0" />
+                    )}
+                    <p className="text-sm text-slate-300">
+                      {feature?.name || "Unknown Feature"}
+                    </p>
+                  </div>
+                  {isLimitType && planFeature.limit !== null && (
+                    <span className="text-sm font-medium text-white">
+                      {planFeature.limit === -1 ? "Unlimited" : planFeature.limit}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-300">Team Members</span>
-                  <span className="text-sm text-white font-medium">
-                    {planConfig.userLimit === -1
-                      ? "Unlimited"
-                      : `${planConfig.userLimit} users`}
-                  </span>
-                </div>
+              );
+            })}
+            {(!subscription?.plan?.plan_features ||
+              subscription.plan.plan_features.length === 0) && (
+              <div className="text-sm text-slate-400 text-center py-4">
+                No features configured for this plan
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

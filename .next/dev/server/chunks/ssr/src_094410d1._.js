@@ -333,7 +333,13 @@ async function request(endpoint, config = {}) {
         body: body ? JSON.stringify(body) : undefined
     };
     try {
+        console.log('[API Client] Making request to:', url);
+        console.log('[API Client] Method:', fetchConfig.method || 'GET');
+        console.log('[API Client] Body:', body);
+        console.log('[API Client] Headers:', headers);
         let response = await fetch(url, fetchOptions);
+        console.log('[API Client] Response status:', response.status);
+        console.log('[API Client] Response ok:', response.ok);
         // If unauthorized, redirect to login (no refresh token flow in Product app)
         if (response.status === 401) {
             if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
@@ -342,6 +348,7 @@ async function request(endpoint, config = {}) {
             throw ApiRequestError.fromApiError(responseData, response.status);
         }
         const responseData = await response.json();
+        console.log('[API Client] Response data:', responseData);
         if (!response.ok) {
             throw ApiRequestError.fromApiError(responseData, response.status);
         }
@@ -412,6 +419,8 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2
 ;
 const supabaseUrl = ("TURBOPACK compile-time value", "https://yoxtsymyhtuhdnaszkzq.supabase.co/");
 const supabaseAnonKey = ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlveHRzeW15aHR1aGRuYXN6a3pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODYwMzYsImV4cCI6MjA4MjU2MjAzNn0.x_5VmGJtXluiqvLE9NomAVnm0BWS7zvNulrG5GtfljE");
+if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+;
 const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$index$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(supabaseUrl, supabaseAnonKey);
 }),
 "[project]/src/lib/utils/logger.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
@@ -965,11 +974,17 @@ const subscriptionsApi = {
 "use strict";
 
 __turbopack_context__.s([
+    "deleteProfileImage",
+    ()=>deleteProfileImage,
+    "uploadProfileImage",
+    ()=>uploadProfileImage,
     "usersApi",
     ()=>usersApi
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api/client.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/constants/index.ts [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$supabaseClient$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/api/supabaseClient.ts [app-ssr] (ecmascript)");
+;
 ;
 ;
 const usersApi = {
@@ -1001,6 +1016,60 @@ const usersApi = {
         return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["apiClient"].delete(`${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$constants$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].USERS}/delete/${id}`);
     }
 };
+async function uploadProfileImage(userId, file) {
+    const bucket = 'user_profile_image';
+    const filePath = `${userId}/image.jpeg`;
+    // Upload file directly to Supabase storage
+    // RLS policy "Allow public upload" with INSERT for anon role allows this
+    // Matches the pattern used in ProposalForm and storage/index.ts
+    const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$supabaseClient$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].storage.from(bucket).upload(filePath, file, {
+        contentType: file.type || 'image/jpeg',
+        upsert: true
+    });
+    if (error) {
+        console.error('Error uploading profile image:', error);
+        throw new Error(`Failed to upload profile image: ${error.message}`);
+    }
+    // Get public URL for the uploaded file
+    const { data: urlData } = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$supabaseClient$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].storage.from(bucket).getPublicUrl(filePath);
+    if (!urlData?.publicUrl) {
+        throw new Error('Failed to get public URL for uploaded image');
+    }
+    return urlData.publicUrl;
+}
+async function deleteProfileImage(imageUrl) {
+    if (!imageUrl) return;
+    try {
+        // Extract bucket and file path from URL
+        // URL format: https://[project].supabase.co/storage/v1/object/public/user_profile_image/[user_id]/image.jpeg
+        const url = new URL(imageUrl);
+        const pathParts = url.pathname.split('/');
+        // Find the bucket name and file path
+        const bucketIndex = pathParts.indexOf('public');
+        if (bucketIndex === -1 || bucketIndex === pathParts.length - 1) {
+            console.warn('Invalid image URL format:', imageUrl);
+            return;
+        }
+        const bucket = pathParts[bucketIndex + 1];
+        const filePath = pathParts.slice(bucketIndex + 2).join('/');
+        if (!bucket || !filePath) {
+            console.warn('Could not extract bucket or file path from URL:', imageUrl);
+            return;
+        }
+        // Delete file from storage
+        const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$api$2f$supabaseClient$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["supabase"].storage.from(bucket).remove([
+            filePath
+        ]);
+        if (error) {
+            console.error('Error deleting profile image:', error);
+            // Don't throw - deletion failure shouldn't block the update
+            console.warn('Failed to delete old profile image, but continuing with update');
+        }
+    } catch (error) {
+        console.error('Error parsing image URL for deletion:', error);
+    // Don't throw - deletion failure shouldn't block the update
+    }
+}
 }),
 "[project]/src/lib/api/roles.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
