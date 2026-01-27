@@ -1,202 +1,248 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-01-16
+**Analysis Date:** 2026-01-27
 
 ## Directory Layout
 
 ```
 Proposal-Product/
 ├── src/
-│   ├── app/                    # Next.js App Router structure
-│   ├── components/             # React components
-│   ├── lib/                    # Business logic and utilities
-│   ├── contexts/               # React Context providers
-│   ├── types/                  # TypeScript type definitions
-│   ├── constants/              # Application constants
-│   └── middleware.ts           # (Future) Route protection
-├── public/                     # Static assets
-├── .planning/                  # Project planning documents
-├── docs/                       # Documentation
-├── package.json                # Dependencies and scripts
-├── tsconfig.json               # TypeScript configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
-├── next.config.js              # Next.js configuration
-├── eslint.config.mjs           # ESLint configuration
-├── postcss.config.js           # PostCSS configuration
-└── README.md                   # Project documentation
+│   ├── app/                    # Next.js App Router (pages + API routes)
+│   │   ├── (auth)/            # Auth route group (login, register)
+│   │   ├── (dashboard)/       # Protected dashboard routes
+│   │   └── api/               # API route handlers
+│   ├── components/            # React components
+│   │   ├── ui/                # Base UI components
+│   │   ├── layout/            # Layout components (Sidebar, Header)
+│   │   ├── proposals/         # Proposal-specific components
+│   │   ├── templates/         # Template components
+│   │   └── forms/             # Complex forms
+│   ├── lib/                   # Core utilities & business logic
+│   │   ├── api/               # API service layer
+│   │   ├── auth/              # Authentication utilities
+│   │   ├── storage/           # File storage (Supabase)
+│   │   ├── utils/             # General utilities
+│   │   └── validations/       # Zod validation schemas
+│   ├── contexts/              # React Context providers
+│   ├── types/                 # TypeScript type definitions
+│   └── constants/             # Global constants
+├── public/                    # Static assets
+├── .next/                     # Next.js build output (gitignored)
+├── Dockerfile                 # Container definition
+├── docker-compose*.yml        # Docker orchestration
+├── package.json               # Project manifest
+├── tsconfig.json              # TypeScript configuration
+├── tailwind.config.ts         # Tailwind CSS config
+├── next.config.js             # Next.js configuration
+└── eslint.config.mjs          # ESLint configuration
 ```
 
 ## Directory Purposes
 
 **src/app/**
-- Purpose: Next.js App Router pages and API routes
-- Contains: Page components (page.tsx), layouts (layout.tsx), API routes (route.ts)
-- Key files: Root layout, auth pages, dashboard pages, API endpoints
+- Purpose: Next.js App Router (file-based routing)
+- Contains: Pages, layouts, API routes
+- Key files: `layout.tsx` (root), `page.tsx` (home)
 - Subdirectories:
-  - `(auth)/` - Route group for authentication pages (login, register)
-  - `(dashboard)/` - Route group for protected dashboard routes
-  - `api/` - Next.js API routes (auth endpoints)
+  - `(auth)/` - Authentication pages (login, register)
+  - `(dashboard)/` - Protected dashboard pages
+  - `api/` - Next.js API route handlers
+
+**src/app/(auth)/**
+- Purpose: Authentication flow pages
+- Contains: Login, register pages with minimal layout
+- Key files: `layout.tsx`, `login/page.tsx`, `register/page.tsx`
+- Subdirectories: None (flat structure)
+
+**src/app/(dashboard)/**
+- Purpose: Protected application pages
+- Contains: Dashboard home, proposals, approvals, users, roles, settings
+- Key files: `layout.tsx` (with AuthGuard), `dashboard/page.tsx`
+- Subdirectories: `dashboard/`, `proposals/`, `approvals/`, `users/`, `roles/`, `settings/`
+
+**src/app/api/**
+- Purpose: Next.js API routes (middleware layer)
+- Contains: Route handlers for auth, users, organizations, storage
+- Key files: `auth/login/route.ts`, `auth/logout/route.ts`, `auth/me/route.ts`, `auth/token/route.ts`
+- Subdirectories: `auth/`, `users/`, `organizations/`, `storage/`
 
 **src/components/**
 - Purpose: Reusable React components
-- Contains: UI components, forms, layout components, feature-specific components
-- Key files: Button, Input, Modal, Card, Table, Badge, etc.
-- Subdirectories:
-  - `ui/` - Atomic UI components (buttons, inputs, modals)
-  - `layout/` - Layout components (sidebar, header, navigation)
-  - `forms/` - Form components (ProposalForm, etc.)
-  - `proposals/` - Proposal-specific components
-  - `templates/` - Template selection/preview components
+- Contains: UI primitives, layouts, feature components
+- Key files: `AuthLayoutWrapper.tsx`
+- Subdirectories: `ui/`, `layout/`, `proposals/`, `templates/`, `forms/`
 
-**src/lib/**
-- Purpose: Business logic, utilities, and helper functions
-- Contains: API client, auth utilities, validation schemas, storage, utils
-- Key files: API client, JWT auth, Zod schemas, logger
-- Subdirectories:
-  - `api/` - API client and service modules
-  - `auth/` - Authentication utilities (server-side and client-side)
-  - `validations/` - Zod validation schemas
-  - `storage/` - File upload/download utilities for Supabase Storage
-  - `utils/` - General utility functions
+**src/components/ui/**
+- Purpose: Base UI component library
+- Contains: Button, Input, Modal, Card, Table components (Radix UI + Tailwind)
+- Key files: `Button.tsx`, `signup.tsx`, `login.tsx`, `gradient-button.tsx`
+- Subdirectories: None
+
+**src/components/layout/**
+- Purpose: Layout and navigation components
+- Contains: Sidebar, Header, PageHeader
+- Key files: `Sidebar.tsx`, `Header.tsx`, `PageHeader.tsx`
+- Subdirectories: None
+
+**src/components/forms/**
+- Purpose: Complex form components
+- Contains: ProposalForm and other multi-field forms
+- Key files: `ProposalForm.tsx` (2,516 lines - needs refactoring)
+- Subdirectories: None
+
+**src/lib/api/**
+- Purpose: API service layer (backend communication)
+- Contains: Domain-specific API clients, HTTP client
+- Key files: `client.ts` (HTTP wrapper), `proposals.ts`, `auth.ts`, `users.ts`, `roles.ts`, `templates.ts`, `subscriptions.ts`, `permissions.ts`, `dashboard.ts`, `supabaseClient.ts`, `index.ts` (unified exports)
+- Subdirectories: None
+
+**src/lib/auth/**
+- Purpose: Authentication and authorization utilities
+- Contains: JWT verification, session management, auth guards
+- Key files: `server.ts` (verifyToken, getServerSession, requireAuth, hasPermission)
+- Subdirectories: None
+
+**src/lib/storage/**
+- Purpose: File storage operations (Supabase)
+- Contains: Upload, delete, signed URL generation
+- Key files: `index.ts`
+- Subdirectories: None
+
+**src/lib/utils/**
+- Purpose: General utility functions
+- Contains: Formatting, logging, helpers
+- Key files: `logger.ts`, `index.ts`
+- Subdirectories: None
+
+**src/lib/validations/**
+- Purpose: Zod validation schemas
+- Contains: Input validation for forms and API
+- Key files: `auth.ts`, `proposal.ts`, `index.ts`
+- Subdirectories: None
 
 **src/contexts/**
-- Purpose: React Context API providers for global state
-- Contains: AuthContext, SidebarContext, AuthNavigationContext
-- Key files: Context definitions and custom hooks
-- Subdirectories: None (flat structure)
+- Purpose: React Context providers for global state
+- Contains: Auth, Sidebar, Navigation contexts
+- Key files: `AuthContext.tsx`, `SidebarContext.tsx`, `AuthNavigationContext.tsx`
+- Subdirectories: None
 
 **src/types/**
-- Purpose: TypeScript type definitions and interfaces
-- Contains: Enums, interfaces, type aliases
-- Key files: `index.ts` - All type definitions (Proposal, User, Role, Permission, etc.)
-- Subdirectories: None (flat structure)
+- Purpose: Centralized TypeScript type definitions
+- Contains: All domain types (User, Proposal, Organization, etc.)
+- Key files: `index.ts`
+- Subdirectories: None
 
 **src/constants/**
-- Purpose: Application-wide constants and configuration
-- Contains: API endpoints, validation rules, role configurations
-- Key files: `index.ts` - Constants for API endpoints, approval roles, status configs
-- Subdirectories: None (flat structure)
-
-**.planning/**
-- Purpose: Project planning and documentation
-- Contains: Codebase maps (this document)
-- Subdirectories: `codebase/` - Codebase analysis documents
-
-**docs/**
-- Purpose: Project documentation
-- Contains: API contracts, future extensions, planning docs
-- Key files: `api-contracts.md`, `future-extensions.md`
+- Purpose: Global constants and configuration
+- Contains: API endpoints, status configs, validation rules
+- Key files: `index.ts`
+- Subdirectories: None
 
 ## Key File Locations
 
 **Entry Points:**
-- `src/app/layout.tsx` - Root layout with global setup
-- `src/app/(dashboard)/layout.tsx` - Dashboard layout with auth providers
+- `src/app/layout.tsx` - Root layout with metadata
+- `src/app/page.tsx` - Home page (redirects to /dashboard)
+- `src/app/(dashboard)/layout.tsx` - Dashboard layout with auth guards
 - `src/app/(auth)/login/page.tsx` - Login page
-- `src/app/(auth)/register/page.tsx` - Registration page
-- `src/app/(dashboard)/dashboard/page.tsx` - Main dashboard page
 
 **Configuration:**
-- `tsconfig.json` - TypeScript configuration (strict mode, path alias `@/*`)
-- `next.config.js` - Next.js configuration (CORS headers)
-- `tailwind.config.ts` - Tailwind CSS custom theme
-- `eslint.config.mjs` - ESLint with Next.js preset
-- `postcss.config.js` - PostCSS with Tailwind + autoprefixer
+- `next.config.js` - Next.js configuration (CORS, image optimization)
+- `tsconfig.json` - TypeScript config (strict mode, path aliases)
+- `tailwind.config.ts` - Tailwind CSS theme
+- `eslint.config.mjs` - ESLint flat config
 - `.env.example` - Environment variable template
+- `.env.docker.example` - Docker environment template
 
 **Core Logic:**
-- `src/lib/api/client.ts` - HTTP client with error handling
-- `src/lib/api/proposals.ts` - Proposal service (CRUD operations)
-- `src/lib/api/auth.ts` - Supabase auth service
-- `src/lib/auth/server.ts` - Server-side auth utilities
-- `src/lib/jwt-auth.ts` - JWT token management
-- `src/contexts/AuthContext.tsx` - Authentication context and hook
+- `src/lib/api/` - All backend communication
+- `src/lib/auth/server.ts` - Authentication/authorization
+- `src/lib/storage/index.ts` - File storage operations
+- `src/lib/validations/` - Input validation
 
 **Testing:**
-- Not detected - No test files or configuration
+- No test files detected (testing not configured)
 
 **Documentation:**
-- `README.md` - Project overview and setup instructions
-- `docs/api-contracts.md` - Backend API documentation
-- `docs/future-extensions.md` - Planned features
+- `README.md` - Project documentation
 
 ## Naming Conventions
 
 **Files:**
-- `page.tsx` - Next.js page components (Next.js convention)
-- `route.ts` - Next.js API routes (Next.js convention)
-- `layout.tsx` - Next.js layouts (Next.js convention)
-- `PascalCase.tsx` - React components (e.g., `Button.tsx`, `ProposalForm.tsx`)
-- `camelCase.ts` - Utility files, modules (e.g., `jwt-auth.ts`, `logger.ts`)
-- `index.ts` - Barrel exports for directory public APIs
+- `page.tsx` - Next.js pages
+- `layout.tsx` - Next.js layouts
+- `route.ts` - API route handlers
+- `PascalCase.tsx` - React components (Button, Card, Header)
+- `kebab-case.tsx` - Special effect/utility components (gradient-button, shader-lines)
+- `camelCase.ts` - Utilities and services (client, logger, proposals)
+- `index.ts` - Barrel exports
 
 **Directories:**
-- `kebab-case` - All directories (e.g., `app-router`, `auth-pages`)
-- `(route-group)` - Next.js route groups with parentheses (e.g., `(auth)`, `(dashboard)`)
+- `kebab-case` - Standard directories (src, lib, components)
+- `(group)` - Next.js route groups ((auth), (dashboard))
 - Plural for collections - `components/`, `contexts/`, `types/`
-- Singular for modules - `lib/api/proposals.ts` (handles multiple operations)
 
 **Special Patterns:**
-- Route groups: `(auth)`, `(dashboard)` - Organize routes without affecting URL
-- Barrel exports: `index.ts` files for clean imports
-- Path alias: `@/*` maps to `./src/*` for absolute imports
+- `index.ts` - Barrel exports for public API
+- `*.tsx` - React components
+- `*.ts` - TypeScript modules
+- `route.ts` - API route handlers in `src/app/api/`
 
 ## Where to Add New Code
 
-**New Feature (e.g., invoices):**
-- Primary code: `src/app/(dashboard)/invoices/page.tsx`, `src/components/invoices/`
-- Service: `src/lib/api/invoices.ts`
-- Types: Add to `src/types/index.ts`
-- Validation: `src/lib/validations/invoice.ts`
-- Tests: (Not currently set up)
+**New Page:**
+- Primary code: `src/app/(dashboard)/{page-name}/page.tsx`
+- Layout (if needed): `src/app/(dashboard)/{page-name}/layout.tsx`
+- Components: `src/components/{feature}/`
 
-**New Component/Module:**
-- Implementation: `src/components/ui/` for reusable UI, `src/components/{feature}/` for feature-specific
-- Types: Add interfaces to `src/types/index.ts` or component file
-- Tests: (Not currently set up)
+**New Component:**
+- UI primitive: `src/components/ui/{ComponentName}.tsx`
+- Feature component: `src/components/{feature}/{ComponentName}.tsx`
+- Export from: `src/components/{category}/index.ts`
 
-**New Route/Page:**
-- Definition: `src/app/(dashboard)/{route}/page.tsx` for protected routes
-- Layout: Use existing `src/app/(dashboard)/layout.tsx` or create nested layout
-- API route: `src/app/api/{route}/route.ts` for server-side endpoints
+**New API Endpoint:**
+- Route handler: `src/app/api/{resource}/route.ts` or `src/app/api/{resource}/{action}/route.ts`
+- Service client: `src/lib/api/{resource}.ts`
+- Export from: `src/lib/api/index.ts`
 
-**New Service/API Integration:**
-- Service: `src/lib/api/{service}.ts` with methods like `list()`, `getById()`, `create()`, etc.
-- Client integration: Use `apiClient` from `src/lib/api/client.ts`
-- Types: Add response types to `src/types/index.ts`
+**New API Service:**
+- Implementation: `src/lib/api/{resource}.ts`
+- Export as object: `export const {resource}Api = { ... }`
+- Add to: `src/lib/api/index.ts`
 
-**Utilities:**
-- Shared helpers: `src/lib/utils/index.ts` or new file in `src/lib/utils/`
-- Type definitions: `src/types/index.ts`
-- Constants: `src/constants/index.ts`
+**New Validation Schema:**
+- Implementation: `src/lib/validations/{domain}.ts`
+- Export from: `src/lib/validations/index.ts`
 
-**Context/State Management:**
-- New context: `src/contexts/{Name}Context.tsx` with Provider and custom hook
-- Pattern: Follow existing `AuthContext.tsx` or `SidebarContext.tsx` structure
+**New Utility:**
+- Shared helpers: `src/lib/utils/index.ts`
+- Domain-specific: `src/lib/{domain}/{utility}.ts`
+
+**New Type:**
+- Add to: `src/types/index.ts`
+- Group by domain (User types, Proposal types, etc.)
+
+**New Constant:**
+- Add to: `src/constants/index.ts`
 
 ## Special Directories
 
 **.next/**
 - Purpose: Next.js build output and cache
-- Source: Generated by Next.js during build/dev
-- Committed: No (in `.gitignore`)
+- Source: Auto-generated by Next.js
+- Committed: No (in .gitignore)
 
 **node_modules/**
-- Purpose: npm dependencies
-- Source: Installed by npm
-- Committed: No (in `.gitignore`)
-
-**.planning/**
-- Purpose: Project planning and codebase documentation
-- Source: Manual documentation
-- Committed: Yes
+- Purpose: npm package dependencies
+- Source: Installed via `npm install`
+- Committed: No (in .gitignore)
 
 **public/**
-- Purpose: Static assets served directly
-- Source: Manual uploads
-- Committed: Yes (typically)
+- Purpose: Static assets (images, fonts, etc.)
+- Source: Manually added
+- Committed: Yes
 
 ---
 
-*Structure analysis: 2026-01-16*
+*Structure analysis: 2026-01-27*
 *Update when directory structure changes*

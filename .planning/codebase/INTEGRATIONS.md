@@ -1,96 +1,98 @@
 # External Integrations
 
-**Analysis Date:** 2026-01-16
+**Analysis Date:** 2026-01-27
 
 ## APIs & External Services
 
-**Backend REST API:**
-- Custom REST API at `NEXT_PUBLIC_API_URL` (default: http://localhost:3001)
-  - SDK/Client: Custom fetch-based client - `src/lib/api/client.ts`
-  - Auth: JWT Bearer tokens in Authorization header
-  - Endpoints: Authentication, Proposals, Users, Roles, Templates, Subscriptions, Organizations, Dashboard
-  - Integration: Server-side and client-side fetch with automatic token injection
+**Backend API:**
+- Custom REST API - `src/lib/api/client.ts`
+  - Base URL: `NEXT_PUBLIC_API_URL` (production: `https://abhimanyu-4200.tl-workspace.techwarelab.com`, dev: `http://localhost:3000`)
+  - Integration method: Custom HTTP client with GET/POST/PUT/PATCH/DELETE methods
+  - Auth: Bearer token in Authorization header from HTTP-only cookies
+  - Error handling: Custom `ApiRequestError` class
+  - Endpoints: `/auth/*`, `/product/proposals/*`, `/templates/*`, `/users/*`, `/roles/*`, `/organizations/*`, `/subscriptions/*`
 
 **External APIs:**
-- None detected (self-contained SaaS application)
+- None detected (no OpenAI, Anthropic, third-party payment processors)
 
 ## Data Storage
 
 **Databases:**
-- Supabase (PostgreSQL) - Primary data store
-  - Connection: Via `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` env vars
-  - Client: @supabase/supabase-js v2.89.0 - `src/lib/api/supabaseClient.ts`
-  - Tables: `proposals`, `organizations`, `product_users`
-  - Direct table access: `src/lib/api/supabaseProposals.ts`, `src/lib/api/auth.ts`
+- PostgreSQL 16-Alpine - `docker-compose.yml`
+  - Connection: via `DATABASE_URL` or individual `DB_*` env vars
+  - Client: Accessed via backend API (not directly from Next.js)
+  - Container: `postgres:16-alpine` with health checks
 
 **File Storage:**
-- Supabase Storage - User uploads (documents, audio files)
-  - SDK/Client: @supabase/supabase-js Storage API
-  - Auth: Supabase anon key (with RLS policies)
-  - Buckets: `proposal-documents`, `proposal-audio` - `src/lib/storage/index.ts`
-  - Upload functions: `uploadFileToStorage()`, `uploadFilesToStorage()`, `generateSignedUrl()`
-  - Used in: `src/components/forms/ProposalForm.tsx` for file uploads
+- Supabase Storage - `src/lib/storage/index.ts`
+  - SDK/Client: @supabase/supabase-js v2.89.0
+  - Auth: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Buckets: `proposal-documents`, `proposal-audio`
+  - Operations: Upload single/multiple files, generate signed URLs (1 hour expiration), delete files, public URLs
+  - File path structure: `{folderId}/{generatedId}.{ext}`
+  - URL: `https://yoxtsymyhtuhdnaszkzq.supabase.co/`
 
 **Caching:**
-- Not detected - No Redis or external caching layer
+- None detected (no Redis, Memcached)
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Dual authentication system:
-  1. JWT-based custom auth - `src/lib/jwt-auth.ts`
-     - Implementation: HTTP-only cookies (`product_auth_token`)
-     - Token storage: Cookies managed via API routes
-     - Session management: JWT decoding client-side, verification server-side
-  2. Supabase Auth - Email/password - `src/lib/api/auth.ts`
-     - Implementation: Supabase client SDK with email/password
-     - Token storage: Supabase session management
-     - Integration: `src/lib/api/supabaseClient.ts`
+- Supabase Auth + Custom JWT - `src/lib/auth/server.ts`, `src/lib/jwt-auth.ts`
+  - Implementation: Supabase client SDK + jose library for JWT handling
+  - Token storage: HTTP-only cookies (`product_auth_token`, `proposal_access_token`)
+  - Session management: JWT with claims (user_id, organization_id, permissions, has_admin_access, iat, exp)
+  - Verification: Server-side JWT verification using jose v5.2.0
 
 **OAuth Integrations:**
-- None currently integrated
-  - TODO: Google sign-in mentioned in `src/app/(auth)/login/page.tsx` (line 61)
+- Not detected (no Google, GitHub, or other OAuth providers configured)
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- None configured
-  - Custom logger utility: `src/lib/utils/logger.ts`
-  - Auth event logging: loginSuccess, loginFailure, registerSuccess, registerFailure, logout
+- Not detected (no Sentry, Rollbar)
 
 **Analytics:**
-- Not detected
+- Not detected (no Mixpanel, Segment, Google Analytics)
 
 **Logs:**
-- Console-based logging only (development)
-  - Custom logger: `src/lib/utils/logger.ts`
-  - No centralized log aggregation
+- Console-based logging - `src/lib/utils/logger.ts`
+  - Auth events logged (login success/failure, logout)
+  - No external log aggregation service
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Not specified in code
-  - Next.js application (can deploy to Vercel, Docker, or any Node.js host)
-  - Environment vars: Configured externally
+- Docker containerization - `Dockerfile`
+  - Multi-stage build (base, deps, builder, runner, development)
+  - Node 20-Alpine base image
+  - Next.js standalone output
+  - Non-root user (nextjs) for security
 
 **CI Pipeline:**
-- Not detected
-  - No GitHub Actions, GitLab CI, or similar configuration files found
+- Not detected (no .github/workflows, .gitlab-ci.yml, etc.)
+
+**Orchestration:**
+- Docker Compose - `docker-compose.yml`, `docker-compose.dev.yml`, `docker-compose.prod.yml`
+  - Services: PostgreSQL (database), Backend (API), Frontend (Next.js), pgAdmin (database management)
+  - Networking: `proposal-network` bridge network
+  - Health checks configured for PostgreSQL
+  - Volume management for persistent data
 
 ## Environment Configuration
 
 **Development:**
 - Required env vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `JWT_SECRET`
-- Secrets location: `.env.local` (gitignored) or `.env` (template in `.env.example`)
-- Mock/stub services: Supabase development project (via env vars)
+- Secrets location: `.env` file (gitignored)
+- Mock/stub services: Supabase configured for both dev and prod
 
 **Staging:**
-- Not explicitly configured
-  - Same env var pattern with staging-specific values
+- Not explicitly configured (same as production)
 
 **Production:**
-- Secrets management: Environment variables (platform-specific: Vercel, Docker env, etc.)
-- Database: Supabase production project
+- Secrets management: Environment variables via Docker Compose
+- Docker `.env.docker.example` template provided
+- CORS configured via `next.config.js` for API routes
 
 ## Webhooks & Callbacks
 
@@ -100,28 +102,7 @@
 **Outgoing:**
 - None detected
 
-## Backend API Endpoints
-
-**Authentication:**
-- `/api/auth/login` - Login with email/password - `src/app/api/auth/login/route.ts`
-- `/api/auth/logout` - Logout and clear cookies - `src/app/api/auth/logout/route.ts`
-- `/api/auth/token` - Retrieve JWT from cookies - `src/app/api/auth/token/route.ts`
-- `/api/auth/me` - Get current user details - `src/app/api/auth/me/route.ts`
-
-**Product Endpoints** (Backend API):
-- `/product/proposals` - List/create proposals - `src/lib/api/proposals.ts`
-- `/product/proposals/{id}` - Get/update/delete proposal
-- `/product/proposals/generate` - Generate proposal with signed documents
-- `/product/proposals/{id}/render` - Render proposal HTML preview
-- `/product/permissions` - Get permissions list - `src/lib/api/permissions.ts`
-- `/dashboard/summary` - Dashboard stats - `src/lib/api/dashboard.ts`
-- `/users`, `/users/{id}` - User management - `src/lib/api/users.ts`
-- `/roles`, `/roles/{id}` - Role management - `src/lib/api/roles.ts`
-- `/templates`, `/templates/{id}` - Template management - `src/lib/api/templates.ts`
-- `/subscriptions` - Subscription management - `src/lib/api/subscriptions.ts`
-- `/organizations` - Organization management
-
 ---
 
-*Integration audit: 2026-01-16*
+*Integration audit: 2026-01-27*
 *Update when adding/removing external services*

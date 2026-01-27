@@ -1,118 +1,129 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-01-16
+**Analysis Date:** 2026-01-27
 
 ## Test Framework
 
+**Status:** ⚠️ **No test framework currently configured**
+
 **Runner:**
-- Not configured - No test framework found
+- Not detected (no Jest, Vitest, or other test framework in `package.json`)
 
 **Assertion Library:**
-- Not applicable
+- Not detected
 
 **Run Commands:**
-- Not applicable - No test scripts in `package.json`
+- No test scripts in `package.json`
+- `npm run lint` available for code quality checks
+- TypeScript type checking via `tsc --noEmit` (not scripted)
 
 ## Test File Organization
 
 **Location:**
-- Not applicable - No test files found
+- No test files found in codebase
+- No `__tests__/` directories
+- No `*.test.ts` or `*.spec.ts` files
 
-**Naming:**
-- No test files detected (no `*.test.*`, `*.spec.*`, or `__tests__/`)
+**Recommended Structure (if tests were added):**
+- Co-located: `src/lib/api/__tests__/proposals.test.ts`
+- Or separate: `src/lib/api/proposals.test.ts` alongside source
 
-**Structure:**
-- Not applicable
+## Quality Tools
 
-## Test Structure
+**Linting:**
+- ESLint 9.39.1 configured via `eslint.config.mjs`
+- Extends: Next.js core web vitals config
+- Run: `npm run lint`
 
-**Suite Organization:**
-- Not applicable - No test framework configured
+**Type Checking:**
+- TypeScript 5.9.3 with strict mode enabled
+- Config: `tsconfig.json`
+- No dedicated type-check script in package.json
 
-**Patterns:**
-- Not applicable
+**Code Organization:**
+Despite no tests, the codebase has excellent architecture for testing:
+- API clients isolated in `src/lib/api/` (easily mockable)
+- Validation schemas in `src/lib/validations/` (pure functions)
+- Utilities in `src/lib/utils/` (pure functions)
+- Business logic separated from components
+- Types centralized in `src/types/`
 
-## Mocking
+## Testable Modules
 
-**Framework:**
-- Not applicable
+**High-value test targets (when testing is added):**
 
-**Patterns:**
-- Not applicable
+**API Client Layer:**
+- `src/lib/api/client.ts` - HTTP wrapper with error handling
+  - `ApiRequestError` class
+  - `buildUrl()` function
+  - `request<T>()` method
+  - `serverFetch<T>()` method
 
-**What to Mock:**
-- Not applicable
+**Utility Functions:**
+- `src/lib/utils/index.ts` - Pure functions
+  - `formatCurrency()`
+  - `isValidStatusTransition()`
+  - `canApproveProposals()`
+  - `getStatusVariant()`
 
-**What NOT to Mock:**
-- Not applicable
+**Validation Schemas:**
+- `src/lib/validations/auth.ts` - Zod schemas
+- `src/lib/validations/proposal.ts` - Validation rules
 
-## Fixtures and Factories
+**Auth Logic:**
+- `src/lib/auth/server.ts` - JWT verification
+  - `verifyToken()`
+  - `getServerSession()`
+  - `requireAuth()`
+  - `hasPermission()`
 
-**Test Data:**
-- Not applicable
+## Recommended Testing Strategy
 
-**Location:**
-- Not applicable
+**If testing were to be implemented:**
 
-## Coverage
+**1. Unit Testing:**
+- Framework: Vitest (modern, fast, TypeScript-native)
+- Alternative: Jest with `ts-jest`
+- Coverage goal: 85%+ for utilities and services
 
-**Requirements:**
-- No coverage tracking configured
+**2. Component Testing:**
+- React Testing Library (user behavior testing)
+- Focus on forms, buttons, modals
+- Coverage goal: 60-70%
 
-**Configuration:**
-- Not applicable
+**3. Integration Testing:**
+- API route handlers (`src/app/api/`)
+- Service layer with mocked backend
+- Coverage goal: 70%+
 
-**View Coverage:**
-- Not applicable
+**4. E2E Testing:**
+- Playwright or Cypress
+- Test critical flows: login, create proposal, approve proposal
+- Coverage: Key user journeys
 
-## Test Types
+**5. Test Organization:**
+```
+src/
+├── lib/
+│   ├── api/
+│   │   ├── client.ts
+│   │   ├── client.test.ts        # Co-located tests
+│   │   ├── proposals.ts
+│   │   └── proposals.test.ts
+```
 
-**Unit Tests:**
-- Not configured
+## Current Test Coverage
 
-**Integration Tests:**
-- Not configured
+**Status:** 0% - No tests found
 
-**E2E Tests:**
-- Not configured
-
-## Common Patterns
-
-**Async Testing:**
-- Not applicable
-
-**Error Testing:**
-- Not applicable
-
-**Snapshot Testing:**
-- Not applicable
+**High-Risk Areas (need tests most):**
+- Authentication flow (`src/lib/auth/`, `src/app/api/auth/`)
+- Proposal creation and approval (`src/lib/api/proposals.ts`)
+- Permission checks (`src/lib/api/permissions.ts`)
+- Form validation (`src/lib/validations/`)
+- File upload (`src/lib/storage/`)
 
 ---
 
-## Current Status: No Testing Infrastructure
-
-**Analysis Summary:**
-- **Test Framework**: Not detected (no Vitest, Jest, or Playwright)
-- **Test Files**: 0 test files found in codebase
-- **Test Configuration**: No test config files (`vitest.config.*`, `jest.config.*`, `playwright.config.*`)
-- **Test Dependencies**: No test-related packages in `package.json`
-- **Test Scripts**: No test scripts in `package.json`
-
-**Recommendation:**
-This is a production-ready SaaS application with no testing infrastructure. Critical paths that should be tested:
-1. **Authentication flow** - `src/lib/jwt-auth.ts`, `src/app/api/auth/**/route.ts`
-2. **API client** - `src/lib/api/client.ts` (error handling, retry logic)
-3. **Validation schemas** - `src/lib/validations/*.ts`
-4. **Proposal CRUD operations** - `src/lib/api/proposals.ts`
-5. **Permission checking** - `src/lib/auth/server.ts`
-6. **Form validation** - `src/components/forms/ProposalForm.tsx`
-
-**Suggested Testing Stack:**
-- **Unit Tests**: Vitest (fast, compatible with Vite/Next.js)
-- **Integration Tests**: Vitest + MSW (Mock Service Worker)
-- **E2E Tests**: Playwright (for critical user flows)
-
----
-
-*Testing analysis: 2026-01-16*
-*Update when test patterns change*
+*Testing analysis: 2026-01-27*
+*Update when test patterns are established*

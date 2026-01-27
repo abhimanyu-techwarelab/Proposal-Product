@@ -2,81 +2,40 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, Badge } from "@/components/ui";
-import { useAuth } from "@/contexts/AuthContext";
-import { subscriptionsApi, SubscriptionResponse } from "@/lib/api/subscriptions";
-import { SUBSCRIPTION_PLAN_CONFIG } from "@/constants";
-import { SubscriptionPlan } from "@/types";
-import { CheckCircle2, XCircle, Loader2, Calendar, CreditCard } from "lucide-react";
-import { decodeJWT } from "@/lib/jwt-auth";
+import {
+  subscriptionsApi,
+  SubscriptionDetailsResponse,
+} from "@/lib/api/subscriptions";
+import {
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Calendar,
+  CreditCard,
+} from "lucide-react";
 
 export function SubscriptionFeatures() {
-  const { productUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [subscription, setSubscription] = useState<SubscriptionResponse | null>(null);
+  const [data, setData] = useState<SubscriptionDetailsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchOrganizationId() {
-      try {
-        const tokenResponse = await fetch("/api/auth/token", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!tokenResponse.ok) {
-          setError("Failed to get authentication token");
-          setIsLoading(false);
-          return;
-        }
-
-        const tokenData = await tokenResponse.json();
-        const token = tokenData.token;
-
-        if (!token) {
-          setError("No authentication token available");
-          setIsLoading(false);
-          return;
-        }
-
-        const payload = decodeJWT(token);
-        if (!payload || !payload.organization_id) {
-          setError("Organization ID not found in token");
-          setIsLoading(false);
-          return;
-        }
-
-        setOrganizationId(payload.organization_id);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch organization ID"
-        );
-        setIsLoading(false);
-      }
-    }
-
-    fetchOrganizationId();
-  }, []);
-
-  useEffect(() => {
-    async function fetchSubscription() {
-      if (!organizationId) return;
-
+    async function fetchDetails() {
       try {
         setIsLoading(true);
-        const data = await subscriptionsApi.getActiveByOrganization(organizationId);
-        setSubscription(data);
+        const result = await subscriptionsApi.getCurrentDetails();
+        setData(result);
       } catch (err) {
-        // If no subscription found, that's okay - show free plan
-        console.log("No active subscription found:", err);
-        setSubscription(null);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch subscription details"
+        );
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchSubscription();
-  }, [organizationId]);
+    fetchDetails();
+  }, []);
 
   if (isLoading) {
     return (
@@ -90,13 +49,15 @@ export function SubscriptionFeatures() {
     );
   }
 
-  // Determine current plan (default to FREE if no subscription)
-  // Use plan.plan_code from the joined plan relation
-  const currentPlan = subscription?.plan?.plan_code
-    ? (subscription.plan.plan_code.toLowerCase() as SubscriptionPlan)
-    : SubscriptionPlan.FREE;
+  const subscription = data?.subscription ?? null;
+  const plan = data?.plan ?? null;
+  const allFeatures = data?.allFeatures ?? [];
+  const planFeatures = plan?.plan_features ?? [];
 
-  const planConfig = SUBSCRIPTION_PLAN_CONFIG[currentPlan] || SUBSCRIPTION_PLAN_CONFIG[SubscriptionPlan.FREE];
+  // Build a lookup: feature_id -> plan_feature for quick access
+  const planFeatureMap = new Map(
+    planFeatures.map((pf) => [pf.feature_id, pf])
+  );
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
@@ -126,7 +87,7 @@ export function SubscriptionFeatures() {
             <div>
               <div className="flex items-center gap-3">
                 <h3 className="text-xl font-semibold text-white">
-                  {planConfig.label} Plan
+                  {plan?.name || "Free"} Plan
                 </h3>
                 <Badge
                   variant={
@@ -140,10 +101,14 @@ export function SubscriptionFeatures() {
                   {subscription?.status?.toUpperCase() || "FREE"}
                 </Badge>
               </div>
-              <p className="text-sm text-slate-400 mt-1">
-                ${planConfig.price}
-                {planConfig.price > 0 ? "/month" : ""}
-              </p>
+              {plan?.price !== null && plan?.price !== undefined && (
+                <p className="text-sm text-slate-400 mt-1">
+                  ${plan.price}
+                  {Number(plan.price) > 0 && plan.billing_interval
+                    ? `/${plan.billing_interval}`
+                    : ""}
+                </p>
+              )}
             </div>
           </div>
 
@@ -178,25 +143,37 @@ export function SubscriptionFeatures() {
         </CardContent>
       </Card>
 
-      {/* Plan Features Card */}
+      {/* All Features Card */}
       <Card>
         <CardHeader
           title="Plan Features"
-          description="Features included in your current subscription plan"
+          description="All available features — highlighted features are included in your current plan"
         />
         <CardContent>
           <div className="space-y-3">
-            {subscription?.plan?.plan_features?.map((planFeature) => {
-              const feature = planFeature.feature;
-              const isLimitType = feature?.type === "limit-number";
-              const isEnabled = isLimitType
-                ? planFeature.limit !== null && planFeature.limit > 0
-                : planFeature.is_enabled;
+            {[...allFeatures].sort((a, b) => {
+              const pfA = planFeatureMap.get(a.id);
+              const pfB = planFeatureMap.get(b.id);
+              const enabledA = pfA ? (a.type === "limit-number" ? pfA.limit !== null && pfA.limit > 0 : pfA.is_enabled) : false;
+              const enabledB = pfB ? (b.type === "limit-number" ? pfB.limit !== null && pfB.limit > 0 : pfB.is_enabled) : false;
+              return (enabledB ? 1 : 0) - (enabledA ? 1 : 0);
+            }).map((feature) => {
+              const planFeature = planFeatureMap.get(feature.id);
+              const isLimitType = feature.type === "limit-number";
+              const isEnabled = planFeature
+                ? isLimitType
+                  ? planFeature.limit !== null && planFeature.limit > 0
+                  : planFeature.is_enabled
+                : false;
 
               return (
                 <div
-                  key={planFeature.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/50"
+                  key={feature.id}
+                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                    isEnabled
+                      ? "bg-success-500/10 border-success-500/30"
+                      : "bg-slate-800/50 border-slate-700/50 opacity-60"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     {isEnabled ? (
@@ -204,11 +181,15 @@ export function SubscriptionFeatures() {
                     ) : (
                       <XCircle className="h-5 w-5 text-slate-500 flex-shrink-0" />
                     )}
-                    <p className="text-sm text-slate-300">
-                      {feature?.name || "Unknown Feature"}
+                    <p
+                      className={`text-sm ${
+                        isEnabled ? "text-white" : "text-slate-400"
+                      }`}
+                    >
+                      {feature.feature}
                     </p>
                   </div>
-                  {isLimitType && planFeature.limit !== null && (
+                  {isLimitType && planFeature?.limit !== null && planFeature?.limit !== undefined && (
                     <span className="text-sm font-medium text-white">
                       {planFeature.limit === -1 ? "Unlimited" : planFeature.limit}
                     </span>
@@ -216,10 +197,9 @@ export function SubscriptionFeatures() {
                 </div>
               );
             })}
-            {(!subscription?.plan?.plan_features ||
-              subscription.plan.plan_features.length === 0) && (
+            {allFeatures.length === 0 && (
               <div className="text-sm text-slate-400 text-center py-4">
-                No features configured for this plan
+                No features available
               </div>
             )}
           </div>

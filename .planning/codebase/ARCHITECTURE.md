@@ -1,182 +1,195 @@
 # Architecture
 
-**Analysis Date:** 2026-01-16
+**Analysis Date:** 2026-01-27
 
 ## Pattern Overview
 
-**Overall:** Next.js 16 App Router SaaS Frontend Application
+**Overall:** Next.js Full-Stack SaaS Application with Layered Architecture
 
 **Key Characteristics:**
-- Client-side SaaS frontend with separate backend API
-- Layered monolithic architecture with clear separation of concerns
-- Feature-based folder structure (proposals, roles, users, approvals, dashboard)
-- Server-first design with React Server Components and Client Components
-- Multi-tenant organization-scoped data isolation
+- Frontend-focused Next.js application bridging to separate backend API
+- Multi-tenant SaaS platform (proposal generation system)
+- Server Components for data fetching, Client Components for interactivity
+- JWT-based authentication with HTTP-only cookies
+- File storage via Supabase
 
 ## Layers
 
 **Presentation Layer:**
-- Purpose: UI rendering, user interaction, route handling
-- Contains: Page components, UI components, forms, layouts
-- Location: `src/app/*`, `src/components/*`
-- Depends on: State management (contexts), API services
+- Purpose: UI rendering and user interaction
+- Contains: React components, pages, forms, layouts
+- Location: `src/components/`, `src/app/`
+- Depends on: Service layer for data, Context for global state
 - Used by: End users via browser
 
-**State Management Layer:**
-- Purpose: Client-side application state, authentication state, UI state
-- Contains: React Context providers, custom hooks
-- Location: `src/contexts/*`, custom hooks in components
-- Depends on: API services for data fetching
-- Used by: Presentation layer components
+**Page/Route Layer:**
+- Purpose: Next.js App Router pages and API routes
+- Contains: Server Components (pages), Client Components (interactive), API route handlers
+- Location: `src/app/(auth)/*`, `src/app/(dashboard)/*`, `src/app/api/*`
+- Depends on: Service layer, Auth utilities
+- Used by: Next.js router
 
 **Service/API Layer:**
-- Purpose: HTTP communication with backend API, data fetching
-- Contains: API client, service modules (proposals, users, roles, auth, etc.)
-- Location: `src/lib/api/*`
-- Depends on: Auth utilities (JWT), type definitions
-- Used by: Page components, contexts, server components
+- Purpose: Business logic and backend communication
+- Contains: API clients (proposals, auth, users, roles, templates, subscriptions, permissions, dashboard)
+- Location: `src/lib/api/*.ts`
+- Depends on: HTTP client (`src/lib/api/client.ts`), Auth utilities
+- Used by: Pages and components
 
-**Data Validation & Types:**
-- Purpose: Input validation, type safety
-- Contains: Zod schemas, TypeScript interfaces/enums
-- Location: `src/lib/validations/*`, `src/types/*`
-- Depends on: None (foundational layer)
-- Used by: Forms, API services, components
+**HTTP Client Layer:**
+- Purpose: Standardized HTTP communication with backend API
+- Contains: `apiClient` (client-side), `serverFetch` (server-side)
+- Location: `src/lib/api/client.ts`
+- Depends on: Auth utilities for token retrieval
+- Used by: Service layer
 
-**Utilities & Constants:**
-- Purpose: Shared helper functions, configuration constants
-- Contains: Formatting utilities, logger, JWT helpers, constants
-- Location: `src/lib/utils/*`, `src/constants/*`
-- Depends on: Types
-- Used by: All layers
+**Authentication Layer:**
+- Purpose: JWT verification, session management, permission checks
+- Contains: Token verification, session extraction, auth guards
+- Location: `src/lib/auth/server.ts`, `src/lib/jwt-auth.ts`
+- Depends on: jose library, cookies
+- Used by: API routes, service layer, page guards
+
+**Utility Layer:**
+- Purpose: Shared helpers and cross-cutting concerns
+- Contains: Storage (Supabase), logging, validation (Zod schemas), general utils
+- Location: `src/lib/storage/`, `src/lib/utils/`, `src/lib/validations/`
+- Depends on: External libraries (Supabase, Zod)
+- Used by: Service layer, components
+
+**State Management:**
+- Purpose: Global application state
+- Contains: React Context providers (Auth, Sidebar, Navigation)
+- Location: `src/contexts/`
+- Depends on: Service layer for data operations
+- Used by: Components via hooks
 
 ## Data Flow
 
+**Proposal Viewing Flow (Server-Side):**
+
+1. User navigates to `/dashboard/proposals`
+2. Next.js loads `src/app/(dashboard)/proposals/page.tsx` (Server Component)
+3. Server Component calls `proposalsServerApi.list()` from `src/lib/api/proposals.ts`
+4. `serverFetch()` in `src/lib/api/client.ts` makes authenticated request to backend API
+5. Backend returns proposal data
+6. Server Component renders `ProposalsTable` with data
+7. HTML sent to browser
+
+**Form Submission Flow (Client-Side):**
+
+1. User fills form in Client Component (e.g., `ProposalForm`)
+2. Form handler calls `apiClient.post()` from `src/lib/api/client.ts`
+3. Client fetches auth token from `/api/auth/token` route
+4. Request sent to backend API with Authorization header
+5. Backend validates, processes, and responds
+6. Component updates state and re-renders
+
 **Authentication Flow:**
 
-1. User submits credentials at `/login` or `/register` page
-2. Form submission calls `src/app/api/auth/login/route.ts` (Next.js API route)
-3. API route forwards request to backend API at `NEXT_PUBLIC_API_URL`
-4. Backend returns JWT token
-5. Token stored in HTTP-only cookie `product_auth_token`
-6. Subsequent requests auto-include cookie via `credentials: 'include'`
-7. Client-side JWT decoded (no verification) via `src/lib/jwt-auth.ts`
-
-**Proposal CRUD Flow:**
-
-1. Page component renders (e.g., `src/app/(dashboard)/proposals/page.tsx`)
-2. Component calls service method: `proposalsApi.list()` from `src/lib/api/proposals.ts`
-3. Service calls `apiClient.get()` from `src/lib/api/client.ts`
-4. Client fetches auth token from `/api/auth/token` endpoint
-5. Request sent to backend with `Authorization: Bearer {token}` header
-6. Response validated against TypeScript types from `src/types/index.ts`
-7. Data bound to React state and rendered in component
-
-**Server Component Data Flow:**
-
-1. Server component calls `serverFetch()` from `src/lib/api/client.ts`
-2. Access token passed explicitly (from `src/lib/auth/server.ts`)
-3. Uses Next.js revalidation tags for ISR cache control
-4. Data rendered server-side before sending to client
+1. User submits login form at `/login`
+2. Form calls `src/app/api/auth/login/route.ts` API route
+3. API route proxies to backend `/auth/login`
+4. Backend validates credentials, returns JWT tokens
+5. API route sets HTTP-only cookies (`product_auth_token`, `proposal_access_token`)
+6. User redirected to `/dashboard`
+7. AuthGuard component verifies token on protected routes
 
 **State Management:**
-- Context-based for authentication and UI state
-- `AuthContext` provides user state, permissions, authentication methods
-- `SidebarContext` manages sidebar toggle state
-- `AuthNavigationContext` handles auth page-specific navigation
+- JWT tokens stored in HTTP-only cookies (secure, not accessible via JavaScript)
+- User/session state managed via `AuthContext` (React Context)
+- UI state (sidebar) managed via `SidebarContext`
+- No global state library (Redux, Zustand) - uses React Context
 
 ## Key Abstractions
 
-**API Client** (`src/lib/api/client.ts`):
-- Purpose: Generic HTTP request wrapper with error handling
-- Pattern: Singleton-like exports (`apiClient`, `serverFetch`)
-- Methods: `get()`, `post()`, `put()`, `patch()`, `delete()`
-- Error handling: Custom `ApiRequestError` class with status codes
+**API Service Objects:**
+- Purpose: Domain-specific API operations
+- Examples: `proposalsApi`, `usersApi`, `rolesApi`, `templatesApi`, `subscriptionsApi`
+- Pattern: Object with methods (list, getById, create, update, delete, + domain-specific)
+- Location: `src/lib/api/*.ts`, exported via `src/lib/api/index.ts`
 
-**Service Modules** (`src/lib/api/*.ts`):
-- Purpose: Endpoint-specific API wrappers
-- Examples: `proposalsApi`, `usersApi`, `rolesApi`, `authApi`, `dashboardApi`
-- Pattern: Object with CRUD methods (`list`, `getById`, `create`, `update`, `delete`)
-- Type safety: Generic `ApiResponse<T>` wrapper
+**HTTP Client:**
+- Purpose: Standardized request handling with auth and error management
+- Examples: `apiClient.get<T>()`, `apiClient.post<T>()`, `serverFetch<T>()`
+- Pattern: Generic type parameters, automatic token injection, error transformation
+- Location: `src/lib/api/client.ts`
 
-**Authentication** (`src/lib/auth/server.ts`, `src/lib/jwt-auth.ts`):
-- Purpose: JWT token management, session handling, permission checking
-- Server-side: `requireRole()`, `requireApprovalRole()`, `getSession()`, `hasPermission()`
-- Client-side: `decodeJWT()`, `getTokenFromCookies()`, `isTokenValid()`, `canUserApprove()`
-- Pattern: Functional utilities with jose library for JWT operations
+**Auth Guards:**
+- Purpose: Protect routes and verify permissions
+- Examples: `AuthGuard` component, `requireAuth()` utility, `hasPermission()`
+- Pattern: HOC/wrapper component, server-side middleware functions
+- Location: `src/components/AuthLayoutWrapper.tsx`, `src/lib/auth/server.ts`
 
-**Validation** (`src/lib/validations/*.ts`):
-- Purpose: Form input validation with Zod schemas
-- Examples: `loginSchema`, `proposalSchema`, `deliverableSchema`, `teamMemberSchema`
-- Pattern: Zod schema definitions with type inference via `z.infer<typeof schema>`
-- Custom refinements for complex validation logic
+**Context Providers:**
+- Purpose: Global state distribution
+- Examples: `AuthProvider`, `SidebarProvider`, `AuthNavigationProvider`
+- Pattern: React Context with custom hooks (`useAuth()`, `useSidebar()`)
+- Location: `src/contexts/*.tsx`
 
-**Contexts** (`src/contexts/*.tsx`):
-- Purpose: Global client-side state management
-- Examples: `AuthContext`, `SidebarContext`, `AuthNavigationContext`
-- Pattern: Context + Provider + custom hook (`useAuth`, `useSidebar`)
-- State: User data, authentication status, permissions, UI state
+**Validation Schemas:**
+- Purpose: Input validation and type inference
+- Examples: `loginSchema`, `proposalSchema`, Zod schemas
+- Pattern: Zod schema definitions with `z.infer<>` for TypeScript types
+- Location: `src/lib/validations/*.ts`
 
 ## Entry Points
 
-**Root Layout:**
+**Root Application:**
 - Location: `src/app/layout.tsx`
-- Triggers: Every page render
-- Responsibilities: Global HTML structure, metadata, CSS imports, `AuthLayoutWrapper`
+- Triggers: Initial page load
+- Responsibilities: Set metadata, wrap with `AuthLayoutWrapper`, load global styles
 
-**Dashboard Layout:**
+**Dashboard Entry:**
 - Location: `src/app/(dashboard)/layout.tsx`
-- Triggers: Dashboard route access
-- Responsibilities: `AuthProvider`, `SidebarProvider`, sidebar rendering, pulse beam animations
+- Triggers: Any `/dashboard/*` route
+- Responsibilities: Wrap with `AuthProvider`, `AuthGuard`, `SidebarProvider`, render sidebar + main content
 
-**Auth Pages:**
+**Authentication Entry:**
 - Location: `src/app/(auth)/login/page.tsx`, `src/app/(auth)/register/page.tsx`
 - Triggers: User navigates to `/login` or `/register`
-- Responsibilities: Render auth forms, handle login/register submission
+- Responsibilities: Render auth forms, handle submission to `/api/auth/*` routes
 
-**API Routes:**
-- Location: `src/app/api/auth/*/route.ts`
-- Triggers: Client-side API requests to `/api/auth/*`
-- Responsibilities: Server-side auth operations (login, logout, token retrieval, user info)
-
-**Development Server:**
-- Command: `npm run dev` (starts Next.js with Turbopack on port 82)
-- Entry: Next.js dev server bootstraps application
+**API Middleware:**
+- Location: `src/app/api/auth/*/route.ts`, `src/app/api/users/*/route.ts`, etc.
+- Triggers: Client-side fetch or server-side calls
+- Responsibilities: Bridge to backend API, manage cookies, handle errors
 
 ## Error Handling
 
-**Strategy:** Exception-based with centralized error classes
+**Strategy:** Centralized error handling with custom error class, bubble to boundaries
 
 **Patterns:**
-- API errors throw `ApiRequestError` with status code and message
-- Client components catch errors and display user-friendly messages
-- Server components handle errors via Next.js error boundaries
-- 401 responses trigger automatic redirect to `/login`
+- HTTP client catches and transforms errors into `ApiRequestError` - `src/lib/api/client.ts`
+- API routes return standardized error responses (status code + message)
+- Components display error messages from caught errors
+- Server Components handle errors with Next.js error boundaries (when configured)
+- 401 responses trigger redirect to `/login`
 
 ## Cross-Cutting Concerns
 
 **Logging:**
-- Custom logger utility: `src/lib/utils/logger.ts`
-- Auth events: loginSuccess, loginFailure, registerSuccess, registerFailure, logout
-- Console-based (development), no centralized logging in production
+- Console-based logging with structured output
+- Auth events logged via `src/lib/utils/logger.ts`
+- Format: `authLogger.loginSuccess()`, `authLogger.loginFailure()`, etc.
 
 **Validation:**
-- Zod schemas at form boundary: `src/lib/validations/*.ts`
-- TypeScript for compile-time type safety
-- Runtime validation in API client before sending requests
+- Zod schemas at API boundaries - `src/lib/validations/`
+- Type-safe validation with `z.infer<typeof schema>`
+- Schemas for auth, proposals, forms
 
 **Authentication:**
 - JWT tokens in HTTP-only cookies
-- Token retrieval via `/api/auth/token` for client-side use
-- Role-based access control: `requireRole()`, `hasPermission()`
-- Permission checking: `canUserApprove()` based on role
+- Server-side verification on protected routes
+- Permission checks via `hasPermission()` utility
+- Token refresh mechanism (via backend)
 
-**Authorization:**
-- Role-based: SUPER_ADMIN, ADMIN, MANAGER, MEMBER, VIEWER
-- Permission-based: Permission keys checked via `hasPermission()`
-- Organization-scoped: All data filtered by `organization_id`
+**File Storage:**
+- Supabase Storage integration - `src/lib/storage/index.ts`
+- Signed URLs for secure file access (1 hour expiration)
+- Upload/delete operations with error handling
 
 ---
 
-*Architecture analysis: 2026-01-16*
+*Architecture analysis: 2026-01-27*
 *Update when major patterns change*
