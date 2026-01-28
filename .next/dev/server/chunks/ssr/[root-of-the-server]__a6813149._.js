@@ -260,7 +260,10 @@ const API_ENDPOINTS = {
     // Subscriptions
     SUBSCRIPTIONS: "/subscriptions",
     SUBSCRIPTION_BY_ID: (id)=>`/subscriptions/${id}`,
-    SUBSCRIPTION_INVOICES: (id)=>`/subscriptions/${id}/invoices`
+    SUBSCRIPTION_INVOICES: (id)=>`/subscriptions/${id}/invoices`,
+    // Usage
+    USAGE_SUMMARY: "/usage/summary",
+    USAGE_BY_FEATURE: (featureKey)=>`/usage/${featureKey}`
 };
 const PROPOSAL_STATUS_CONFIG = {
     [__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$types$2f$index$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ProposalStatus"].DRAFT]: {

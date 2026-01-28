@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/api/supabaseClient';
+import { apiClient } from '@/lib/api/client';
+import { API_ENDPOINTS } from '@/constants';
 import { generateId } from '@/lib/utils';
 
 // ============================================================================
@@ -157,11 +159,11 @@ export async function generateSignedUrls(
 
 /**
  * Generate signed URLs for both documents and audio files
+ * Uses the backend POST /storage/signed-urls endpoint
  */
 export async function generateAllSignedUrls(
   documentPaths: string[],
   audioPaths: string[],
-  expiresIn: number = 3600
 ): Promise<{
   documentUrls: string[];
   audioUrls: string[];
@@ -171,26 +173,39 @@ export async function generateAllSignedUrls(
   const documentUrls: string[] = [];
   const audioUrls: string[] = [];
 
-  // Generate document signed URLs
-  if (documentPaths.length > 0) {
-    const docResult = await generateSignedUrls(
-      STORAGE_BUCKETS.DOCUMENTS,
-      documentPaths,
-      expiresIn
-    );
-    documentUrls.push(...docResult.urls.map((u) => u.signedUrl));
-    errors.push(...docResult.errors);
+  // Build storage paths with bucket prefixes
+  const storagePaths: string[] = [
+    ...documentPaths.map((p) => `${STORAGE_BUCKETS.DOCUMENTS}/${p}`),
+    ...audioPaths.map((p) => `${STORAGE_BUCKETS.AUDIO}/${p}`),
+  ];
+
+  if (storagePaths.length === 0) {
+    return { documentUrls, audioUrls, errors };
   }
 
-  // Generate audio signed URLs
-  if (audioPaths.length > 0) {
-    const audioResult = await generateSignedUrls(
-      STORAGE_BUCKETS.AUDIO,
-      audioPaths,
-      expiresIn
-    );
-    audioUrls.push(...audioResult.urls.map((u) => u.signedUrl));
-    errors.push(...audioResult.errors);
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.STORAGE_SIGNED_URLS,
+      { storagePaths },
+    ) as any;
+
+    const signedUrls: { path: string; signedUrl: string | null; error?: string }[] =
+      response?.signedUrls ?? response?.data?.signedUrls ?? [];
+
+    for (const item of signedUrls) {
+      if (!item.signedUrl) {
+        errors.push(`Failed to generate signed URL for ${item.path}: ${item.error || 'unknown error'}`);
+        continue;
+      }
+
+      if (item.path.startsWith(`${STORAGE_BUCKETS.DOCUMENTS}/`)) {
+        documentUrls.push(item.signedUrl);
+      } else if (item.path.startsWith(`${STORAGE_BUCKETS.AUDIO}/`)) {
+        audioUrls.push(item.signedUrl);
+      }
+    }
+  } catch (error: any) {
+    errors.push(`Failed to generate signed URLs: ${error.message}`);
   }
 
   return { documentUrls, audioUrls, errors };

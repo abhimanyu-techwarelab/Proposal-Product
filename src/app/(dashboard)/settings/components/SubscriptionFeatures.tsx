@@ -6,6 +6,7 @@ import {
   subscriptionsApi,
   SubscriptionDetailsResponse,
 } from "@/lib/api/subscriptions";
+import { usageApi, UsageItem } from "@/lib/api/usage";
 import {
   CheckCircle2,
   XCircle,
@@ -17,14 +18,25 @@ import {
 export function SubscriptionFeatures() {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<SubscriptionDetailsResponse | null>(null);
+  const [usageMap, setUsageMap] = useState<Map<string, number>>(new Map());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchDetails() {
       try {
         setIsLoading(true);
-        const result = await subscriptionsApi.getCurrentDetails();
+        const [result, usageData] = await Promise.all([
+          subscriptionsApi.getCurrentDetails(),
+          usageApi.getSummary().catch(() => [] as UsageItem[]),
+        ]);
         setData(result);
+
+        // Build usage map keyed by feature_key
+        const map = new Map<string, number>();
+        for (const item of usageData) {
+          map.set(item.feature_key, item.current_usage);
+        }
+        setUsageMap(map);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to fetch subscription details"
@@ -189,11 +201,32 @@ export function SubscriptionFeatures() {
                       {feature.feature}
                     </p>
                   </div>
-                  {isLimitType && planFeature?.limit !== null && planFeature?.limit !== undefined && (
-                    <span className="text-sm font-medium text-white">
-                      {planFeature.limit === -1 ? "Unlimited" : planFeature.limit}
-                    </span>
-                  )}
+                  {isLimitType && planFeature?.limit !== null && planFeature?.limit !== undefined && (() => {
+                    const currentUsage = usageMap.get(feature.key) ?? 0;
+                    const limit = planFeature.limit;
+                    const isUnlimited = limit === -1;
+                    const usagePercent = isUnlimited ? 0 : limit > 0 ? (currentUsage / limit) * 100 : 0;
+
+                    return (
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              usagePercent > 90
+                                ? "bg-danger-500"
+                                : usagePercent > 70
+                                ? "bg-warning-500"
+                                : "bg-success-500"
+                            }`}
+                            style={{ width: `${Math.min(usagePercent, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-white whitespace-nowrap">
+                          {currentUsage} / {isUnlimited ? "Unlimited" : limit}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}

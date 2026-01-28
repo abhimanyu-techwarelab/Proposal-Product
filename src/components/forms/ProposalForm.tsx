@@ -159,7 +159,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
   // Loader modal state
   const [showLoaderModal, setShowLoaderModal] = useState(false);
-  const [loaderStatus, setLoaderStatus] = useState<'uploading' | 'generating' | 'pending'>('uploading');
+  const [loaderStatus, setLoaderStatus] = useState<'uploading' | 'generating' | 'pending' | 'completed' | 'failed'>('uploading');
 
   // File upload refs and state (files stored locally until submit)
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -180,6 +180,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [showProcessingModal, setShowProcessingModal] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const generationPollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -342,6 +343,12 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     setExtractionStatus('idle');
     setExtractionProgress(0);
     setShowProcessingModal(false);
+    setShowLoaderModal(false);
+    setLoaderStatus('uploading');
+    if (generationPollingRef.current) {
+      clearInterval(generationPollingRef.current);
+      generationPollingRef.current = null;
+    }
     setDraftSavedMessage(null);
     setSubmitError(null);
     setErrors({});
@@ -373,6 +380,9 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
+      }
+      if (generationPollingRef.current) {
+        clearInterval(generationPollingRef.current);
       }
     };
   }, []);
@@ -478,6 +488,14 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
         } else if (currentExtractionStatus) {
           setExtractionStatus(currentExtractionStatus);
           setExtractionProgress(currentExtractionProgress);
+        }
+
+        // Check if proposal is being generated (submitted for generation)
+        if (draft.status === 'processing' && !isExtractionInProgress) {
+          console.log('[LoadDraft] Proposal is being generated, showing loader modal');
+          setShowLoaderModal(true);
+          setLoaderStatus('pending');
+          startGenerationPolling(id);
         }
       }
     } catch (error) {
@@ -618,6 +636,37 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     }, 2000); // Poll every 2 seconds
   };
 
+  // Poll for proposal generation status
+  const startGenerationPolling = (id: string) => {
+    if (generationPollingRef.current) {
+      clearInterval(generationPollingRef.current);
+    }
+
+    generationPollingRef.current = setInterval(async () => {
+      try {
+        const response = await proposalsApi.getById(id);
+        const responseData = response.success && response.data ? response.data : response;
+        const proposal = responseData as any;
+
+        if (proposal?.status === 'approval_pending' || proposal?.status === 'completed') {
+          if (generationPollingRef.current) {
+            clearInterval(generationPollingRef.current);
+            generationPollingRef.current = null;
+          }
+          setLoaderStatus('completed');
+        } else if (proposal?.status === 'failed') {
+          if (generationPollingRef.current) {
+            clearInterval(generationPollingRef.current);
+            generationPollingRef.current = null;
+          }
+          setLoaderStatus('failed');
+        }
+      } catch (error) {
+        console.error('[GenerationPolling] Failed to get proposal status:', error);
+      }
+    }, 3000); // Poll every 3 seconds
+  };
+
   // Apply extracted fields from draft to form
   const applyDraftFields = (draft: any) => {
     // Apply all fields from draft (preserves user-entered values by using || checks)
@@ -709,7 +758,7 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
   };
 
   // Check if form should be disabled during extraction
-  const isFormDisabled = extractionStatus === 'processing';
+  const isFormDisabled = extractionStatus === 'processing' || showLoaderModal;
 
   // ============================================================================
   // File Upload Handlers
@@ -1508,9 +1557,11 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
 
         // Submit the draft for generation
         await proposalsApi.submitDraft(proposalId);
+        // Start polling for generation status
+        startGenerationPolling(proposalId);
       } else {
         // Create new proposal directly (legacy flow)
-        await proposalsApi.generate({
+        const generateResponse = await proposalsApi.generate({
           subscription_id: subscription.id,
           template_id: templateId || undefined,
           created_by: productUser.id,
@@ -1535,6 +1586,12 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
           document_storage_paths: signedDocUrls,
           audio_storage_paths: signedAudioUrls,
         });
+        // Start polling for generation status (legacy flow)
+        const genData = generateResponse.success && generateResponse.data ? generateResponse.data : generateResponse;
+        const genId = (genData as any)?.id || (genData as any)?.proposal_id;
+        if (genId) {
+          startGenerationPolling(genId);
+        }
       }
 
       // Keep modal showing - user can click View Proposals to navigate
@@ -1543,13 +1600,19 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
     } catch (error) {
       setShowLoaderModal(false);
       if (error instanceof ApiRequestError) {
-        setSubmitError(error.message);
-        if (error.details) {
-          setErrors(
-            Object.fromEntries(
-              Object.entries(error.details).map(([key, msgs]) => [key, msgs[0]])
-            )
+        if (error.code === 'USAGE_LIMIT_EXCEEDED') {
+          setSubmitError(
+            'You have reached your plan limit for proposal generation. Please upgrade your subscription to continue.'
           );
+        } else {
+          setSubmitError(error.message);
+          if (error.details) {
+            setErrors(
+              Object.fromEntries(
+                Object.entries(error.details).map(([key, msgs]) => [key, msgs[0]])
+              )
+            );
+          }
         }
       } else if (error instanceof Error) {
         setSubmitError(error.message);
@@ -1717,44 +1780,94 @@ export function ProposalForm({ templateId, onChangeTemplate }: ProposalFormProps
       {/* Loader Modal - for final submission */}
       <Modal
         isOpen={showLoaderModal}
-        onClose={() => {}}
+        onClose={() => {
+          if (loaderStatus === 'completed' || loaderStatus === 'failed') {
+            setShowLoaderModal(false);
+            setLoaderStatus('uploading');
+          }
+        }}
         closeOnOverlayClick={false}
-        closeOnEsc={false}
+        closeOnEsc={loaderStatus === 'completed' || loaderStatus === 'failed'}
         showCloseButton={false}
         size="sm"
       >
         <div className="flex flex-col items-center justify-center py-8">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#B87333] border-t-transparent mb-4" />
+          {/* Spinner for active states */}
+          {(loaderStatus === 'uploading' || loaderStatus === 'generating' || loaderStatus === 'pending') && (
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#B87333] border-t-transparent mb-4" />
+          )}
+
+          {/* Success icon */}
+          {loaderStatus === 'completed' && (
+            <div className="h-12 w-12 rounded-full bg-success-500/20 flex items-center justify-center mb-4">
+              <svg className="h-6 w-6 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          )}
+
+          {/* Failed icon */}
+          {loaderStatus === 'failed' && (
+            <div className="h-12 w-12 rounded-full bg-danger-500/20 flex items-center justify-center mb-4">
+              <svg className="h-6 w-6 text-danger-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          )}
 
           <h3 className="text-lg font-semibold text-white mb-2">
             {loaderStatus === 'uploading' && 'Uploading Documents...'}
             {loaderStatus === 'generating' && 'Generating Proposal...'}
             {loaderStatus === 'pending' && 'Processing...'}
+            {loaderStatus === 'completed' && 'Proposal Generated!'}
+            {loaderStatus === 'failed' && 'Generation Failed'}
           </h3>
 
           <p className="text-sm text-slate-400">
-            Status:{' '}
-            <span className="text-[#DA8A67] font-medium">
-              {loaderStatus === 'uploading' && 'Uploading'}
-              {loaderStatus === 'generating' && 'Generating'}
-              {loaderStatus === 'pending' && 'Pending'}
-            </span>
+            {loaderStatus === 'completed' ? (
+              'Your proposal has been generated successfully.'
+            ) : loaderStatus === 'failed' ? (
+              'Something went wrong while generating your proposal.'
+            ) : (
+              <>
+                Status:{' '}
+                <span className="text-[#DA8A67] font-medium">
+                  {loaderStatus === 'uploading' && 'Uploading'}
+                  {loaderStatus === 'generating' && 'Generating'}
+                  {loaderStatus === 'pending' && 'Pending'}
+                </span>
+              </>
+            )}
           </p>
 
-          {/* Info message */}
-          <p className="text-sm text-slate-500 mt-4 text-center max-w-sm">
-            Your proposal will be available in the Proposals page once generated.
-          </p>
+          {/* Info message for active states */}
+          {(loaderStatus === 'uploading' || loaderStatus === 'generating' || loaderStatus === 'pending') && (
+            <p className="text-sm text-slate-500 mt-4 text-center max-w-sm">
+              Your proposal will be available in the Proposals page once generated.
+            </p>
+          )}
 
-          {/* View Proposals Button */}
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4"
-            onClick={() => router.push('/proposals')}
-          >
-            View Proposals
-          </Button>
+          {/* Buttons */}
+          <div className="flex gap-3 mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/proposals')}
+            >
+              View Proposals
+            </Button>
+            {(loaderStatus === 'completed' || loaderStatus === 'failed') && (
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowLoaderModal(false);
+                  setLoaderStatus('uploading');
+                }}
+              >
+                {loaderStatus === 'completed' ? 'Continue' : 'Close'}
+              </Button>
+            )}
+          </div>
         </div>
       </Modal>
 

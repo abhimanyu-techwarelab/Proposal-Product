@@ -56,6 +56,13 @@ export const API_ENDPOINTS = {
   SUBSCRIPTIONS: "/subscriptions",
   SUBSCRIPTION_BY_ID: (id: string) => `/subscriptions/${id}`,
   SUBSCRIPTION_INVOICES: (id: string) => `/subscriptions/${id}/invoices`,
+
+  // Usage
+  USAGE_SUMMARY: "/usage/summary",
+  USAGE_BY_FEATURE: (featureKey: string) => `/usage/${featureKey}`,
+
+  // Storage
+  STORAGE_SIGNED_URLS: "/storage/signed-urls",
 } as const;
 
 // ============================================================================
